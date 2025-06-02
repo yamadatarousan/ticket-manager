@@ -32,7 +32,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                        description: { type: :string },
                        status: { type: :string, enum: ['open', 'in_progress', 'resolved', 'closed'] },
                        priority: { type: :string, enum: ['low', 'medium', 'high', 'urgent'] },
-                       assigned_to: { type: :string },
+                       assigned_to: { type: [:string, :null] },
                        created_by: { type: :string }
                      }
                    }
@@ -78,7 +78,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
               description: { type: :string },
               status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
               priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
-              assigned_to: { type: :string },
+              assigned_to: { type: [:string, :null] },
               created_by: { type: :string }
             },
             required: [ 'title', 'description', 'status', 'priority', 'created_by' ]
@@ -97,7 +97,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      description: { type: :string },
                      status: { type: :string },
                      priority: { type: :string },
-                     assigned_to: { type: :string },
+                     assigned_to: { type: [:string, :null] },
                      created_by: { type: :string }
                    }
                  }
@@ -111,7 +111,10 @@ RSpec.describe 'api/v1/tickets', type: :request do
       response(422, 'バリデーションエラー') do
         schema type: :object,
                properties: {
-                 errors: { type: :object }
+                 errors: { 
+                   type: :array,
+                   items: { type: :string }
+                 }
                }
 
         let(:ticket) { { ticket: { title: '' } } }
@@ -141,7 +144,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      description: { type: :string },
                      status: { type: :string },
                      priority: { type: :string },
-                     assigned_to: { type: :string },
+                     assigned_to: { type: [:string, :null] },
                      created_by: { type: :string }
                    }
                  }
@@ -181,7 +184,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
               description: { type: :string },
               status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
               priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
-              assigned_to: { type: :string },
+              assigned_to: { type: [:string, :null] },
               created_by: { type: :string }
             }
           }
@@ -199,7 +202,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      description: { type: :string },
                      status: { type: :string },
                      priority: { type: :string },
-                     assigned_to: { type: :string },
+                     assigned_to: { type: [:string, :null] },
                      created_by: { type: :string }
                    }
                  }

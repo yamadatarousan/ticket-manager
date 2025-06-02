@@ -5,8 +5,8 @@ class User < ApplicationRecord
   # ロールのenum定義
   enum :role, {
     user: 0,
-    admin: 1,
-    manager: 2
+    manager: 1,
+    admin: 2
   }
 
   # バリデーション
@@ -49,6 +49,6 @@ class User < ApplicationRecord
   # 認証メソッド
   def self.authenticate(email, password)
     user = find_by(email: email)
-    user&.authenticate(password)
+    user&.authenticate(password) ? user : nil
   end
 end

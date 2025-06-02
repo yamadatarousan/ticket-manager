@@ -39,12 +39,7 @@ RSpec.configure do |config|
             description: 'JWTトークンによる認証。ヘッダーに "Authorization: Bearer <token>" の形式で送信してください。'
           }
         }
-      },
-      security: [
-        {
-          Bearer: []
-        }
-      ]
+      }
     }
   }
 
