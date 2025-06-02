@@ -18,7 +18,7 @@ admin_user = User.create!(
 
 manager_user = User.create!(
   name: "マネージャー",
-  email: "manager@example.com", 
+  email: "manager@example.com",
   role: "manager"
 )
 

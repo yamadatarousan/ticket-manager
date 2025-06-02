@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   # Swagger UI
-  mount Rswag::Ui::Engine => '/api-docs'
-  mount Rswag::Api::Engine => '/api-docs'
-  
+  mount Rswag::Ui::Engine => "/api-docs"
+  mount Rswag::Api::Engine => "/api-docs"
+
   # API routes
   namespace :api do
     namespace :v1 do
@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       resources :users
     end
   end
-  
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

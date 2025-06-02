@@ -6,7 +6,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       tags 'Tickets'
       description 'チケット一覧を取得'
       produces 'application/json'
-      
+
       parameter name: :status, in: :query, type: :string, description: 'ステータスでフィルタ', required: false
       parameter name: :priority, in: :query, type: :string, description: '優先度でフィルタ', required: false
       parameter name: :assigned_to, in: :query, type: :string, description: '担当者でフィルタ', required: false
@@ -25,8 +25,8 @@ RSpec.describe 'api/v1/tickets', type: :request do
                        id: { type: :integer },
                        title: { type: :string },
                        description: { type: :string },
-                       status: { type: :string, enum: ['open', 'in_progress', 'resolved', 'closed'] },
-                       priority: { type: :string, enum: ['low', 'medium', 'high', 'urgent'] },
+                       status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
+                       priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
                        assigned_to: { type: :string },
                        created_by: { type: :string },
                        created_at: { type: :string, format: :datetime },
@@ -52,7 +52,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       description 'チケットを作成'
       consumes 'application/json'
       produces 'application/json'
-      
+
       parameter name: :ticket, in: :body, schema: {
         type: :object,
         properties: {
@@ -61,12 +61,12 @@ RSpec.describe 'api/v1/tickets', type: :request do
             properties: {
               title: { type: :string },
               description: { type: :string },
-              status: { type: :string, enum: ['open', 'in_progress', 'resolved', 'closed'] },
-              priority: { type: :string, enum: ['low', 'medium', 'high', 'urgent'] },
+              status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
+              priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
               assigned_to: { type: :string },
               created_by: { type: :string }
             },
-            required: ['title', 'description', 'status', 'priority', 'created_by']
+            required: [ 'title', 'description', 'status', 'priority', 'created_by' ]
           }
         }
       }
@@ -107,7 +107,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       description 'チケットを更新'
       consumes 'application/json'
       produces 'application/json'
-      
+
       parameter name: :ticket, in: :body, schema: {
         type: :object,
         properties: {
@@ -116,8 +116,8 @@ RSpec.describe 'api/v1/tickets', type: :request do
             properties: {
               title: { type: :string },
               description: { type: :string },
-              status: { type: :string, enum: ['open', 'in_progress', 'resolved', 'closed'] },
-              priority: { type: :string, enum: ['low', 'medium', 'high', 'urgent'] },
+              status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
+              priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
               assigned_to: { type: :string },
               created_by: { type: :string }
             }

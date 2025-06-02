@@ -17,7 +17,7 @@ RSpec.describe "Api::V1::Users", type: :request do
       user_params = {
         user: {
           name: "新規ユーザー",
-          email: "new@example.com", 
+          email: "new@example.com",
           role: "user"
         }
       }

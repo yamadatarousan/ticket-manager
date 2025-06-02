@@ -1,17 +1,17 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_user, only: [:show, :update, :destroy]
+  before_action :set_user, only: [ :show, :update, :destroy ]
 
   # GET /api/v1/users
   def index
     @users = User.all
-    
+
     # フィルタリング
     @users = @users.by_role(params[:role]) if params[:role].present?
-    
+
     # ページネーション
     @users = @users.limit(params[:limit] || 50)
     @users = @users.offset(params[:offset] || 0)
-    
+
     render json: {
       users: @users,
       meta: {
@@ -57,7 +57,7 @@ class Api::V1::UsersController < ApplicationController
   def set_user
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { error: 'User not found' }, status: :not_found
+    render json: { error: "User not found" }, status: :not_found
   end
 
   def user_params

@@ -1,20 +1,20 @@
 class Api::V1::TicketsController < ApplicationController
-  before_action :set_ticket, only: [:show, :update, :destroy]
+  before_action :set_ticket, only: [ :show, :update, :destroy ]
 
   # GET /api/v1/tickets
   def index
     @tickets = Ticket.all
-    
+
     # フィルタリング
     @tickets = @tickets.by_status(params[:status]) if params[:status].present?
     @tickets = @tickets.by_priority(params[:priority]) if params[:priority].present?
     @tickets = @tickets.assigned_to_user(params[:assigned_to]) if params[:assigned_to].present?
     @tickets = @tickets.created_by_user(params[:created_by]) if params[:created_by].present?
-    
+
     # ページネーション（将来的に実装可能）
     @tickets = @tickets.limit(params[:limit] || 50)
     @tickets = @tickets.offset(params[:offset] || 0)
-    
+
     render json: {
       tickets: @tickets,
       meta: {
@@ -60,7 +60,7 @@ class Api::V1::TicketsController < ApplicationController
   def set_ticket
     @ticket = Ticket.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { error: 'Ticket not found' }, status: :not_found
+    render json: { error: "Ticket not found" }, status: :not_found
   end
 
   def ticket_params

@@ -39,7 +39,7 @@ RSpec.describe User, type: :model do
 
   describe 'ロール enum' do
     it '正しいロール値を持つこと' do
-      expect(User.roles.keys).to eq(['user', 'admin', 'manager'])
+      expect(User.roles.keys).to eq([ 'user', 'admin', 'manager' ])
     end
   end
 end
