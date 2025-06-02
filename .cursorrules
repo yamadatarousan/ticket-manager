@@ -1,7 +1,7 @@
 # チケット管理プロジェクト - Cursor ルール
 
 ## プロジェクト概要
-Reactフロントエンドと Ruby on Rails バックエンドで構築されたチケット管理システムです。
+Reactフロントエンドと Ruby on Rails バックエンドで構築されたチケット管理システムです。BacklogやRedmineを参考に
 
 ## 開発環境
 - **OS**: macOS
@@ -11,11 +11,18 @@ Reactフロントエンドと Ruby on Rails バックエンドで構築された
 ## 技術スタック
 
 ### フロントエンド
-- **フレームワーク**: React
+- **フレームワーク**: React (Create React App with TypeScript)
 - **言語**: TypeScript
-- **CSS**: シンプルなCSSフレームワークを使用 (例: Tailwind CSS, Bootstrap, CSS Modules)
+- **CSS**: Tailwind CSS (CDN版)
+- **ビルドツール**: Create React App (標準設定)
 - **テスト**: Jest
 - **ディレクトリ**: `./frontend/`
+
+#### フロントエンド環境構築済み
+- Create React App with TypeScript template
+- Tailwind CSS CDN版（`https://cdn.tailwindcss.com`）
+- PostCSS/CRACO不要のシンプルな構成
+- 本番環境では別途ビルド版Tailwindに移行予定
 
 ### バックエンド
 - **フレームワーク**: Ruby on Rails (最新安定版を使用)
@@ -91,7 +98,7 @@ Reactフロントエンドと Ruby on Rails バックエンドで構築された
 ```bash
 cd frontend
 npm install
-npm start          # 開発サーバー
+npm start          # 開発サーバー（Create React App標準）
 npm test           # テスト実行
 npm run build      # プロダクションビルド
 ```
@@ -113,6 +120,14 @@ rails db:create
 rails db:migrate
 rails db:seed
 ```
+
+## 技術スタック詳細
+
+### Tailwind CSS CDN版
+- **配信方式**: CDN (`https://cdn.tailwindcss.com`)
+- **設定ファイル**: 不要（CDN版のため）
+- **ビルドプロセス**: Create React App標準（PostCSS/CRACO不要）
+- **本番考慮**: 将来的にビルド版への移行を検討
 
 ## 注意事項
 - 依存関係は最小限に抑え、十分な理由付けを行う
