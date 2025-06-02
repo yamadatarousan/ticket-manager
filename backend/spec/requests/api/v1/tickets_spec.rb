@@ -2,7 +2,7 @@ require 'swagger_helper'
 
 RSpec.describe 'api/v1/tickets', type: :request do
   path '/api/v1/tickets' do
-    get('list tickets') do
+    get('チケット一覧取得') do
       tags 'Tickets'
       description 'チケット一覧を取得'
       produces 'application/json'
@@ -14,7 +14,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       parameter name: :limit, in: :query, type: :integer, description: '取得件数制限', required: false
       parameter name: :offset, in: :query, type: :integer, description: 'オフセット', required: false
 
-      response(200, 'successful') do
+      response(200, '成功') do
         schema type: :object,
                properties: {
                  tickets: {
@@ -47,7 +47,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       end
     end
 
-    post('create ticket') do
+    post('チケット作成') do
       tags 'Tickets'
       description 'チケットを作成'
       consumes 'application/json'
@@ -71,12 +71,12 @@ RSpec.describe 'api/v1/tickets', type: :request do
         }
       }
 
-      response(201, 'created') do
-        let(:ticket) { { ticket: { title: 'Test Ticket', description: 'Test Description', status: 'open', priority: 'medium', created_by: 'test@example.com' } } }
+      response(201, '作成成功') do
+        let(:ticket) { { ticket: { title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', created_by: 'test@example.com' } } }
         run_test!
       end
 
-      response(422, 'unprocessable entity') do
+      response(422, 'バリデーションエラー') do
         let(:ticket) { { ticket: { title: '' } } }
         run_test!
       end
@@ -86,23 +86,23 @@ RSpec.describe 'api/v1/tickets', type: :request do
   path '/api/v1/tickets/{id}' do
     parameter name: 'id', in: :path, type: :string, description: 'チケットID'
 
-    get('show ticket') do
+    get('チケット詳細取得') do
       tags 'Tickets'
       description 'チケット詳細を取得'
       produces 'application/json'
 
-      response(200, 'successful') do
-        let(:id) { Ticket.create(title: 'Test', description: 'Test', status: 'open', priority: 'medium', created_by: 'test@example.com').id }
+      response(200, '成功') do
+        let(:id) { Ticket.create(title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', created_by: 'test@example.com').id }
         run_test!
       end
 
-      response(404, 'not found') do
+      response(404, '見つからない') do
         let(:id) { 'invalid' }
         run_test!
       end
     end
 
-    patch('update ticket') do
+    patch('チケット更新') do
       tags 'Tickets'
       description 'チケットを更新'
       consumes 'application/json'
@@ -125,19 +125,19 @@ RSpec.describe 'api/v1/tickets', type: :request do
         }
       }
 
-      response(200, 'successful') do
-        let(:id) { Ticket.create(title: 'Test', description: 'Test', status: 'open', priority: 'medium', created_by: 'test@example.com').id }
-        let(:ticket) { { ticket: { title: 'Updated Title' } } }
+      response(200, '更新成功') do
+        let(:id) { Ticket.create(title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', created_by: 'test@example.com').id }
+        let(:ticket) { { ticket: { title: '更新されたタイトル' } } }
         run_test!
       end
     end
 
-    delete('delete ticket') do
+    delete('チケット削除') do
       tags 'Tickets'
       description 'チケットを削除'
 
-      response(204, 'no content') do
-        let(:id) { Ticket.create(title: 'Test', description: 'Test', status: 'open', priority: 'medium', created_by: 'test@example.com').id }
+      response(204, '削除成功') do
+        let(:id) { Ticket.create(title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', created_by: 'test@example.com').id }
         run_test!
       end
     end

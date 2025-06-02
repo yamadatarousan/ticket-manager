@@ -2,8 +2,20 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('Tailwindテストのタイトルが表示される', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const titleElement = screen.getByText(/tailwind テスト/i);
+  expect(titleElement).toBeInTheDocument();
+});
+
+test('黄色いボタンが表示される', () => {
+  render(<App />);
+  const yellowButton = screen.getByText(/黄色いボタン/i);
+  expect(yellowButton).toBeInTheDocument();
+});
+
+test('ピンクのボタンが表示される', () => {
+  render(<App />);
+  const pinkButton = screen.getByText(/ピンクのボタン/i);
+  expect(pinkButton).toBeInTheDocument();
 });
