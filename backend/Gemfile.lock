@@ -123,6 +123,8 @@ GEM
     json-schema (5.1.1)
       addressable (~> 2.8)
       bigdecimal (~> 3.1)
+    jwt (2.10.1)
+      base64
     kamal (2.6.1)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -372,6 +374,7 @@ DEPENDENCIES
   brakeman
   debug
   factory_bot_rails
+  jwt
   kamal
   mysql2 (~> 0.5)
   puma (>= 5.0)

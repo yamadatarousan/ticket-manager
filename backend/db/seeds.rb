@@ -8,27 +8,33 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# サンプルユーザーを作成
+# サンプルユーザーを作成（パスワード付き）
 puts "Creating users..."
-admin_user = User.create!(
-  name: "管理者",
-  email: "admin@example.com",
-  role: "admin"
-)
+admin_user = User.find_or_create_by!(email: "admin@example.com") do |user|
+  user.name = "管理者"
+  user.role = "admin"
+  user.password = "password123"
+  user.password_confirmation = "password123"
+end
 
-manager_user = User.create!(
-  name: "マネージャー",
-  email: "manager@example.com",
-  role: "manager"
-)
+manager_user = User.find_or_create_by!(email: "manager@example.com") do |user|
+  user.name = "マネージャー"
+  user.role = "manager"
+  user.password = "password123"
+  user.password_confirmation = "password123"
+end
 
-regular_user = User.create!(
-  name: "一般ユーザー",
-  email: "user@example.com",
-  role: "user"
-)
+regular_user = User.find_or_create_by!(email: "user@example.com") do |user|
+  user.name = "一般ユーザー"
+  user.role = "user"
+  user.password = "password123"
+  user.password_confirmation = "password123"
+end
 
 puts "Created #{User.count} users"
+
+# 既存のチケットを削除してから新しく作成
+Ticket.destroy_all
 
 # サンプルチケットを作成
 puts "Creating tickets..."
@@ -86,6 +92,14 @@ puts "Sample data:"
 puts "- Users: #{User.count}"
 puts "- Tickets: #{Ticket.count}"
 puts ""
+puts "認証テスト用のユーザー情報:"
+puts "管理者: email: admin@example.com, password: password123"
+puts "マネージャー: email: manager@example.com, password: password123"
+puts "一般ユーザー: email: user@example.com, password: password123"
+puts ""
 puts "You can access the API at:"
-puts "- GET /api/v1/users"
-puts "- GET /api/v1/tickets"
+puts "- POST /api/v1/auth/login (ログイン)"
+puts "- GET /api/v1/auth/me (現在のユーザー情報)"
+puts "- POST /api/v1/auth/logout (ログアウト)"
+puts "- GET /api/v1/users (認証必須)"
+puts "- GET /api/v1/tickets (認証必須)"
