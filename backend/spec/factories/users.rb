@@ -5,12 +5,12 @@ FactoryBot.define do
     role { :user }
     password { "password123" }
     password_confirmation { "password123" }
-    
+
     trait :admin do
       role { :admin }
       name { "管理者ユーザー" }
     end
-    
+
     trait :manager do
       role { :manager }
       name { "マネージャーユーザー" }

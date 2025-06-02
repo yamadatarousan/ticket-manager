@@ -1,5 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-  skip_before_action :authenticate_request, only: [:create]
+  skip_before_action :authenticate_request, only: [ :create ]
   before_action :set_user, only: %i[show update destroy]
 
   # GET /api/v1/users
@@ -36,7 +36,7 @@ class Api::V1::UsersController < ApplicationController
       render json: {
         user: user_response(@user),
         token: token,
-        message: 'ユーザーが正常に作成されました'
+        message: "ユーザーが正常に作成されました"
       }, status: :created
     else
       render json: @user.errors, status: :unprocessable_entity

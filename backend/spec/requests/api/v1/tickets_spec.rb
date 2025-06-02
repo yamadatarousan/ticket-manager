@@ -10,7 +10,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       tags 'Tickets'
       description 'チケット一覧を取得'
       produces 'application/json'
-      security [Bearer: []]
+      security [ Bearer: [] ]
 
       parameter name: :status, in: :query, type: :string, description: 'ステータスでフィルタ', required: false
       parameter name: :priority, in: :query, type: :string, description: '優先度でフィルタ', required: false
@@ -30,9 +30,9 @@ RSpec.describe 'api/v1/tickets', type: :request do
                        id: { type: :integer },
                        title: { type: :string },
                        description: { type: :string },
-                       status: { type: :string, enum: ['open', 'in_progress', 'resolved', 'closed'] },
-                       priority: { type: :string, enum: ['low', 'medium', 'high', 'urgent'] },
-                       assigned_to: { type: [:string, :null] },
+                       status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
+                       priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
+                       assigned_to: { type: [ :string, :null ] },
                        created_by: { type: :string }
                      }
                    }
@@ -66,7 +66,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       description 'チケットを作成'
       consumes 'application/json'
       produces 'application/json'
-      security [Bearer: []]
+      security [ Bearer: [] ]
 
       parameter name: :ticket, in: :body, schema: {
         type: :object,
@@ -78,7 +78,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
               description: { type: :string },
               status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
               priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
-              assigned_to: { type: [:string, :null] },
+              assigned_to: { type: [ :string, :null ] },
               created_by: { type: :string }
             },
             required: [ 'title', 'description', 'status', 'priority', 'created_by' ]
@@ -97,7 +97,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      description: { type: :string },
                      status: { type: :string },
                      priority: { type: :string },
-                     assigned_to: { type: [:string, :null] },
+                     assigned_to: { type: [ :string, :null ] },
                      created_by: { type: :string }
                    }
                  }
@@ -111,7 +111,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       response(422, 'バリデーションエラー') do
         schema type: :object,
                properties: {
-                 errors: { 
+                 errors: {
                    type: :array,
                    items: { type: :string }
                  }
@@ -131,7 +131,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       tags 'Tickets'
       description 'チケット詳細を取得'
       produces 'application/json'
-      security [Bearer: []]
+      security [ Bearer: [] ]
 
       response(200, '成功') do
         schema type: :object,
@@ -144,7 +144,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      description: { type: :string },
                      status: { type: :string },
                      priority: { type: :string },
-                     assigned_to: { type: [:string, :null] },
+                     assigned_to: { type: [ :string, :null ] },
                      created_by: { type: :string }
                    }
                  }
@@ -172,7 +172,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       description 'チケットを更新'
       consumes 'application/json'
       produces 'application/json'
-      security [Bearer: []]
+      security [ Bearer: [] ]
 
       parameter name: :ticket, in: :body, schema: {
         type: :object,
@@ -184,7 +184,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
               description: { type: :string },
               status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
               priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
-              assigned_to: { type: [:string, :null] },
+              assigned_to: { type: [ :string, :null ] },
               created_by: { type: :string }
             }
           }
@@ -202,7 +202,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      description: { type: :string },
                      status: { type: :string },
                      priority: { type: :string },
-                     assigned_to: { type: [:string, :null] },
+                     assigned_to: { type: [ :string, :null ] },
                      created_by: { type: :string }
                    }
                  }
@@ -218,7 +218,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
     delete('チケット削除') do
       tags 'Tickets'
       description 'チケットを削除'
-      security [Bearer: []]
+      security [ Bearer: [] ]
 
       response(204, '削除成功') do
         let(:Authorization) { "Bearer #{admin_user.generate_jwt_token}" }
@@ -240,7 +240,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
         expect(json['meta']).to include('total', 'count')
       end
     end
-    
+
     context "認証されていないユーザーの場合" do
       it "認証エラーが返されること" do
         get "/api/v1/tickets"

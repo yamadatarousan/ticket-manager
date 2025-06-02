@@ -28,9 +28,9 @@ RSpec.describe Ticket, type: :model do
 
   describe 'ステータス enum' do
     it '正しいステータス値を持つこと' do
-      expect(Ticket.statuses.keys).to eq(['open', 'in_progress', 'resolved', 'closed'])
+      expect(Ticket.statuses.keys).to eq([ 'open', 'in_progress', 'resolved', 'closed' ])
     end
-    
+
     it 'ステータスを正しく設定できること' do
       ticket = create(:ticket, :in_progress)
       expect(ticket.status).to eq('in_progress')
@@ -40,9 +40,9 @@ RSpec.describe Ticket, type: :model do
 
   describe '優先度 enum' do
     it '正しい優先度値を持つこと' do
-      expect(Ticket.priorities.keys).to eq(['low', 'medium', 'high', 'urgent'])
+      expect(Ticket.priorities.keys).to eq([ 'low', 'medium', 'high', 'urgent' ])
     end
-    
+
     it '優先度を正しく設定できること' do
       ticket = create(:ticket, :high_priority)
       expect(ticket.priority).to eq('high')
