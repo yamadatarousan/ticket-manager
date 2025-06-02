@@ -1,0 +1,219 @@
+---
+openapi: 3.0.1
+info:
+  title: チケット管理システム API
+  description: BacklogやRedmineを参考にしたチケット管理システムのREST API
+  version: v1
+paths:
+  "/api/v1/tickets":
+    get:
+      summary: チケット一覧取得
+      tags:
+      - Tickets
+      description: チケット一覧を取得
+      parameters:
+      - name: status
+        in: query
+        description: ステータスでフィルタ
+        required: false
+        schema:
+          type: string
+      - name: priority
+        in: query
+        description: 優先度でフィルタ
+        required: false
+        schema:
+          type: string
+      - name: assigned_to
+        in: query
+        description: 担当者でフィルタ
+        required: false
+        schema:
+          type: string
+      - name: created_by
+        in: query
+        description: 作成者でフィルタ
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: 取得件数制限
+        required: false
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        description: オフセット
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tickets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                          - open
+                          - in_progress
+                          - resolved
+                          - closed
+                        priority:
+                          type: string
+                          enum:
+                          - low
+                          - medium
+                          - high
+                          - urgent
+                        assigned_to:
+                          type: string
+                        created_by:
+                          type: string
+                        created_at:
+                          type: string
+                          format: datetime
+                        updated_at:
+                          type: string
+                          format: datetime
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      count:
+                        type: integer
+    post:
+      summary: チケット作成
+      tags:
+      - Tickets
+      description: チケットを作成
+      parameters: []
+      responses:
+        '201':
+          description: 作成成功
+        '422':
+          description: バリデーションエラー
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticket:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - open
+                      - in_progress
+                      - resolved
+                      - closed
+                    priority:
+                      type: string
+                      enum:
+                      - low
+                      - medium
+                      - high
+                      - urgent
+                    assigned_to:
+                      type: string
+                    created_by:
+                      type: string
+                  required:
+                  - title
+                  - description
+                  - status
+                  - priority
+                  - created_by
+  "/api/v1/tickets/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: チケットID
+      required: true
+      schema:
+        type: string
+    get:
+      summary: チケット詳細取得
+      tags:
+      - Tickets
+      description: チケット詳細を取得
+      responses:
+        '200':
+          description: 成功
+        '404':
+          description: 見つからない
+    patch:
+      summary: チケット更新
+      tags:
+      - Tickets
+      description: チケットを更新
+      parameters: []
+      responses:
+        '200':
+          description: 更新成功
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticket:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - open
+                      - in_progress
+                      - resolved
+                      - closed
+                    priority:
+                      type: string
+                      enum:
+                      - low
+                      - medium
+                      - high
+                      - urgent
+                    assigned_to:
+                      type: string
+                    created_by:
+                      type: string
+    delete:
+      summary: チケット削除
+      tags:
+      - Tickets
+      description: チケットを削除
+      responses:
+        '204':
+          description: 削除成功
+servers:
+- url: http://localhost:3001
+  description: 開発環境
+components:
+  schemas: {}
