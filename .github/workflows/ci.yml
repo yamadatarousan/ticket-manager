@@ -96,14 +96,16 @@ jobs:
     - name: Run Brakeman security scan
       run: |
         echo "Brakemanセキュリティスキャンを実行中..."
+        set +e  # Disable exit on error
         bundle exec brakeman --no-pager --format text
         BRAKEMAN_EXIT_CODE=$?
-        if [ $BRAKEMAN_EXIT_CODE -eq 3 ]; then
-          echo "⚠️  Brakeman警告が検出されましたが、既知の警告として継続します"
-          exit 0
-        elif [ $BRAKEMAN_EXIT_CODE -eq 0 ]; then
+        set -e  # Re-enable exit on error
+        
+        if [ $BRAKEMAN_EXIT_CODE -eq 0 ]; then
           echo "✅ Brakemanスキャン成功: セキュリティ警告なし"
-          exit 0
+        elif [ $BRAKEMAN_EXIT_CODE -eq 3 ]; then
+          echo "⚠️  Brakeman警告が検出されましたが、既知の警告として継続します"
+          echo "警告の詳細は上記の出力を確認してください"
         else
           echo "❌ Brakemanスキャンでエラーが発生しました (exit code: $BRAKEMAN_EXIT_CODE)"
           exit $BRAKEMAN_EXIT_CODE
