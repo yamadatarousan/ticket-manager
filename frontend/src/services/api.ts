@@ -217,13 +217,44 @@ class ApiService {
   }
 
   async createTicket(ticketData: Partial<Ticket>): Promise<{ ticket: Ticket }> {
-    const response = await fetch(`${API_BASE_URL}/tickets`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ ticket: ticketData })
-    });
-    
-    return this.handleResponse<{ ticket: Ticket }>(response);
+    try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('createTicket API call started');
+        console.log('Ticket data:', ticketData);
+        
+        const token = localStorage.getItem('auth_token');
+        console.log('Auth token exists:', !!token);
+        console.log('Auth token length:', token?.length || 0);
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/tickets`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ ticket: ticketData })
+      });
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('createTicket response status:', response.status);
+        console.log('createTicket response ok:', response.ok);
+      }
+      
+      const result = await this.handleResponse<{ ticket: Ticket }>(response);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('createTicket API call successful:', result);
+      }
+      
+      return result;
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('createTicket API call failed:', error);
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
   }
 
   async updateTicket(id: number, ticketData: Partial<Ticket>): Promise<{ ticket: Ticket }> {
