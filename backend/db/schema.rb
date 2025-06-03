@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_02_211155) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_02_220754) do
   create_table "tickets", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -28,5 +28,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_02_211155) do
     t.integer "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "password_digest"
   end
 end

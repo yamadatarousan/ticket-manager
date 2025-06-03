@@ -1,5 +1,6 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :set_user, only: [ :show, :update, :destroy ]
+  skip_before_action :authenticate_request, only: [ :create ]
+  before_action :set_user, only: %i[show update destroy]
 
   # GET /api/v1/users
   def index
@@ -31,9 +32,14 @@ class Api::V1::UsersController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
-      render json: @user, status: :created
+      token = @user.generate_jwt_token
+      render json: {
+        user: user_response(@user),
+        token: token,
+        message: "ユーザーが正常に作成されました"
+      }, status: :created
     else
-      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+      render json: @user.errors, status: :unprocessable_entity
     end
   end
 
@@ -42,14 +48,13 @@ class Api::V1::UsersController < ApplicationController
     if @user.update(user_params)
       render json: @user
     else
-      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+      render json: @user.errors, status: :unprocessable_entity
     end
   end
 
   # DELETE /api/v1/users/1
   def destroy
-    @user.destroy
-    head :no_content
+    @user.destroy!
   end
 
   private
@@ -61,6 +66,17 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:name, :email, :role)
+    params.require(:user).permit(:name, :email, :role, :password, :password_confirmation)
+  end
+
+  def user_response(user)
+    {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      created_at: user.created_at,
+      updated_at: user.updated_at
+    }
   end
 end

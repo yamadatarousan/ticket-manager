@@ -2,20 +2,20 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('Tailwindテストのタイトルが表示される', () => {
+test('チケット管理システムのタイトルが表示される', () => {
   render(<App />);
-  const titleElement = screen.getByText(/tailwind テスト/i);
+  const titleElement = screen.getByText(/チケット管理システム/i);
   expect(titleElement).toBeInTheDocument();
 });
 
-test('黄色いボタンが表示される', () => {
+test('ログインボタンが表示される', () => {
   render(<App />);
-  const yellowButton = screen.getByText(/黄色いボタン/i);
-  expect(yellowButton).toBeInTheDocument();
+  const loginButton = screen.getByRole('button', { name: /ログイン/i });
+  expect(loginButton).toBeInTheDocument();
 });
 
-test('ピンクのボタンが表示される', () => {
+test('メールアドレス入力フィールドが表示される', () => {
   render(<App />);
-  const pinkButton = screen.getByText(/ピンクのボタン/i);
-  expect(pinkButton).toBeInTheDocument();
+  const emailInput = screen.getByLabelText(/メールアドレス/i);
+  expect(emailInput).toBeInTheDocument();
 });

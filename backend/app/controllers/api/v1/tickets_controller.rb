@@ -26,7 +26,7 @@ class Api::V1::TicketsController < ApplicationController
 
   # GET /api/v1/tickets/1
   def show
-    render json: @ticket
+    render json: { ticket: @ticket }
   end
 
   # POST /api/v1/tickets
@@ -34,7 +34,7 @@ class Api::V1::TicketsController < ApplicationController
     @ticket = Ticket.new(ticket_params)
 
     if @ticket.save
-      render json: @ticket, status: :created
+      render json: { ticket: @ticket }, status: :created
     else
       render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
     end
@@ -43,7 +43,7 @@ class Api::V1::TicketsController < ApplicationController
   # PATCH/PUT /api/v1/tickets/1
   def update
     if @ticket.update(ticket_params)
-      render json: @ticket
+      render json: { ticket: @ticket }
     else
       render json: { errors: @ticket.errors.full_messages }, status: :unprocessable_entity
     end

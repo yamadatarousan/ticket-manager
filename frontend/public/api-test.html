@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Ticket Manager API Test</h1>
+    
+    <div>
+        <h2>Test API Connection</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testGetUser()">Test Get Current User</button>
+        <button onclick="testPing()">Test Ping to Backend</button>
+    </div>
+    
+    <div>
+        <h2>Results</h2>
+        <pre id="results"></pre>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:3001/api/v1';
+        
+        function log(message) {
+            const results = document.getElementById('results');
+            results.textContent += new Date().toISOString() + ': ' + message + '\n';
+        }
+        
+        async function testPing() {
+            try {
+                log('Testing ping to backend...');
+                const response = await fetch('http://localhost:3001/', {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                log('Ping Response Status: ' + response.status);
+                log('Ping Response OK: ' + response.ok);
+            } catch (error) {
+                log('Ping Error: ' + error.message);
+            }
+        }
+        
+        async function testLogin() {
+            try {
+                log('Testing login...');
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user: {
+                            email: 'admin@example.com',
+                            password: 'password123'
+                        }
+                    })
+                });
+                
+                log('Login Response Status: ' + response.status);
+                log('Login Response OK: ' + response.ok);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('Login Response Data: ' + JSON.stringify(data, null, 2));
+                    
+                    if (data.token) {
+                        localStorage.setItem('auth_token', data.token);
+                        log('Token saved to localStorage');
+                    }
+                } else {
+                    const errorData = await response.text();
+                    log('Login Error Data: ' + errorData);
+                }
+            } catch (error) {
+                log('Login Error: ' + error.message);
+            }
+        }
+        
+        async function testGetUser() {
+            try {
+                log('Testing get current user...');
+                const token = localStorage.getItem('auth_token');
+                
+                if (!token) {
+                    log('No token found in localStorage');
+                    return;
+                }
+                
+                log('Using token: ' + token.substring(0, 20) + '...');
+                
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                log('Get User Response Status: ' + response.status);
+                log('Get User Response OK: ' + response.ok);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('Get User Response Data: ' + JSON.stringify(data, null, 2));
+                } else {
+                    const errorData = await response.text();
+                    log('Get User Error Data: ' + errorData);
+                }
+            } catch (error) {
+                log('Get User Error: ' + error.message);
+                log('Error type: ' + error.constructor.name);
+            }
+        }
+        
+        // Clear results on page load
+        document.getElementById('results').textContent = '';
+        log('API Test page loaded');
+    </script>
+</body>
+</html> 

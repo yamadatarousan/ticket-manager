@@ -30,7 +30,15 @@ RSpec.configure do |config|
         }
       ],
       components: {
-        schemas: {}
+        schemas: {},
+        securitySchemes: {
+          Bearer: {
+            type: :http,
+            scheme: :bearer,
+            bearerFormat: 'JWT',
+            description: 'JWTトークンによる認証。ヘッダーに "Authorization: Bearer <token>" の形式で送信してください。'
+          }
+        }
       }
     }
   }

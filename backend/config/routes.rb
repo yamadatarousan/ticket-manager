@@ -6,6 +6,12 @@ Rails.application.routes.draw do
   # API routes
   namespace :api do
     namespace :v1 do
+      # 認証関連のルート
+      post "auth/login", to: "auth#login"
+      post "auth/logout", to: "auth#logout"
+      get "auth/me", to: "auth#me"
+
+      # リソースルート
       resources :tickets
       resources :users
     end
