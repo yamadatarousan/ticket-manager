@@ -137,3 +137,7 @@ rails db:seed
 - パフォーマンスを監視し、必要に応じて最適化を行う
 - すべての会話、対話は日本語を用いること
 - github actionsでコケないように都度その点を意識して修正を行う
+- 以下のテスト用アカウントを忘れないこと！
+  - 管理者: admin@example.com / password123
+  - マネージャー: manager@example.com / password123
+  - 一般ユーザー: user@example.com / password123
