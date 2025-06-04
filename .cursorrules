@@ -547,6 +547,7 @@ rails db:seed
   - 管理者: admin@example.com / password123
   - マネージャー: manager@example.com / password123
   - 一般ユーザー: user@example.com / password123
+- コード作成者であるAIエージェントはテスト、ビルドが通るか、github actionsのようなCIツールが通るかまで責任を負うこと
 
 ## 最重要事項
 - 自らの思考や振る舞いが明確に改善すべきものである場合、このファイルに記載すべき改善案を自ら提示すること
