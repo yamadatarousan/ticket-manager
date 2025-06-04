@@ -5,139 +5,124 @@ import { RegisterForm } from './components/RegisterForm';
 import { Navbar } from './components/Navbar';
 import { TicketList } from './components/TicketList';
 import { TicketCreateForm } from './components/TicketCreateForm';
-import { Ticket } from './types';
+import { UserList } from './components/UserList';
+import { UserCreateForm } from './components/UserCreateForm';
+import { UserEditForm } from './components/UserEditForm';
+import { Ticket, User } from './types';
 import './App.css';
 
 // 認証が必要なページのメインコンポーネント
 const AuthenticatedApp: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState('tickets');
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [ticketListKey, setTicketListKey] = useState(0);
+  const { user } = useAuth();
+  const [currentView, setCurrentView] = useState('tickets');
+  const [ticketRefreshKey, setTicketRefreshKey] = useState(0);
+  const [userRefreshKey, setUserRefreshKey] = useState(0);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page);
-    setSelectedTicket(null);
-  };
-
-  const handleTicketClick = (ticket: Ticket) => {
-    setSelectedTicket(ticket);
-    setCurrentPage('ticket-detail');
-  };
-
-  const handleTicketCreated = (ticket: Ticket) => {
-    // チケット作成成功時にチケット一覧ページに戻る
-    setCurrentPage('tickets');
-    // チケット一覧を再読み込みするためにキーを更新
-    setTicketListKey(prev => prev + 1);
-    // 必要に応じて成功メッセージを表示
+  // チケット作成完了時のハンドラー
+  const handleTicketCreateSuccess = (ticket: Ticket) => {
     console.log('チケットが作成されました:', ticket);
+    setCurrentView('tickets');
+    setTicketRefreshKey(prev => prev + 1); // TicketListを再レンダリング
   };
 
-  const renderCurrentPage = () => {
-    switch (currentPage) {
+  // チケット作成キャンセル時のハンドラー
+  const handleTicketCreateCancel = () => {
+    setCurrentView('tickets');
+  };
+
+  // ユーザー作成完了時のハンドラー
+  const handleUserCreateSuccess = (user: User) => {
+    console.log('ユーザーが作成されました:', user);
+    setCurrentView('users');
+    setUserRefreshKey(prev => prev + 1);
+  };
+
+  // ユーザー作成キャンセル時のハンドラー
+  const handleUserCreateCancel = () => {
+    setCurrentView('users');
+  };
+
+  // ユーザー編集完了時のハンドラー
+  const handleUserEditSuccess = (user: User) => {
+    console.log('ユーザーが更新されました:', user);
+    setSelectedUser(null);
+    setCurrentView('users');
+    setUserRefreshKey(prev => prev + 1);
+  };
+
+  // ユーザー編集キャンセル時のハンドラー
+  const handleUserEditCancel = () => {
+    setSelectedUser(null);
+    setCurrentView('users');
+  };
+
+  // ユーザークリック時のハンドラー
+  const handleUserClick = (user: User) => {
+    // 現在は編集画面に遷移
+    setSelectedUser(user);
+    setCurrentView('user-edit');
+  };
+
+  // ユーザー編集開始時のハンドラー
+  const handleUserEdit = (user: User) => {
+    setSelectedUser(user);
+    setCurrentView('user-edit');
+  };
+
+  // 認証されていない場合はログインフォームを表示
+  if (!user) {
+    return <LoginForm />;
+  }
+
+  // メインコンテンツのレンダリング
+  const renderContent = () => {
+    switch (currentView) {
       case 'tickets':
-        return (
-          <TicketList
-            key={ticketListKey}
-            onTicketClick={handleTicketClick}
-            onCreateTicket={() => setCurrentPage('create-ticket')}
-          />
-        );
-      case 'create-ticket':
+        return <TicketList key={ticketRefreshKey} />;
+      case 'ticket-create':
         return (
           <TicketCreateForm
-            onSuccess={handleTicketCreated}
-            onCancel={() => setCurrentPage('tickets')}
+            onSuccess={handleTicketCreateSuccess}
+            onCancel={handleTicketCreateCancel}
           />
-        );
-      case 'ticket-detail':
-        return (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">チケット詳細</h2>
-                <button
-                  onClick={() => setCurrentPage('tickets')}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  ← 一覧に戻る
-                </button>
-              </div>
-              {selectedTicket ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-xl font-semibold">{selectedTicket.title}</h3>
-                    <p className="text-gray-600 mt-2">{selectedTicket.description}</p>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">ステータス</span>
-                      <p className="mt-1">{selectedTicket.status}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">優先度</span>
-                      <p className="mt-1">{selectedTicket.priority}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">担当者</span>
-                      <p className="mt-1">{selectedTicket.assigned_to || '未割り当て'}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">作成者</span>
-                      <p className="mt-1">{selectedTicket.created_by}</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">チケットが選択されていません。</p>
-                </div>
-              )}
-            </div>
-          </div>
         );
       case 'users':
         return (
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">ユーザー管理</h2>
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">👥</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">ユーザー管理機能</h3>
-                <p className="text-gray-500 mb-4">ユーザー管理機能は開発中です。</p>
-              </div>
-            </div>
-          </div>
-        );
-      case 'profile':
-        return (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">プロフィール設定</h2>
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">⚙️</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">プロフィール設定</h3>
-                <p className="text-gray-500 mb-4">プロフィール設定機能は開発中です。</p>
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <TicketList
-            key={ticketListKey}
-            onTicketClick={handleTicketClick}
-            onCreateTicket={() => setCurrentPage('create-ticket')}
+          <UserList
+            key={userRefreshKey}
+            onUserClick={handleUserClick}
+            onCreateUser={() => setCurrentView('user-create')}
+            onEditUser={handleUserEdit}
           />
         );
+      case 'user-create':
+        return (
+          <UserCreateForm
+            onSuccess={handleUserCreateSuccess}
+            onCancel={handleUserCreateCancel}
+          />
+        );
+      case 'user-edit':
+        return selectedUser ? (
+          <UserEditForm
+            user={selectedUser}
+            onSuccess={handleUserEditSuccess}
+            onCancel={handleUserEditCancel}
+          />
+        ) : (
+          <div>ユーザーが選択されていません</div>
+        );
+      default:
+        return <TicketList key={ticketRefreshKey} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onNavigate={handleNavigate} />
+      <Navbar onNavigate={(page) => setCurrentView(page)} />
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {renderCurrentPage()}
+        {renderContent()}
       </main>
     </div>
   );

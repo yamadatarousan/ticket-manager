@@ -14,17 +14,17 @@ class Api::V1::UsersController < ApplicationController
     @users = @users.offset(params[:offset] || 0)
 
     render json: {
-      users: @users,
-      meta: {
-        total: User.count,
-        count: @users.count
-      }
+      users: @users.map { |user| user_response(user) },
+      total_count: User.count,
+      total_pages: 1,
+      current_page: 1,
+      per_page: 50
     }
   end
 
   # GET /api/v1/users/1
   def show
-    render json: @user
+    render json: { user: user_response(@user) }
   end
 
   # POST /api/v1/users
@@ -46,7 +46,7 @@ class Api::V1::UsersController < ApplicationController
   # PATCH/PUT /api/v1/users/1
   def update
     if @user.update(user_params)
-      render json: @user
+      render json: { user: user_response(@user) }
     else
       render json: @user.errors, status: :unprocessable_entity
     end

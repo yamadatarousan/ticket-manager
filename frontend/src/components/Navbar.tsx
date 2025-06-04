@@ -65,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                 チケット一覧
               </button>
               <button
-                onClick={() => onNavigate?.('create-ticket')}
+                onClick={() => onNavigate?.('ticket-create')}
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 チケット作成
@@ -148,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                       </button>
                       <button
                         onClick={() => {
-                          onNavigate?.('create-ticket');
+                          onNavigate?.('ticket-create');
                           setIsDropdownOpen(false);
                         }}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
