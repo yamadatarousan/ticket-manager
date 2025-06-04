@@ -32,6 +32,7 @@ import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { TicketList } from './components/TicketList';
 import { TicketCreateForm } from './components/TicketCreateForm';
+import { TicketEditPage } from './components/TicketEditPage';
 import { UserList } from './components/UserList';
 import { UserCreateForm } from './components/UserCreateForm';
 import { UserEditForm } from './components/UserEditForm';
@@ -163,7 +164,7 @@ const TicketPages: React.FC = () => {
 
   const handleTicketClick = (ticket: Ticket) => {
     console.log('チケットがクリックされました:', ticket);
-    // TODO: チケット詳細ページの実装
+    navigate(`/tickets/${ticket.id}/edit`);
   };
 
   const handleCreateTicket = () => {
@@ -189,6 +190,10 @@ const TicketPages: React.FC = () => {
             onCancel={handleTicketCreateCancel}
           />
         } 
+      />
+      <Route 
+        path="/:id/edit" 
+        element={<TicketEditPage />} 
       />
     </Routes>
   );
