@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { Navbar } from './Navbar';
+import { MemoryRouter } from 'react-router-dom';
+import Navbar from './Navbar';
 
 // AuthContextのモック
 jest.mock('../context/AuthContext', () => ({
@@ -12,12 +13,22 @@ jest.mock('../context/AuthContext', () => ({
   })
 }));
 
+// テスト用のナビゲーションバーラッパー
+const NavbarWrapper: React.FC<{ initialEntries?: string[] }> = ({ 
+  initialEntries = ['/tickets'] 
+}) => (
+  <MemoryRouter initialEntries={initialEntries}>
+    <Navbar />
+  </MemoryRouter>
+);
+
 describe('Navbar', () => {
   it('ナビゲーションバーが正しく表示されること', () => {
-    render(<Navbar />);
+    render(<NavbarWrapper />);
     
     // ナビゲーションバーの主要な要素が存在することを確認
-    expect(screen.getByText(/チケット管理システム/i)).toBeInTheDocument();
-    expect(screen.getByText(/チケット一覧/i)).toBeInTheDocument();
+    expect(screen.getByText('チケット管理')).toBeInTheDocument();
+    expect(screen.getByText('ダッシュボード')).toBeInTheDocument();
+    expect(screen.getByText('チケット')).toBeInTheDocument();
   });
 }); 

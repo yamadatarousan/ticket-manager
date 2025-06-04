@@ -18,9 +18,10 @@ describe('RegisterForm', () => {
     render(<RegisterForm />);
     
     // フォームの主要な要素が存在することを確認
-    expect(screen.getByLabelText(/メールアドレス/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^パスワード$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/パスワード確認/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /アカウント作成/i })).toBeInTheDocument();
+    expect(screen.getByLabelText('名前')).toBeInTheDocument();
+    expect(screen.getByLabelText('メールアドレス')).toBeInTheDocument();
+    expect(screen.getByLabelText('パスワード')).toBeInTheDocument();
+    expect(screen.getByLabelText('パスワード（確認）')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '登録する' })).toBeInTheDocument();
   });
 }); 

@@ -1,45 +1,94 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { RegisterRequest } from '../types';
 
+/**
+ * ユーザー登録フォームのプロパティ
+ */
 interface RegisterFormProps {
+  /** 登録成功時に呼び出されるコールバック関数 */
   onSuccess?: () => void;
+  /** ログインフォームに切り替える際に呼び出されるコールバック関数 */
   onSwitchToLogin?: () => void;
 }
 
+/**
+ * ユーザー登録フォームコンポーネント
+ * 
+ * 新規ユーザーアカウント作成のためのフォームを提供します。
+ * このコンポーネントは以下の機能を実装しています：
+ * - ユーザー名、メールアドレス、パスワード入力
+ * - リアルタイムバリデーション
+ * - パスワード確認チェック
+ * - 送信状態の表示
+ * - エラーメッセージの表示
+ * - ログインフォームへの切り替え
+ * 
+ * @param props - 登録フォームのプロパティ
+ * @returns 登録フォームのReactコンポーネント
+ * 
+ * @example
+ * ```tsx
+ * <RegisterForm
+ *   onSuccess={() => navigate('/dashboard')}
+ *   onSwitchToLogin={() => setCurrentForm('login')}
+ * />
+ * ```
+ */
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin }) => {
   const { register, isLoading, error, clearError } = useAuth();
-  const [formData, setFormData] = useState({
+  
+  /**
+   * フォームの入力データを管理するstate
+   */
+  const [formData, setFormData] = useState<RegisterRequest>({
     name: '',
     email: '',
     password: '',
-    password_confirmation: '',
-    role: 'user' as 'user' | 'manager' | 'admin'
+    password_confirmation: ''
   });
+  
+  /**
+   * フォームのバリデーションエラーを管理するstate
+   */
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
-  const validateForm = () => {
+  /**
+   * フォームの入力値をバリデーションする
+   * 
+   * バリデーション規則：
+   * - 名前: 必須、1文字以上
+   * - メールアドレス: 必須、有効な形式
+   * - パスワード: 必須、6文字以上
+   * - パスワード確認: 必須、パスワードと一致
+   * 
+   * @returns バリデーションが成功した場合true、失敗した場合false
+   */
+  const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
 
+    // 名前のバリデーション
     if (!formData.name.trim()) {
       errors.name = '名前を入力してください';
-    } else if (formData.name.length < 2) {
-      errors.name = '名前は2文字以上で入力してください';
     }
 
+    // メールアドレスのバリデーション
     if (!formData.email.trim()) {
       errors.email = 'メールアドレスを入力してください';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = '有効なメールアドレスを入力してください';
     }
 
-    if (!formData.password.trim()) {
+    // パスワードのバリデーション
+    if (!formData.password) {
       errors.password = 'パスワードを入力してください';
     } else if (formData.password.length < 6) {
       errors.password = 'パスワードは6文字以上で入力してください';
     }
 
-    if (!formData.password_confirmation.trim()) {
-      errors.password_confirmation = 'パスワード確認を入力してください';
+    // パスワード確認のバリデーション
+    if (!formData.password_confirmation) {
+      errors.password_confirmation = 'パスワードを再入力してください';
     } else if (formData.password !== formData.password_confirmation) {
       errors.password_confirmation = 'パスワードが一致しません';
     }
@@ -48,7 +97,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /**
+   * フォーム送信時の処理
+   * 
+   * バリデーションを実行し、成功時にユーザー登録処理を呼び出します。
+   * 
+   * @param e - フォーム送信イベント
+   */
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     clearError();
     
@@ -58,13 +114,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
 
     try {
       await register(formData);
-      onSuccess?.();
-    } catch (error) {
-      // エラーは AuthContext で処理される
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (err) {
+      // エラーはAuthContextで処理される
+      console.error('Registration error:', err);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  /**
+   * 入力フィールドの値変更時の処理
+   * 
+   * フォームデータを更新し、該当フィールドのエラーをクリアします。
+   * 
+   * @param e - 入力変更イベント
+   */
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -82,12 +148,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+      {/* ヘッダー部分 */}
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">新規登録</h2>
+        <h2 className="text-2xl font-bold text-gray-900">アカウント登録</h2>
         <p className="text-gray-600 mt-2">新しいアカウントを作成してください</p>
       </div>
 
+      {/* 登録フォーム */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* 名前入力フィールド */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             名前
@@ -101,7 +170,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
               formErrors.name ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="田中太郎"
+            placeholder="山田太郎"
             disabled={isLoading}
           />
           {formErrors.name && (
@@ -109,6 +178,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           )}
         </div>
 
+        {/* メールアドレス入力フィールド */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             メールアドレス
@@ -130,24 +200,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           )}
         </div>
 
-        <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-            ロール
-          </label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            disabled={isLoading}
-          >
-            <option value="user">一般ユーザー</option>
-            <option value="manager">マネージャー</option>
-            <option value="admin">管理者</option>
-          </select>
-        </div>
-
+        {/* パスワード入力フィールド */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             パスワード
@@ -169,9 +222,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           )}
         </div>
 
+        {/* パスワード確認入力フィールド */}
         <div>
           <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
-            パスワード確認
+            パスワード（確認）
           </label>
           <input
             type="password"
@@ -182,7 +236,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
               formErrors.password_confirmation ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="パスワードを再入力"
+            placeholder="パスワードをもう一度入力"
             disabled={isLoading}
           />
           {formErrors.password_confirmation && (
@@ -190,19 +244,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           )}
         </div>
 
+        {/* エラーメッセージ */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
             <p className="text-sm">{error}</p>
           </div>
         )}
 
+        {/* 登録ボタン */}
         <button
           type="submit"
           disabled={isLoading}
           className={`w-full py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
             isLoading
               ? 'bg-gray-400 cursor-not-allowed text-white'
-              : 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
           }`}
         >
           {isLoading ? (
@@ -211,13 +267,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
               登録中...
             </div>
           ) : (
-            'アカウント作成'
+            '登録する'
           )}
         </button>
 
-        <div className="text-center">
+        {/* ログインへの切り替え */}
+        <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
-            既にアカウントをお持ちの場合{' '}
+            既にアカウントをお持ちですか？{' '}
             <button
               type="button"
               onClick={onSwitchToLogin}
@@ -229,14 +286,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
           </p>
         </div>
       </form>
-
-      {/* 注意事項 */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-md">
-        <p className="text-xs text-blue-800 font-semibold mb-1">ご注意:</p>
-        <p className="text-xs text-blue-700">
-          管理者・マネージャーロールは開発・テスト目的でのみ使用してください。
-        </p>
-      </div>
     </div>
   );
-}; 
+};
+
+export default RegisterForm; 

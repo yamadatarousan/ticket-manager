@@ -3,12 +3,48 @@ import { Ticket } from '../types';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * チケット一覧表示のプロパティ
+ */
 interface TicketListProps {
+  /** 一覧の更新を通知するためのキー（親コンポーネントで変更すると再読み込み） */
+  refreshKey?: number;
   onTicketClick?: (ticket: Ticket) => void;
   onCreateTicket?: () => void;
 }
 
-export const TicketList: React.FC<TicketListProps> = ({ onTicketClick, onCreateTicket }) => {
+/**
+ * チケット一覧表示コンポーネント
+ * 
+ * システム内のチケット一覧を表示し、以下の機能を提供します：
+ * - チケットの検索とフィルタリング
+ * - ステータス・優先度によるソート
+ * - 詳細表示への遷移
+ * - 担当者の割り当て
+ * - ステータス変更
+ * - 管理機能（編集・削除）
+ * 
+ * 異なる権限レベルによって表示内容や操作が変わります：
+ * - 管理者：全てのチケットを表示・編集可能
+ * - マネージャー：チーム全体のチケットを管理
+ * - 一般ユーザー：自分に割り当てられたチケットと自分が作成したチケットのみ
+ * 
+ * @param props - コンポーネントのプロパティ
+ * @returns チケット一覧表示のReactコンポーネント
+ * 
+ * @example
+ * ```tsx
+ * // 通常の表示
+ * <TicketList />
+ * 
+ * // 更新機能付きの表示
+ * const [refreshKey, setRefreshKey] = useState(0);
+ * <TicketList refreshKey={refreshKey} />
+ * // 更新したい時
+ * setRefreshKey(prevKey => prevKey + 1);
+ * ```
+ */
+export const TicketList: React.FC<TicketListProps> = ({ refreshKey = 0, onTicketClick, onCreateTicket }) => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);

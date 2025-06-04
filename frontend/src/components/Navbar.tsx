@@ -1,204 +1,405 @@
 import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * ナビゲーションバーコンポーネントのプロパティ
+ */
 interface NavbarProps {
+  /** ナビゲーション発生時に呼び出されるコールバック関数（後方互換性のため残す） */
   onNavigate?: (page: string) => void;
+  /** 現在表示中のビュー名（後方互換性のため残す） */
+  currentView?: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
-  const { user, logout, isAuthenticated } = useAuth();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+/**
+ * ナビゲーションバーコンポーネント
+ * 
+ * アプリケーション全体のナビゲーションバーを提供します。
+ * このコンポーネントは以下の機能を実装しています：
+ * - ページ間のナビゲーションリンク（React Router Link使用）
+ * - ユーザー権限に基づいたメニュー表示制御
+ * - ログイン状態の表示・ログアウト機能
+ * - モバイル対応のレスポンシブデザイン
+ * - 現在のページのハイライト（URL基準）
+ * 
+ * @returns ナビゲーションバーのReactコンポーネント
+ * 
+ * @example
+ * ```tsx
+ * // アプリケーションのルートコンポーネントで使用
+ * <div className="app-container">
+ *   <Navbar />
+ *   <main>{children}</main>
+ * </div>
+ * ```
+ */
+const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
+  
+  // モバイルメニューの開閉状態
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // ユーザーメニューの開閉状態
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
+  /**
+   * 現在のパスがナビゲーションリンクと一致するかチェックする
+   * 
+   * @param path - チェックするパス
+   * @returns 現在のパスに一致する場合はtrue、それ以外はfalse
+   */
+  const isActive = (path: string): boolean => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  /**
+   * ログアウト処理を行い、ログインページに遷移する
+   */
+  const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      setIsDropdownOpen(false);
     } catch (error) {
-      console.error('ログアウトエラー:', error);
+      console.error('Logout error:', error);
     }
   };
 
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return '管理者';
-      case 'manager':
-        return 'マネージャー';
-      case 'user':
-        return '一般ユーザー';
-      default:
-        return role;
-    }
+  /**
+   * モバイルメニューの開閉を切り替える
+   */
+  const toggleMobileMenu = (): void => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'manager':
-        return 'bg-blue-100 text-blue-800';
-      case 'user':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  /**
+   * ユーザーメニューの開閉を切り替える
+   */
+  const toggleUserMenu = (): void => {
+    setIsUserMenuOpen(!isUserMenuOpen);
   };
 
-  if (!isAuthenticated || !user) {
-    return null;
-  }
+  /**
+   * ナビゲーションリンクの共通スタイルを取得する
+   * 
+   * @param path - リンクのパス
+   * @returns CSSクラス名
+   */
+  const getLinkStyles = (path: string): string => {
+    return `px-3 py-2 rounded-md text-sm font-medium ${
+      isActive(path)
+        ? 'bg-gray-900 text-white'
+        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+    }`;
+  };
+
+  /**
+   * モバイルナビゲーションリンクの共通スタイルを取得する
+   * 
+   * @param path - リンクのパス
+   * @returns CSSクラス名
+   */
+  const getMobileLinkStyles = (path: string): string => {
+    return `block px-3 py-2 rounded-md text-base font-medium ${
+      isActive(path)
+        ? 'bg-gray-900 text-white'
+        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+    }`;
+  };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* ロゴとナビゲーション */}
+        <div className="flex items-center justify-between h-16">
+          {/* ロゴとデスクトップナビゲーションリンク */}
           <div className="flex items-center">
+            {/* ロゴ */}
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">🎫 チケット管理システム</h1>
+              <Link 
+                to="/tickets"
+                className="text-white font-bold text-xl hover:text-gray-300"
+              >
+                チケット管理
+              </Link>
             </div>
-            <div className="hidden md:ml-6 md:flex md:space-x-8">
-              <button
-                onClick={() => onNavigate?.('tickets')}
-                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                チケット一覧
-              </button>
-              <button
-                onClick={() => onNavigate?.('ticket-create')}
-                className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                チケット作成
-              </button>
-              {(user.role === 'admin' || user.role === 'manager') && (
-                <button
-                  onClick={() => onNavigate?.('users')}
-                  className="text-gray-900 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  ユーザー管理
-                </button>
-              )}
+            
+            {/* デスクトップナビゲーションリンク */}
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-4">
+                {isAuthenticated && (
+                  <>
+                    <Link 
+                      to="/dashboard"
+                      className={getLinkStyles('/dashboard')}
+                    >
+                      ダッシュボード
+                    </Link>
+                    <Link 
+                      to="/tickets"
+                      className={getLinkStyles('/tickets')}
+                    >
+                      チケット
+                    </Link>
+                    {/* 管理者またはマネージャーのみ表示 */}
+                    {user && (user.role === 'admin' || user.role === 'manager') && (
+                      <Link 
+                        to="/users"
+                        className={getLinkStyles('/users')}
+                      >
+                        ユーザー管理
+                      </Link>
+                    )}
+                    {/* 管理者のみ表示 */}
+                    {user && user.role === 'admin' && (
+                      <Link 
+                        to="/settings"
+                        className={getLinkStyles('/settings')}
+                      >
+                        設定
+                      </Link>
+                    )}
+                  </>
+                )}
+                
+                {!isAuthenticated && (
+                  <>
+                    <Link 
+                      to="/login"
+                      className={getLinkStyles('/login')}
+                    >
+                      ログイン
+                    </Link>
+                    <Link 
+                      to="/register"
+                      className={getLinkStyles('/register')}
+                    >
+                      新規登録
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
-
-          {/* ユーザーメニュー */}
+          
+          {/* ユーザーメニューとモバイルメニューボタン */}
           <div className="flex items-center">
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <div className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 rounded-md transition-colors">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {user.name.charAt(0).toUpperCase()}
-                      </span>
+            {/* ユーザー情報（認証済みの場合） */}
+            {isAuthenticated && user && (
+              <div className="ml-3 relative">
+                <div>
+                  <button
+                    onClick={toggleUserMenu}
+                    className="max-w-xs bg-gray-800 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                    id="user-menu-button"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
+                    <span className="sr-only">ユーザーメニューを開く</span>
+                    <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white">
+                      {user.name.charAt(0).toUpperCase()}
                     </div>
-                  </div>
-                  <div className="hidden md:block text-left">
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                    <div className="text-xs text-gray-500">{user.email}</div>
-                  </div>
-                  <div className="hidden md:block">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
-                      {getRoleLabel(user.role)}
-                    </span>
-                  </div>
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  </button>
                 </div>
-              </button>
-
-              {/* ドロップダウンメニュー */}
-              {isDropdownOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-72 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                  <div className="py-1">
-                    {/* ユーザー情報表示 */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-medium">
-                            {user.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-gray-900 truncate">{user.name}</div>
-                          <div className="text-sm text-gray-500 truncate">{user.email}</div>
-                          <div className="mt-1">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
-                              {getRoleLabel(user.role)}
-                            </span>
-                          </div>
-                        </div>
+                
+                {/* ユーザーメニュードロップダウン */}
+                {isUserMenuOpen && (
+                  <div
+                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
+                    tabIndex={-1}
+                  >
+                    <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-gray-500">{user.email}</div>
+                      <div className="text-xs mt-1 bg-gray-100 px-2 py-1 rounded">
+                        {user.role === 'admin' && '管理者'}
+                        {user.role === 'manager' && 'マネージャー'}
+                        {user.role === 'user' && '一般ユーザー'}
                       </div>
                     </div>
-
-                    {/* モバイル用ナビゲーション */}
-                    <div className="md:hidden border-b border-gray-100">
-                      <button
-                        onClick={() => {
-                          onNavigate?.('tickets');
-                          setIsDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        📋 チケット一覧
-                      </button>
-                      <button
-                        onClick={() => {
-                          onNavigate?.('ticket-create');
-                          setIsDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        ➕ チケット作成
-                      </button>
-                      {(user.role === 'admin' || user.role === 'manager') && (
-                        <button
-                          onClick={() => {
-                            onNavigate?.('users');
-                            setIsDropdownOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          👥 ユーザー管理
-                        </button>
-                      )}
-                    </div>
-
-                    {/* アカウントメニュー */}
-                    <button
-                      onClick={() => {
-                        onNavigate?.('profile');
-                        setIsDropdownOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                      tabIndex={-1}
+                      id="user-menu-item-0"
+                      onClick={() => setIsUserMenuOpen(false)}
                     >
-                      ⚙️ プロフィール設定
-                    </button>
+                      プロフィール
+                    </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                      tabIndex={-1}
+                      id="user-menu-item-2"
                     >
-                      🚪 ログアウト
+                      ログアウト
                     </button>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            )}
+            
+            {/* モバイルメニューボタン */}
+            <div className="ml-4 flex md:hidden">
+              <button
+                onClick={toggleMobileMenu}
+                className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                aria-controls="mobile-menu"
+                aria-expanded="false"
+              >
+                <span className="sr-only">メニューを開く</span>
+                {/* アイコン（メニュー閉じている時） */}
+                {!isMobileMenuOpen && (
+                  <svg
+                    className="block h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+                {/* アイコン（メニュー開いている時） */}
+                {isMobileMenuOpen && (
+                  <svg
+                    className="block h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ドロップダウンが開いている時のオーバーレイ */}
-      {isDropdownOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsDropdownOpen(false)}
-        ></div>
+      {/* モバイルメニュー */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden" id="mobile-menu">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {isAuthenticated && (
+              <>
+                <Link 
+                  to="/dashboard"
+                  className={getMobileLinkStyles('/dashboard')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ダッシュボード
+                </Link>
+                <Link 
+                  to="/tickets"
+                  className={getMobileLinkStyles('/tickets')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  チケット
+                </Link>
+                {/* 管理者またはマネージャーのみ表示 */}
+                {user && (user.role === 'admin' || user.role === 'manager') && (
+                  <Link 
+                    to="/users"
+                    className={getMobileLinkStyles('/users')}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    ユーザー管理
+                  </Link>
+                )}
+                {/* 管理者のみ表示 */}
+                {user && user.role === 'admin' && (
+                  <Link 
+                    to="/settings"
+                    className={getMobileLinkStyles('/settings')}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    設定
+                  </Link>
+                )}
+              </>
+            )}
+            
+            {!isAuthenticated && (
+              <>
+                <Link 
+                  to="/login"
+                  className={getMobileLinkStyles('/login')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ログイン
+                </Link>
+                <Link 
+                  to="/register"
+                  className={getMobileLinkStyles('/register')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  新規登録
+                </Link>
+              </>
+            )}
+          </div>
+          
+          {/* モバイルユーザーメニュー（認証済みの場合） */}
+          {isAuthenticated && user && (
+            <div className="pt-4 pb-3 border-t border-gray-700">
+              <div className="flex items-center px-5">
+                <div className="flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-gray-500 flex items-center justify-center text-white">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <div className="text-base font-medium leading-none text-white">{user.name}</div>
+                  <div className="text-sm font-medium leading-none text-gray-400 mt-1">{user.email}</div>
+                  <div className="text-xs mt-1 bg-gray-700 text-gray-300 px-2 py-1 rounded inline-block">
+                    {user.role === 'admin' && '管理者'}
+                    {user.role === 'manager' && 'マネージャー'}
+                    {user.role === 'user' && '一般ユーザー'}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 px-2 space-y-1">
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  プロフィール
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                >
+                  ログアウト
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </nav>
   );
-}; 
+};
+
+export default Navbar; 
