@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+/**
+ * ナビゲーションバーコンポーネントのプロパティ
+ */
+interface NavbarProps {
+  /** ナビゲーション発生時に呼び出されるコールバック関数（後方互換性のため残す） */
+  onNavigate?: (page: string) => void;
+  /** 現在表示中のビュー名（後方互換性のため残す） */
+  currentView?: string;
+}
 
 /**
  * ナビゲーションバーコンポーネント
  * 
  * アプリケーション全体のナビゲーションバーを提供します。
  * このコンポーネントは以下の機能を実装しています：
- * - ページ間のナビゲーションリンク
+ * - ページ間のナビゲーションリンク（React Router Link使用）
  * - ユーザー権限に基づいたメニュー表示制御
  * - ログイン状態の表示・ログアウト機能
  * - モバイル対応のレスポンシブデザイン
- * - 現在のページのハイライト
+ * - 現在のページのハイライト（URL基準）
  * 
  * @returns ナビゲーションバーのReactコンポーネント
  * 
@@ -24,9 +34,8 @@ import { useAuth } from '../context/AuthContext';
  * </div>
  * ```
  */
-const Navbar: React.FC = () => {
+const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   
   // モバイルメニューの開閉状態
@@ -42,9 +51,7 @@ const Navbar: React.FC = () => {
    * @returns 現在のパスに一致する場合はtrue、それ以外はfalse
    */
   const isActive = (path: string): boolean => {
-    // 完全一致または先頭一致（サブパスを含む）
-    return location.pathname === path || 
-           (path !== '/' && location.pathname.startsWith(path));
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   /**
@@ -53,7 +60,6 @@ const Navbar: React.FC = () => {
   const handleLogout = async (): Promise<void> => {
     try {
       await logout();
-      navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -109,7 +115,10 @@ const Navbar: React.FC = () => {
           <div className="flex items-center">
             {/* ロゴ */}
             <div className="flex-shrink-0">
-              <Link to="/" className="text-white font-bold text-xl">
+              <Link 
+                to="/tickets"
+                className="text-white font-bold text-xl hover:text-gray-300"
+              >
                 チケット管理
               </Link>
             </div>
@@ -119,21 +128,33 @@ const Navbar: React.FC = () => {
               <div className="ml-10 flex items-baseline space-x-4">
                 {isAuthenticated && (
                   <>
-                    <Link to="/dashboard" className={getLinkStyles('/dashboard')}>
+                    <Link 
+                      to="/dashboard"
+                      className={getLinkStyles('/dashboard')}
+                    >
                       ダッシュボード
                     </Link>
-                    <Link to="/tickets" className={getLinkStyles('/tickets')}>
+                    <Link 
+                      to="/tickets"
+                      className={getLinkStyles('/tickets')}
+                    >
                       チケット
                     </Link>
                     {/* 管理者またはマネージャーのみ表示 */}
                     {user && (user.role === 'admin' || user.role === 'manager') && (
-                      <Link to="/users" className={getLinkStyles('/users')}>
+                      <Link 
+                        to="/users"
+                        className={getLinkStyles('/users')}
+                      >
                         ユーザー管理
                       </Link>
                     )}
                     {/* 管理者のみ表示 */}
                     {user && user.role === 'admin' && (
-                      <Link to="/settings" className={getLinkStyles('/settings')}>
+                      <Link 
+                        to="/settings"
+                        className={getLinkStyles('/settings')}
+                      >
                         設定
                       </Link>
                     )}
@@ -142,10 +163,16 @@ const Navbar: React.FC = () => {
                 
                 {!isAuthenticated && (
                   <>
-                    <Link to="/login" className={getLinkStyles('/login')}>
+                    <Link 
+                      to="/login"
+                      className={getLinkStyles('/login')}
+                    >
                       ログイン
                     </Link>
-                    <Link to="/register" className={getLinkStyles('/register')}>
+                    <Link 
+                      to="/register"
+                      className={getLinkStyles('/register')}
+                    >
                       新規登録
                     </Link>
                   </>
@@ -274,14 +301,14 @@ const Navbar: React.FC = () => {
             {isAuthenticated && (
               <>
                 <Link 
-                  to="/dashboard" 
+                  to="/dashboard"
                   className={getMobileLinkStyles('/dashboard')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   ダッシュボード
                 </Link>
                 <Link 
-                  to="/tickets" 
+                  to="/tickets"
                   className={getMobileLinkStyles('/tickets')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -290,7 +317,7 @@ const Navbar: React.FC = () => {
                 {/* 管理者またはマネージャーのみ表示 */}
                 {user && (user.role === 'admin' || user.role === 'manager') && (
                   <Link 
-                    to="/users" 
+                    to="/users"
                     className={getMobileLinkStyles('/users')}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -300,7 +327,7 @@ const Navbar: React.FC = () => {
                 {/* 管理者のみ表示 */}
                 {user && user.role === 'admin' && (
                   <Link 
-                    to="/settings" 
+                    to="/settings"
                     className={getMobileLinkStyles('/settings')}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -313,14 +340,14 @@ const Navbar: React.FC = () => {
             {!isAuthenticated && (
               <>
                 <Link 
-                  to="/login" 
+                  to="/login"
                   className={getMobileLinkStyles('/login')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   ログイン
                 </Link>
                 <Link 
-                  to="/register" 
+                  to="/register"
                   className={getMobileLinkStyles('/register')}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
