@@ -1,28 +1,70 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * ログインフォームのプロパティ
+ */
 interface LoginFormProps {
+  /** ログイン成功時に呼び出されるコールバック関数 */
   onSuccess?: () => void;
+  /** 登録フォームに切り替える際に呼び出されるコールバック関数 */
   onSwitchToRegister?: () => void;
 }
 
+/**
+ * ユーザーログインのためのフォームコンポーネント
+ * 
+ * このコンポーネントは以下の機能を提供します：
+ * - メールアドレスとパスワードによる認証
+ * - リアルタイムバリデーション
+ * - ローディング状態の表示
+ * - エラーメッセージの表示
+ * - 登録フォームへの切り替え
+ * - テスト用アカウント情報の表示
+ * 
+ * @param props - ログインフォームのプロパティ
+ * @returns ログインフォームのReactコンポーネント
+ * 
+ * @example
+ * ```tsx
+ * <LoginForm
+ *   onSuccess={() => navigate('/dashboard')}
+ *   onSwitchToRegister={() => setCurrentForm('register')}
+ * />
+ * ```
+ */
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) => {
   const { login, isLoading, error, clearError } = useAuth();
+  
+  /** フォームの入力データを管理するstate */
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  
+  /** フォームバリデーションエラーを管理するstate */
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
-  const validateForm = () => {
+  /**
+   * フォームの入力値をバリデーションする
+   * 
+   * バリデーション規則：
+   * - メールアドレス: 必須、有効な形式
+   * - パスワード: 必須、6文字以上
+   * 
+   * @returns バリデーションが成功した場合true、失敗した場合false
+   */
+  const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
 
+    // メールアドレスのバリデーション
     if (!formData.email.trim()) {
       errors.email = 'メールアドレスを入力してください';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = '有効なメールアドレスを入力してください';
     }
 
+    // パスワードのバリデーション
     if (!formData.password.trim()) {
       errors.password = 'パスワードを入力してください';
     } else if (formData.password.length < 6) {
@@ -33,7 +75,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /**
+   * フォーム送信時の処理
+   * 
+   * 1. バリデーションを実行
+   * 2. 認証処理を実行
+   * 3. 成功時にコールバックを呼び出し
+   * 
+   * @param e - フォーム送信イベント
+   */
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     clearError();
     
@@ -49,7 +100,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /**
+   * 入力フィールドの値変更時の処理
+   * 
+   * フォームデータを更新し、該当フィールドのエラーをクリアします
+   * 
+   * @param e - 入力変更イベント
+   */
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -67,12 +125,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+      {/* ヘッダー部分 */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">ログイン</h2>
         <p className="text-gray-600 mt-2">アカウントにサインインしてください</p>
       </div>
 
+      {/* ログインフォーム */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* メールアドレス入力フィールド */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             メールアドレス
@@ -94,6 +155,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
           )}
         </div>
 
+        {/* パスワード入力フィールド */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             パスワード
@@ -115,12 +177,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
           )}
         </div>
 
+        {/* 認証エラーメッセージ */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
             <p className="text-sm">{error}</p>
           </div>
         )}
 
+        {/* ログインボタン */}
         <button
           type="submit"
           disabled={isLoading}
@@ -140,6 +204,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
           )}
         </button>
 
+        {/* 登録フォームへの切り替えリンク */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
             アカウントをお持ちでない場合{' '}

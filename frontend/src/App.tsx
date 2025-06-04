@@ -1,3 +1,29 @@
+/**
+ * チケット管理システム メインアプリケーション
+ * 
+ * このコンポーネントはアプリケーション全体の構成を管理し、以下の機能を提供します：
+ * - ルーティング設定（React Router）
+ * - 認証状態管理（AuthProvider）
+ * - レイアウト構成（ナビゲーション、メインコンテンツ）
+ * - 権限に基づいたルート保護
+ * 
+ * アプリケーションのルーティング構造：
+ * - / - ホーム画面（認証済みユーザーはダッシュボードにリダイレクト）
+ * - /login - ログイン画面
+ * - /register - ユーザー登録画面
+ * - /dashboard - ダッシュボード（要認証）
+ * - /tickets - チケット一覧（要認証）
+ * - /tickets/new - チケット作成（要認証）
+ * - /tickets/:id - チケット詳細（要認証）
+ * - /tickets/:id/edit - チケット編集（要認証）
+ * - /users - ユーザー一覧（要管理者/マネージャー権限）
+ * - /users/new - ユーザー作成（要管理者権限）
+ * - /users/:id - ユーザー詳細（要管理者/マネージャー権限）
+ * - /users/:id/edit - ユーザー編集（要管理者権限）
+ * - /profile - ユーザープロフィール（要認証）
+ * - /settings - システム設定（要管理者権限）
+ * - * - 404ページ
+ */
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginForm } from './components/LoginForm';
