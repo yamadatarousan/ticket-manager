@@ -19,6 +19,14 @@ export interface Ticket {
   updated_at: string;
 }
 
+export interface CreateTicketRequest {
+  title: string;
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  assigned_to?: string | null;
+}
+
 export interface AuthResponse {
   user: User;
   token: string;
