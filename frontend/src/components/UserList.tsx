@@ -113,6 +113,7 @@ export const UserList: React.FC<UserListProps> = ({
           <button
             onClick={onCreateUser}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center"
+            data-testid="create-user-button"
           >
             <span className="mr-2">+</span>
             新規ユーザー作成
@@ -134,6 +135,7 @@ export const UserList: React.FC<UserListProps> = ({
               onChange={(e) => setFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="ユーザーを検索..."
+              data-testid="user-search-input"
             />
           </div>
           <div className="md:w-48">
@@ -145,6 +147,7 @@ export const UserList: React.FC<UserListProps> = ({
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              data-testid="role-filter-select"
             >
               <option value="">すべて</option>
               <option value="user">一般ユーザー</option>
@@ -227,7 +230,10 @@ export const UserList: React.FC<UserListProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}
+                        data-testid={`role-badge-${user.id}`}
+                      >
                         {getRoleDisplayName(user.role)}
                       </span>
                     </td>
@@ -241,6 +247,7 @@ export const UserList: React.FC<UserListProps> = ({
                             <button
                               onClick={() => onEditUser(user)}
                               className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded"
+                              data-testid={`edit-user-button-${user.id}`}
                             >
                               編集
                             </button>
@@ -249,6 +256,7 @@ export const UserList: React.FC<UserListProps> = ({
                             <button
                               onClick={() => handleDeleteUser(user)}
                               className="text-red-600 hover:text-red-900 px-2 py-1 rounded"
+                              data-testid={`delete-user-button-${user.id}`}
                             >
                               削除
                             </button>
