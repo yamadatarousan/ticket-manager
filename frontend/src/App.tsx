@@ -27,9 +27,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
-import Navbar from './components/Navbar';
 import { TicketList } from './components/TicketList';
 import { TicketCreateForm } from './components/TicketCreateForm';
 import { UserList } from './components/UserList';
@@ -37,24 +37,6 @@ import { UserCreateForm } from './components/UserCreateForm';
 import { UserEditForm } from './components/UserEditForm';
 import { Ticket, User } from './types';
 import './App.css';
-
-// プライベートルートコンポーネント
-const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">認証状態を確認中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
 
 // メインレイアウトコンポーネント
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -363,9 +345,6 @@ const AuthenticatedApp: React.FC = () => {
 // 認証が不要なページのコンポーネント
 const UnauthenticatedApp: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const isRegisterPage = location.pathname === '/register';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

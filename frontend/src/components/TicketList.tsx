@@ -45,7 +45,7 @@ interface TicketListProps {
  * ```
  */
 export const TicketList: React.FC<TicketListProps> = ({ refreshKey = 0, onTicketClick, onCreateTicket }) => {
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -53,28 +53,28 @@ class Ticket < ApplicationRecord
 
   # スコープ定義
   # @note これらのスコープを使用してチケットをフィルタリングできます
-  
+
   # 指定されたステータスのチケットを取得
   # @param status [String, Symbol] 取得するチケットのステータス
   # @return [ActiveRecord::Relation] 指定したステータスのチケットのコレクション
   # @example
   #   Ticket.by_status(:open) # 未着手のチケットを取得
   scope :by_status, ->(status) { where(status: status) }
-  
+
   # 指定された優先度のチケットを取得
   # @param priority [String, Symbol] 取得するチケットの優先度
   # @return [ActiveRecord::Relation] 指定した優先度のチケットのコレクション
   # @example
   #   Ticket.by_priority(:high) # 高優先度のチケットを取得
   scope :by_priority, ->(priority) { where(priority: priority) }
-  
+
   # 指定されたユーザーに割り当てられたチケットを取得
   # @param user [Integer] 担当者のユーザーID
   # @return [ActiveRecord::Relation] 指定したユーザーに割り当てられたチケットのコレクション
   # @example
   #   Ticket.assigned_to_user(1) # ユーザーID:1に割り当てられたチケットを取得
   scope :assigned_to_user, ->(user) { where(assigned_to: user) }
-  
+
   # 指定されたユーザーによって作成されたチケットを取得
   # @param user [Integer] 作成者のユーザーID
   # @return [ActiveRecord::Relation] 指定したユーザーによって作成されたチケットのコレクション
