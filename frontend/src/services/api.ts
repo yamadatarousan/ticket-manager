@@ -1,4 +1,4 @@
-import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse } from '../types';
+import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats } from '../types';
 
 /** APIベースURL（環境変数または開発環境のデフォルト値） */
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
@@ -315,6 +315,44 @@ class ApiService {
         }
       }
       
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // ダッシュボード関連API
+  // ============================================================================
+
+  /**
+   * ダッシュボード統計情報を取得
+   * 
+   * ダッシュボード表示に必要な統計情報（チケット数、ステータス別分布など）を取得します。
+   * 
+   * @returns ダッシュボード統計情報
+   * @throws {Error} 取得失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const stats = await apiService.getDashboardStats();
+   *   console.log('総チケット数:', stats.ticket_stats.total);
+   * } catch (error) {
+   *   console.error('統計情報取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getDashboardStats(): Promise<DashboardStats> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<DashboardStats>(response);
+    } catch (error) {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
       }

@@ -222,4 +222,42 @@ export interface PaginatedResponse<T> {
   current_page: number;
   /** 1ページあたりの件数 */
   per_page: number;
+}
+
+/**
+ * ダッシュボード統計情報の型定義
+ * 
+ * ダッシュボード画面で表示する各種統計情報を定義します。
+ * チケットの数、ステータス分布、優先度分布、最近の活動などが含まれます。
+ */
+export interface DashboardStats {
+  /** チケット統計情報 */
+  ticket_stats: {
+    /** 総チケット数 */
+    total: number;
+    /** ステータス別チケット数 */
+    by_status: Record<string, number>;
+    /** 優先度別チケット数 */
+    by_priority: Record<string, number>;
+    /** 自分のチケット数 */
+    my_tickets: {
+      /** 自分に割り当てられたチケット数 */
+      assigned_to_me: number;
+      /** 自分が作成したチケット数 */
+      created_by_me: number;
+    };
+  };
+  /** 最近のチケット（直近10件） */
+  recent_tickets: Array<{
+    id: number;
+    title: string;
+    status: string;
+    priority: string;
+    assigned_to: string | null;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  /** 統計情報生成日時 */
+  generated_at: string;
 } 

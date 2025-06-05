@@ -11,6 +11,9 @@ Rails.application.routes.draw do
       post "auth/logout", to: "auth#logout"
       get "auth/me", to: "auth#me"
 
+      # ダッシュボード関連のルート
+      get "dashboard/stats", to: "dashboard#stats"
+
       # リソースルート
       resources :tickets do
         # ネストしたコメントリソース（チケットに紐づくコメント）

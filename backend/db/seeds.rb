@@ -78,6 +78,70 @@ tickets_data = [
     priority: "urgent",
     assigned_to: admin_user.email,
     created_by: admin_user.email
+  },
+  {
+    title: "ユーザーマニュアルの更新",
+    description: "新機能追加に伴うマニュアルの更新作業。",
+    status: "open",
+    priority: "low",
+    assigned_to: regular_user.email,
+    created_by: manager_user.email
+  },
+  {
+    title: "バックアップシステムの構築",
+    description: "データ保護のためのバックアップシステムを構築する。",
+    status: "in_progress",
+    priority: "high",
+    assigned_to: admin_user.email,
+    created_by: admin_user.email
+  },
+  {
+    title: "API仕様書の作成",
+    description: "外部連携用のAPI仕様書を作成する。",
+    status: "resolved",
+    priority: "medium",
+    assigned_to: manager_user.email,
+    created_by: admin_user.email
+  },
+  {
+    title: "モバイル対応の検討",
+    description: "スマートフォンからの利用を考慮したUI改善。",
+    status: "open",
+    priority: "medium",
+    assigned_to: regular_user.email,
+    created_by: regular_user.email
+  },
+  {
+    title: "通知機能の実装",
+    description: "チケット更新時の通知機能を実装する。",
+    status: "in_progress",
+    priority: "high",
+    assigned_to: manager_user.email,
+    created_by: regular_user.email
+  },
+  {
+    title: "パフォーマンステストの実施",
+    description: "システム全体のパフォーマンステストを実施する。",
+    status: "open",
+    priority: "medium",
+    assigned_to: admin_user.email,
+    created_by: manager_user.email
+  },
+  {
+    title: "エラーログの分析",
+    description: "システムエラーの原因分析と対策検討。",
+    status: "resolved",
+    priority: "low",
+    assigned_to: regular_user.email,
+    created_by: admin_user.email
+  },
+  {
+    title: "データ移行ツールの開発",
+    description: "旧システムからのデータ移行ツールを開発する。",
+    status: "closed",
+    priority: "high",
+    assigned_to: admin_user.email,
+    created_by: manager_user.email
   }
 ]
 
