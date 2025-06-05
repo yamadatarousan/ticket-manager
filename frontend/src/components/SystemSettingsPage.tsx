@@ -100,7 +100,29 @@ export const SystemSettingsPage: React.FC = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors: string[] = [];
+    
+    if (!newSetting.key.trim()) {
+      errors.push('設定キーは必須です');
+    } else if (!/^[a-zA-Z0-9_-]+$/.test(newSetting.key)) {
+      errors.push('設定キーは英数字、アンダースコア（_）、ハイフン（-）のみ使用可能です');
+    }
+    
+    if (!newSetting.value.trim()) {
+      errors.push('設定値は必須です');
+    }
+    
+    return errors;
+  };
+
   const handleCreate = async () => {
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join('\n'));
+      return;
+    }
+    
     try {
       await apiService.createSystemSetting(newSetting);
       setSuccess('新しい設定を作成しました');
@@ -115,7 +137,12 @@ export const SystemSettingsPage: React.FC = () => {
       await fetchSettings();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '設定の作成に失敗しました');
+      console.error('設定作成エラー:', err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('設定の作成に失敗しました');
+      }
     }
   };
 
@@ -184,10 +211,10 @@ export const SystemSettingsPage: React.FC = () => {
 
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-          <p className="text-sm">{error}</p>
+          <div className="text-sm whitespace-pre-line">{error}</div>
           <button 
             onClick={() => setError(null)}
-            className="text-red-500 hover:text-red-700 text-xs mt-1"
+            className="text-red-500 hover:text-red-700 text-xs mt-2"
           >
             ✕ 閉じる
           </button>
@@ -230,6 +257,9 @@ export const SystemSettingsPage: React.FC = () => {
                 placeholder="例: max_file_size"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                英数字、アンダースコア（_）、ハイフン（-）のみ使用可能
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">設定値</label>
@@ -279,8 +309,8 @@ export const SystemSettingsPage: React.FC = () => {
           <div className="mt-4 flex space-x-2">
             <button
               onClick={handleCreate}
-              disabled={!newSetting.key || !newSetting.value}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md font-medium"
+              disabled={!newSetting.key.trim() || !newSetting.value.trim() || !/^[a-zA-Z0-9_-]+$/.test(newSetting.key)}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md font-medium"
             >
               作成
             </button>

@@ -79,6 +79,11 @@ class ApiService {
       try {
         const errorData = await response.json();
         errorMessage = errorData.error || errorData.message || errorMessage;
+        
+        // 詳細なエラー情報がある場合は追加
+        if (errorData.details && Array.isArray(errorData.details)) {
+          errorMessage += '\n詳細: ' + errorData.details.join(', ');
+        }
       } catch (parseError) {
         // JSONパースエラーの場合、ステータスコードベースのメッセージを使用
         switch (response.status) {
