@@ -1,4 +1,4 @@
-name: CI
+name: 継続的インテグレーション（CI）
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   frontend:
-    name: Frontend Tests & Build
+    name: フロントエンド（テスト・ビルド）
     runs-on: ubuntu-latest
     
     defaults:
@@ -16,33 +16,33 @@ jobs:
         working-directory: ./frontend
     
     steps:
-    - name: Checkout code
+    - name: コードのチェックアウト
       uses: actions/checkout@v4
     
-    - name: Setup Node.js
+    - name: Node.js環境のセットアップ
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
     
-    - name: Install dependencies
+    - name: 依存関係のインストール
       run: npm ci
     
-    - name: Run tests
+    - name: テストの実行
       run: npm test -- --coverage --watchAll=false
     
-    - name: Build application
+    - name: アプリケーションのビルド
       run: npm run build
     
-    - name: Upload build artifacts
+    - name: ビルド成果物のアップロード
       uses: actions/upload-artifact@v4
       with:
         name: frontend-build
         path: frontend/build/
 
   backend:
-    name: Backend Tests & Lint
+    name: バックエンド（テスト・静的解析）
     runs-on: ubuntu-latest
     
     services:
@@ -64,17 +64,17 @@ jobs:
         working-directory: ./backend
     
     steps:
-    - name: Checkout code
+    - name: コードのチェックアウト
       uses: actions/checkout@v4
     
-    - name: Setup Ruby
+    - name: Ruby環境のセットアップ
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.3.0'
         bundler-cache: true
         working-directory: ./backend
     
-    - name: Setup database
+    - name: データベースのセットアップ
       env:
         RAILS_ENV: test
         CI: true
@@ -83,23 +83,23 @@ jobs:
         bundle exec rails db:create
         bundle exec rails db:migrate
     
-    - name: Run tests
+    - name: テストの実行
       env:
         RAILS_ENV: test
         CI: true
         DATABASE_URL: mysql2://root@127.0.0.1:3306/ticket_manager_test
       run: bundle exec rspec
     
-    - name: Run RuboCop
+    - name: RuboCop静的解析の実行
       run: bundle exec rubocop
     
-    - name: Run Brakeman security scan
+    - name: Brakemanセキュリティスキャンの実行
       run: |
-        echo "Brakemanセキュリティスキャンを実行中..."
-        set +e  # Disable exit on error
+        echo "🔍 Brakemanセキュリティスキャンを実行中..."
+        set +e  # エラー発生時の自動終了を無効化
         bundle exec brakeman --no-pager --format text
         BRAKEMAN_EXIT_CODE=$?
-        set -e  # Re-enable exit on error
+        set -e  # エラー発生時の自動終了を再有効化
         
         if [ $BRAKEMAN_EXIT_CODE -eq 0 ]; then
           echo "✅ Brakemanスキャン成功: セキュリティ警告なし"
@@ -107,11 +107,11 @@ jobs:
           echo "⚠️  Brakeman警告が検出されましたが、既知の警告として継続します"
           echo "警告の詳細は上記の出力を確認してください"
         else
-          echo "❌ Brakemanスキャンでエラーが発生しました (exit code: $BRAKEMAN_EXIT_CODE)"
+          echo "❌ Brakemanスキャンでエラーが発生しました (終了コード: $BRAKEMAN_EXIT_CODE)"
           exit $BRAKEMAN_EXIT_CODE
         fi
     
-    - name: Generate Swagger documentation
+    - name: Swaggerドキュメント生成
       env:
         RAILS_ENV: test
         CI: true
@@ -119,23 +119,23 @@ jobs:
       run: bundle exec rails rswag:specs:swaggerize
 
   integration:
-    name: Integration Check
+    name: 統合チェック
     runs-on: ubuntu-latest
     needs: [frontend, backend]
     
     steps:
-    - name: Checkout code
+    - name: コードのチェックアウト
       uses: actions/checkout@v4
     
-    - name: Download frontend build
+    - name: フロントエンドビルドのダウンロード
       uses: actions/download-artifact@v4
       with:
         name: frontend-build
         path: ./frontend/build/
     
-    - name: Verify build artifacts
+    - name: ビルド成果物の検証
       run: |
-        echo "Frontend build size:"
+        echo "📊 フロントエンドビルドサイズ:"
         du -sh frontend/build/
-        echo "Backend swagger docs:"
-        ls -la backend/swagger/v1/ || echo "Swagger docs not found" 
+        echo "📋 バックエンドSwaggerドキュメント:"
+        ls -la backend/swagger/v1/ || echo "⚠️  Swaggerドキュメントが見つかりません" 

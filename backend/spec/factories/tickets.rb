@@ -4,8 +4,8 @@ FactoryBot.define do
     description { "テスト用のチケット説明です。" }
     status { :open }
     priority { :medium }
-    assigned_to { "user@example.com" }
-    created_by { "admin@example.com" }
+    association :assigned_user, factory: :user
+    association :creator, factory: :user
 
     trait :in_progress do
       status { :in_progress }

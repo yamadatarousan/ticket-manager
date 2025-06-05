@@ -1,4 +1,4 @@
-import { User, Ticket, AuthResponse, LoginRequest, RegisterRequest, PaginatedResponse } from '../types';
+import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats, SystemSetting, SystemSettingRequest, Project, ProjectRequest } from '../types';
 
 /** APIベースURL（環境変数または開発環境のデフォルト値） */
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
@@ -79,6 +79,11 @@ class ApiService {
       try {
         const errorData = await response.json();
         errorMessage = errorData.error || errorData.message || errorMessage;
+        
+        // 詳細なエラー情報がある場合は追加
+        if (errorData.details && Array.isArray(errorData.details)) {
+          errorMessage += '\n詳細: ' + errorData.details.join(', ');
+        }
       } catch (parseError) {
         // JSONパースエラーの場合、ステータスコードベースのメッセージを使用
         switch (response.status) {
@@ -142,7 +147,10 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
         body: JSON.stringify({ user: credentials })
       });
       
@@ -312,6 +320,210 @@ class ApiService {
         }
       }
       
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // ダッシュボード関連API
+  // ============================================================================
+
+  /**
+   * ダッシュボード統計情報を取得
+   * 
+   * ダッシュボード表示に必要な統計情報（チケット数、ステータス別分布など）を取得します。
+   * 
+   * @returns ダッシュボード統計情報
+   * @throws {Error} 取得失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const stats = await apiService.getDashboardStats();
+   *   console.log('総チケット数:', stats.ticket_stats.total);
+   * } catch (error) {
+   *   console.error('統計情報取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getDashboardStats(): Promise<DashboardStats> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<DashboardStats>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // システム設定関連API
+  // ============================================================================
+
+  /**
+   * システム設定一覧を取得
+   * 
+   * 管理者のみアクセス可能。システム全体の設定項目一覧を取得します。
+   * 
+   * @returns システム設定一覧
+   * @throws {Error} 取得失敗、認証エラー、権限エラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.getSystemSettings();
+   *   console.log('設定数:', response.system_settings.length);
+   * } catch (error) {
+   *   console.error('設定取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getSystemSettings(): Promise<{ system_settings: SystemSetting[] }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ system_settings: SystemSetting[] }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * 個別システム設定を取得
+   * 
+   * @param id システム設定ID
+   * @returns システム設定情報
+   * @throws {Error} 取得失敗、認証エラー、権限エラーの場合
+   */
+  async getSystemSetting(id: number): Promise<{ system_setting: SystemSetting }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ system_setting: SystemSetting }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を作成
+   * 
+   * @param systemSetting システム設定データ
+   * @returns 作成されたシステム設定情報
+   * @throws {Error} 作成失敗、認証エラー、権限エラーの場合
+   */
+  async createSystemSetting(systemSetting: SystemSettingRequest): Promise<{ system_setting: SystemSetting; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ system_setting: systemSetting })
+      });
+      
+      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を更新
+   * 
+   * @param id システム設定ID
+   * @param systemSetting 更新するシステム設定データ
+   * @returns 更新されたシステム設定情報
+   * @throws {Error} 更新失敗、認証エラー、権限エラーの場合
+   */
+  async updateSystemSetting(id: number, systemSetting: Partial<SystemSettingRequest>): Promise<{ system_setting: SystemSetting; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ system_setting: systemSetting })
+      });
+      
+      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を削除
+   * 
+   * @param id システム設定ID
+   * @returns 削除結果
+   * @throws {Error} 削除失敗、認証エラー、権限エラーの場合
+   */
+  async deleteSystemSetting(id: number): Promise<{ message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ message: string }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を一括更新
+   * 
+   * @param settings 設定キーと値のハッシュ
+   * @returns 更新結果
+   * @throws {Error} 更新失敗、認証エラー、権限エラーの場合
+   */
+  async bulkUpdateSystemSettings(settings: Record<string, any>): Promise<{ system_settings: SystemSetting[]; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/bulk_update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ settings })
+      });
+      
+      return await this.handleResponse<{ system_settings: SystemSetting[]; message: string }>(response);
+    } catch (error) {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
       }
@@ -660,6 +872,325 @@ class ApiService {
     
     if (!response.ok) {
       throw new Error('ユーザーの削除に失敗しました');
+    }
+  }
+
+  // ============================================================================
+  // コメント管理API
+  // ============================================================================
+
+  /**
+   * チケットのコメント一覧取得
+   * 
+   * 指定されたチケットに関連するコメントの一覧を取得します。
+   * コメントは作成日時順（古い順）で返されます。
+   * 
+   * @param ticketId - チケットID
+   * @returns コメント一覧
+   * @throws {Error} 取得失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.getComments(123);
+   *   console.log('コメント一覧:', response.comments);
+   * } catch (error) {
+   *   console.error('コメント取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getComments(ticketId: number): Promise<{ comments: Comment[] }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/comments`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ comments: Comment[] }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * コメント作成
+   * 
+   * 指定されたチケットに新しいコメントを追加します。
+   * 作成者は現在ログインしているユーザーに自動設定されます。
+   * 
+   * @param ticketId - チケットID
+   * @param commentData - コメント作成情報
+   * @param commentData.content - コメント内容
+   * @returns 作成されたコメント情報
+   * @throws {Error} 作成失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.createComment(123, {
+   *     content: '作業を開始しました'
+   *   });
+   *   console.log('コメント作成成功:', response.comment);
+   * } catch (error) {
+   *   console.error('コメント作成失敗:', error.message);
+   * }
+   * ```
+   */
+  async createComment(ticketId: number, commentData: CreateCommentRequest): Promise<{ comment: Comment }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/comments`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ comment: commentData })
+      });
+      
+      return await this.handleResponse<{ comment: Comment }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * コメント更新
+   * 
+   * 既存のコメントの内容を更新します。
+   * 自分が作成したコメントのみ更新可能です（管理者は全て更新可能）。
+   * 
+   * @param commentId - コメントID
+   * @param commentData - 更新するコメント情報
+   * @param commentData.content - 新しいコメント内容
+   * @returns 更新されたコメント情報
+   * @throws {Error} 更新失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.updateComment(456, {
+   *     content: '作業が完了しました'
+   *   });
+   *   console.log('コメント更新成功:', response.comment);
+   * } catch (error) {
+   *   console.error('コメント更新失敗:', error.message);
+   * }
+   * ```
+   */
+  async updateComment(commentId: number, commentData: CreateCommentRequest): Promise<{ comment: Comment }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ comment: commentData })
+      });
+      
+      return await this.handleResponse<{ comment: Comment }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * コメント削除
+   * 
+   * 指定されたコメントを削除します。
+   * 自分が作成したコメントのみ削除可能です（管理者は全て削除可能）。
+   * 
+   * @param commentId - 削除するコメントのID
+   * @throws {Error} 削除失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   await apiService.deleteComment(456);
+   *   console.log('コメント削除成功');
+   * } catch (error) {
+   *   console.error('コメント削除失敗:', error.message);
+   * }
+   * ```
+   */
+  async deleteComment(commentId: number): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      await this.handleResponse<void>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // プロジェクト関連API
+  // ============================================================================
+
+  /**
+   * プロジェクト一覧を取得
+   * 
+   * @param params - フィルター条件（オプション）
+   * @param params.status - プロジェクトのステータス（active, completed等）
+   * @param params.created_by - 作成者ID
+   * @returns プロジェクト一覧
+   * @throws {Error} 取得失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const projects = await apiService.getProjects();
+   *   console.log('プロジェクト一覧:', projects.projects);
+   * } catch (error) {
+   *   console.error('プロジェクト取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getProjects(params?: { status?: string; created_by?: number }): Promise<Project[]> {
+    const urlParams = new URLSearchParams();
+    if (params?.status) {
+      urlParams.append('status', params.status);
+    }
+    if (params?.created_by) {
+      urlParams.append('created_by', params.created_by.toString());
+    }
+    
+    const url = `${API_BASE_URL}/projects${urlParams.toString() ? `?${urlParams.toString()}` : ''}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+    
+    const data = await this.handleResponse<{ projects: Project[]; meta: { total: number } }>(response);
+    return data.projects;
+  }
+
+  /**
+   * 指定IDのプロジェクト詳細を取得
+   * 
+   * @param id - プロジェクトID
+   * @returns プロジェクト詳細情報
+   * @throws {Error} プロジェクトが見つからない場合またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.getProject(123);
+   *   console.log('プロジェクト詳細:', response.project);
+   * } catch (error) {
+   *   console.error('プロジェクト取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getProject(id: number): Promise<Project> {
+    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: 'GET',
+      headers: this.getAuthHeaders()
+    });
+    
+    return this.handleResponse<Project>(response);
+  }
+
+  /**
+   * 新しいプロジェクトを作成
+   * 
+   * @param projectData - 作成するプロジェクトの情報
+   * @param projectData.title - プロジェクトのタイトル（必須）
+   * @param projectData.description - プロジェクトの説明
+   * @param projectData.status - プロジェクトのステータス（デフォルト: 'active'）
+   * @param projectData.created_by - 作成者ID
+   * @returns 作成されたプロジェクト情報
+   * @throws {Error} 作成失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const newProject = await apiService.createProject({
+   *     title: '新しいプロジェクト',
+   *     description: 'プロジェクトの詳細説明',
+   *     status: 'active',
+   *     created_by: 123
+   *   });
+   *   console.log('プロジェクト作成完了:', newProject.project);
+   * } catch (error) {
+   *   console.error('プロジェクト作成失敗:', error.message);
+   * }
+   * ```
+   */
+  async createProject(projectData: ProjectRequest): Promise<Project> {
+    const response = await fetch(`${API_BASE_URL}/projects`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ project: projectData })
+    });
+    
+    return this.handleResponse<Project>(response);
+  }
+
+  /**
+   * 既存のプロジェクトを更新
+   * 
+   * @param id - 更新するプロジェクトのID
+   * @param projectData - 更新するプロジェクトの情報（部分更新可能）
+   * @returns 更新されたプロジェクト情報
+   * @throws {Error} 更新失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const updatedProject = await apiService.updateProject(123, {
+   *     title: '更新されたプロジェクトタイトル',
+   *     description: '更新されたプロジェクトの詳細説明'
+   *   });
+   *   console.log('プロジェクト更新完了:', updatedProject.project);
+   * } catch (error) {
+   *   console.error('プロジェクト更新失敗:', error.message);
+   * }
+   * ```
+   */
+  async updateProject(id: number, projectData: ProjectRequest): Promise<Project> {
+    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ project: projectData })
+    });
+    
+    return this.handleResponse<Project>(response);
+  }
+
+  /**
+   * プロジェクトを削除
+   * 
+   * @param id - 削除するプロジェクトのID
+   * @throws {Error} 削除失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   await apiService.deleteProject(123);
+   *   console.log('プロジェクト削除完了');
+   * } catch (error) {
+   *   console.error('プロジェクト削除失敗:', error.message);
+   * }
+   * ```
+   */
+  async deleteProject(id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+    
+    if (!response.ok) {
+      throw new Error('プロジェクトの削除に失敗しました');
     }
   }
 }

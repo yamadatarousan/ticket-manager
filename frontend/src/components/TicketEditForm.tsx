@@ -1,17 +1,53 @@
-import React, { useState } from 'react';
-import { Ticket, CreateTicketRequest } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Ticket } from '../types';
 import { apiService } from '../services/api';
 
-interface TicketCreateFormProps {
+interface TicketEditFormProps {
+  ticket: Ticket;
   onSuccess: (ticket: Ticket) => void;
   onCancel: () => void;
 }
 
-interface FormData extends CreateTicketRequest {
+interface FormData {
+  title: string;
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   assigned_to: string;
 }
 
-export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
+/**
+ * チケット編集フォームコンポーネント
+ * 
+ * 既存のチケット情報を編集するためのフォームコンポーネントです。
+ * 以下の機能を提供します：
+ * - チケット情報の表示と編集
+ * - バリデーション機能
+ * - エラーハンドリング
+ * - 読み込み状態の表示
+ * 
+ * @param props - コンポーネントのプロパティ
+ * @param props.ticket - 編集対象のチケット情報
+ * @param props.onSuccess - 編集成功時のコールバック関数
+ * @param props.onCancel - キャンセル時のコールバック関数
+ * @returns チケット編集フォームのReactコンポーネント
+ * 
+ * @example
+ * ```tsx
+ * <TicketEditForm
+ *   ticket={selectedTicket}
+ *   onSuccess={(updatedTicket) => {
+ *     console.log('チケットが更新されました:', updatedTicket);
+ *     navigate('/tickets');
+ *   }}
+ *   onCancel={() => {
+ *     navigate('/tickets');
+ *   }}
+ * />
+ * ```
+ */
+export const TicketEditForm: React.FC<TicketEditFormProps> = ({
+  ticket,
   onSuccess,
   onCancel
 }) => {
@@ -24,6 +60,19 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // チケット情報でフォームを初期化
+  useEffect(() => {
+    if (ticket) {
+      setFormData({
+        title: ticket.title,
+        description: ticket.description,
+        status: ticket.status,
+        priority: ticket.priority,
+        assigned_to: ticket.assigned_to ? ticket.assigned_to.toString() : ''
+      });
+    }
+  }, [ticket]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -64,10 +113,10 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
         assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined
       };
       
-      const response = await apiService.createTicket(ticketData);
+      const response = await apiService.updateTicket(ticket.id, ticketData);
       onSuccess(response.ticket);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'チケットの作成に失敗しました');
+      setError(err instanceof Error ? err.message : 'チケットの更新に失敗しました');
     } finally {
       setIsSubmitting(false);
     }
@@ -77,13 +126,39 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">新規チケット作成</h2>
+          <h2 className="text-2xl font-bold text-gray-900">チケット編集</h2>
           <button
             onClick={onCancel}
             className="text-gray-600 hover:text-gray-800 text-sm font-medium"
           >
             ← 一覧に戻る
           </button>
+        </div>
+
+        {/* チケット情報 */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-md">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-700">チケットID:</span>
+              <span className="ml-2 text-gray-900">#{ticket.id}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700">作成者:</span>
+              <span className="ml-2 text-gray-900">{ticket.created_by}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700">作成日:</span>
+              <span className="ml-2 text-gray-900">
+                {new Date(ticket.created_at).toLocaleDateString('ja-JP')}
+              </span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700">最終更新:</span>
+              <span className="ml-2 text-gray-900">
+                {new Date(ticket.updated_at).toLocaleDateString('ja-JP')}
+              </span>
+            </div>
+          </div>
         </div>
 
         {error && (
@@ -202,10 +277,10 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
               {isSubmitting ? (
                 <>
                   <span className="inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  作成中...
+                  更新中...
                 </>
               ) : (
-                'チケットを作成'
+                'チケットを更新'
               )}
             </button>
           </div>

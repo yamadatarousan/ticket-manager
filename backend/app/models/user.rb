@@ -43,6 +43,13 @@ class User < ApplicationRecord
   validates :role, presence: true
   validates :password, length: { minimum: 6 }, allow_nil: true
 
+  # 関連定義
+  # @note ユーザーは複数のチケットを担当できる
+  has_many :assigned_tickets, class_name: "Ticket", foreign_key: "assigned_to", dependent: :nullify
+
+  # @note ユーザーは複数のチケットを作成できる
+  has_many :created_tickets, class_name: "Ticket", foreign_key: "created_by", dependent: :restrict_with_error
+
   # スコープ
   # @note 指定されたロールを持つユーザーを取得
   # @param role [String, Symbol] 取得するユーザーのロール

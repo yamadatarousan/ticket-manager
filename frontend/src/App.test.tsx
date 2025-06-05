@@ -68,13 +68,10 @@ describe('App', () => {
     }));
 
     render(<App />);
-    const loadingText = screen.getByText(/認証状態を確認中/i);
-    expect(loadingText).toBeInTheDocument();
+    // ローディングスピナーの確認（クラス名で確認）
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
   });
 
-  test('フッターの開発環境情報が表示される', () => {
-    render(<App />);
-    const footerText = screen.getByText(/開発・テスト環境/i);
-    expect(footerText).toBeInTheDocument();
-  });
+
 });

@@ -39,19 +39,30 @@ class Api::V1::AuthController < ApplicationController
   #     "message": "ログインに成功しました"
   #   }
   def login
-    user = User.authenticate(login_params[:email], login_params[:password])
+    begin
+      user = User.authenticate(login_params[:email], login_params[:password])
 
-    if user
-      token = user.generate_jwt_token
+      if user
+        token = user.generate_jwt_token
+        render json: {
+          user: user_response(user),
+          token: token,
+          message: "ログインに成功しました"
+        }, status: :ok
+      else
+        render json: {
+          error: "メールアドレスまたはパスワードが間違っています"
+        }, status: :unauthorized
+      end
+    rescue ActionController::ParameterMissing => e
       render json: {
-        user: user_response(user),
-        token: token,
-        message: "ログインに成功しました"
-      }, status: :ok
-    else
+        error: "パラメータが不足しています: #{e.message}"
+      }, status: :bad_request
+    rescue => e
+      Rails.logger.error("Login error: #{e.message}")
       render json: {
-        error: "メールアドレスまたはパスワードが間違っています"
-      }, status: :unauthorized
+        error: "ログイン処理中にエラーが発生しました"
+      }, status: :internal_server_error
     end
   end
 
