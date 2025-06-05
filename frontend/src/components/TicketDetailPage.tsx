@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { Ticket } from '../types';
+import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 /**
  * チケット詳細表示ページコンポーネント
@@ -15,6 +16,8 @@ export const TicketDetailPage: React.FC = () => {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchTicket = async () => {
@@ -97,6 +100,31 @@ export const TicketDetailPage: React.FC = () => {
 
   const handleBack = () => {
     navigate('/tickets');
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!ticket) return;
+
+    try {
+      setIsDeleting(true);
+      await apiService.deleteTicket(ticket.id);
+      
+      // 削除成功後、チケット一覧に戻る
+      navigate('/tickets');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'チケットの削除に失敗しました');
+      setShowDeleteModal(false);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) {
@@ -183,8 +211,17 @@ export const TicketDetailPage: React.FC = () => {
               >
                 <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
+                </svg                >
                 編集
+              </button>
+              <button
+                onClick={handleDelete}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                削除
               </button>
             </div>
           </div>
@@ -273,6 +310,15 @@ export const TicketDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 削除確認モーダル */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        itemName={`チケット #${ticket.id}: ${ticket.title}`}
+        isLoading={isDeleting}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }; 
