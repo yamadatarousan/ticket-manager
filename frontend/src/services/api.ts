@@ -1,4 +1,4 @@
-import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats } from '../types';
+import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats, SystemSetting, SystemSettingRequest } from '../types';
 
 /** APIベースURL（環境変数または開発環境のデフォルト値） */
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
@@ -352,6 +352,172 @@ class ApiService {
       });
       
       return await this.handleResponse<DashboardStats>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // システム設定関連API
+  // ============================================================================
+
+  /**
+   * システム設定一覧を取得
+   * 
+   * 管理者のみアクセス可能。システム全体の設定項目一覧を取得します。
+   * 
+   * @returns システム設定一覧
+   * @throws {Error} 取得失敗、認証エラー、権限エラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.getSystemSettings();
+   *   console.log('設定数:', response.system_settings.length);
+   * } catch (error) {
+   *   console.error('設定取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getSystemSettings(): Promise<{ system_settings: SystemSetting[] }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ system_settings: SystemSetting[] }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * 個別システム設定を取得
+   * 
+   * @param id システム設定ID
+   * @returns システム設定情報
+   * @throws {Error} 取得失敗、認証エラー、権限エラーの場合
+   */
+  async getSystemSetting(id: number): Promise<{ system_setting: SystemSetting }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ system_setting: SystemSetting }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を作成
+   * 
+   * @param systemSetting システム設定データ
+   * @returns 作成されたシステム設定情報
+   * @throws {Error} 作成失敗、認証エラー、権限エラーの場合
+   */
+  async createSystemSetting(systemSetting: SystemSettingRequest): Promise<{ system_setting: SystemSetting; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ system_setting: systemSetting })
+      });
+      
+      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を更新
+   * 
+   * @param id システム設定ID
+   * @param systemSetting 更新するシステム設定データ
+   * @returns 更新されたシステム設定情報
+   * @throws {Error} 更新失敗、認証エラー、権限エラーの場合
+   */
+  async updateSystemSetting(id: number, systemSetting: Partial<SystemSettingRequest>): Promise<{ system_setting: SystemSetting; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ system_setting: systemSetting })
+      });
+      
+      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を削除
+   * 
+   * @param id システム設定ID
+   * @returns 削除結果
+   * @throws {Error} 削除失敗、認証エラー、権限エラーの場合
+   */
+  async deleteSystemSetting(id: number): Promise<{ message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ message: string }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * システム設定を一括更新
+   * 
+   * @param settings 設定キーと値のハッシュ
+   * @returns 更新結果
+   * @throws {Error} 更新失敗、認証エラー、権限エラーの場合
+   */
+  async bulkUpdateSystemSettings(settings: Record<string, any>): Promise<{ system_settings: SystemSetting[]; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/system_settings/bulk_update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ settings })
+      });
+      
+      return await this.handleResponse<{ system_settings: SystemSetting[]; message: string }>(response);
     } catch (error) {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');

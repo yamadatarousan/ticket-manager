@@ -260,4 +260,49 @@ export interface DashboardStats {
   }>;
   /** 統計情報生成日時 */
   generated_at: string;
+}
+
+/**
+ * システム設定情報の型定義
+ * 
+ * アプリケーション全体の設定を管理する設定項目の型を定義します。
+ * 管理者のみがアクセス・編集可能な設定項目です。
+ */
+export interface SystemSetting {
+  /** 設定の一意識別子 */
+  id: number;
+  /** 設定キー（英数字、アンダースコア、ハイフンのみ） */
+  key: string;
+  /** 設定値（文字列形式） */
+  value: string;
+  /** 型変換済みの設定値 */
+  typed_value: any;
+  /** 設定の説明 */
+  description: string;
+  /** 設定の型（string, integer, boolean, json） */
+  setting_type: 'string' | 'integer' | 'boolean' | 'json';
+  /** 公開設定（一般ユーザーも閲覧可能かどうか） */
+  is_public: boolean;
+  /** 設定作成日時（ISO 8601形式） */
+  created_at: string;
+  /** 設定最終更新日時（ISO 8601形式） */
+  updated_at: string;
+}
+
+/**
+ * システム設定作成・更新リクエストの型定義
+ * 
+ * システム設定の新規作成や更新時に送信するデータの型を定義します。
+ */
+export interface SystemSettingRequest {
+  /** 設定キー（必須） */
+  key: string;
+  /** 設定値（必須） */
+  value: string;
+  /** 設定の説明（オプション） */
+  description?: string;
+  /** 設定の型（デフォルト: 'string'） */
+  setting_type?: 'string' | 'integer' | 'boolean' | 'json';
+  /** 公開設定（デフォルト: false） */
+  is_public?: boolean;
 } 

@@ -14,6 +14,14 @@ Rails.application.routes.draw do
       # ダッシュボード関連のルート
       get "dashboard/stats", to: "dashboard#stats"
 
+      # システム設定関連のルート
+      resources :system_settings do
+        collection do
+          post :bulk_update
+          get :public, action: :public_settings
+        end
+      end
+
       # リソースルート
       resources :tickets do
         # ネストしたコメントリソース（チケットに紐づくコメント）

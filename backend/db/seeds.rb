@@ -150,6 +150,91 @@ tickets_data.each do |ticket_attrs|
 end
 
 puts "Created #{Ticket.count} tickets"
+
+# システム設定を作成
+puts "Creating system settings..."
+
+# 既存の設定を削除してから新しく作成
+SystemSetting.destroy_all
+
+default_settings = [
+  {
+    key: 'app_name',
+    value: 'チケット管理システム',
+    description: 'アプリケーションの表示名',
+    setting_type: 'string',
+    is_public: true
+  },
+  {
+    key: 'app_version',
+    value: '1.0.0',
+    description: 'アプリケーションのバージョン',
+    setting_type: 'string',
+    is_public: true
+  },
+  {
+    key: 'maintenance_mode',
+    value: 'false',
+    description: 'メンテナンスモードの有効/無効',
+    setting_type: 'boolean',
+    is_public: false
+  },
+  {
+    key: 'max_tickets_per_user',
+    value: '100',
+    description: 'ユーザーあたりの最大チケット数',
+    setting_type: 'integer',
+    is_public: false
+  },
+  {
+    key: 'allow_guest_access',
+    value: 'false',
+    description: 'ゲストアクセスの許可',
+    setting_type: 'boolean',
+    is_public: false
+  },
+  {
+    key: 'email_notifications',
+    value: 'true',
+    description: 'メール通知の有効/無効',
+    setting_type: 'boolean',
+    is_public: false
+  },
+  {
+    key: 'default_ticket_priority',
+    value: 'medium',
+    description: 'デフォルトのチケット優先度',
+    setting_type: 'string',
+    is_public: false
+  },
+  {
+    key: 'session_timeout_minutes',
+    value: '480',
+    description: 'セッションタイムアウト時間（分）',
+    setting_type: 'integer',
+    is_public: false
+  },
+  {
+    key: 'backup_enabled',
+    value: 'true',
+    description: '自動バックアップの有効/無効',
+    setting_type: 'boolean',
+    is_public: false
+  },
+  {
+    key: 'api_rate_limit',
+    value: '1000',
+    description: 'API Rate Limit（1時間あたりのリクエスト数）',
+    setting_type: 'integer',
+    is_public: false
+  }
+]
+
+default_settings.each do |setting_attrs|
+  SystemSetting.create!(setting_attrs)
+end
+
+puts "Created #{SystemSetting.count} system settings"
 puts "Seed data creation completed!"
 puts ""
 puts "Sample data:"

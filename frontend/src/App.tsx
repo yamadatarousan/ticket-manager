@@ -37,6 +37,7 @@ import { TicketDetailPage } from './components/TicketDetailPage';
 import { UserList } from './components/UserList';
 import { UserCreateForm } from './components/UserCreateForm';
 import { UserEditForm } from './components/UserEditForm';
+import { SystemSettingsPage } from './components/SystemSettingsPage';
 import { Ticket, User, DashboardStats } from './types';
 import { apiService } from './services/api';
 import './App.css';
@@ -486,20 +487,7 @@ const ProfilePage: React.FC = () => {
 
 // 設定ページ
 const SettingsPage: React.FC = () => {
-  return (
-    <div className="space-y-6">
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            システム設定
-          </h1>
-          <p className="text-gray-600">
-            設定機能は今後実装予定です。
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  return <SystemSettingsPage />;
 };
 
 // 認証済みアプリケーションのルーティング
