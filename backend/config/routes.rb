@@ -14,12 +14,12 @@ Rails.application.routes.draw do
       # リソースルート
       resources :tickets do
         # ネストしたコメントリソース（チケットに紐づくコメント）
-        resources :comments, only: [:index, :create]
+        resources :comments, only: [ :index, :create ]
       end
-      
+
       # 個別のコメント操作（編集・削除など）
-      resources :comments, only: [:show, :update, :destroy]
-      
+      resources :comments, only: [ :show, :update, :destroy ]
+
       resources :users
     end
   end

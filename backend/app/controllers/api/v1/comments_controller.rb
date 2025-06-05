@@ -5,8 +5,8 @@
 # BacklogやRedmineのようなコメント機能を実現します。
 # ==============================================================================
 class Api::V1::CommentsController < ApplicationController
-  before_action :set_ticket, only: [:index, :create]
-  before_action :set_comment, only: [:show, :update, :destroy]
+  before_action :set_ticket, only: [ :index, :create ]
+  before_action :set_comment, only: [ :show, :update, :destroy ]
 
   # チケットのコメント一覧取得
   #
@@ -30,7 +30,7 @@ class Api::V1::CommentsController < ApplicationController
   #   }
   def index
     @comments = @ticket.comments.order(:created_at)
-    
+
     render json: {
       comments: @comments.map { |comment| comment_response(comment) }
     }
@@ -166,4 +166,4 @@ class Api::V1::CommentsController < ApplicationController
       updated_at: comment.updated_at
     }
   end
-end 
+end

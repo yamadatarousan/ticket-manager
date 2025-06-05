@@ -34,12 +34,12 @@ class Comment < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   # インスタンスメソッド
-  
+
   # コメント作成者の名前を取得
   # @return [String] ユーザー名、またはメールアドレスの@マーク前の部分
   def author_name
     # 実際のプロダクションではUserモデルから名前を取得する
-    user_email.split('@').first.humanize
+    user_email.split("@").first.humanize
   end
 
   # コメントの短縮版を取得
