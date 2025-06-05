@@ -135,6 +135,12 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                       ダッシュボード
                     </Link>
                     <Link 
+                      to="/projects"
+                      className={getLinkStyles('/projects')}
+                    >
+                      プロジェクト
+                    </Link>
+                    <Link 
                       to="/tickets"
                       className={getLinkStyles('/tickets')}
                     >
@@ -306,6 +312,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   ダッシュボード
+                </Link>
+                <Link 
+                  to="/projects"
+                  className={getMobileLinkStyles('/projects')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  プロジェクト
                 </Link>
                 <Link 
                   to="/tickets"

@@ -57,8 +57,11 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
 
     try {
       const ticketData = {
-        ...formData,
-        assigned_to: formData.assigned_to.trim() || null
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined
       };
       
       const response = await apiService.createTicket(ticketData);

@@ -6,12 +6,12 @@ import { Ticket } from '../types';
 // モックチケットデータ
 const mockTicket: Ticket = {
   id: 1,
-  title: 'テストチケット',
-  description: 'テスト用の説明',
+  title: 'Test Ticket',
+  description: 'Test Description',
   status: 'open',
   priority: 'medium',
-  assigned_to: 'test@example.com',
-  created_by: 'creator@example.com',
+  assigned_to: 2,
+  created_by: 3,
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-01T00:00:00.000Z'
 };

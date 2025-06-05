@@ -55,6 +55,12 @@ class Ticket < ApplicationRecord
   # @note チケットは複数のコメントを持つ
   has_many :comments, dependent: :destroy
 
+  # @note チケットには担当者（ユーザー）が設定される（オプショナル）
+  belongs_to :assigned_user, class_name: "User", foreign_key: "assigned_to", optional: true
+
+  # @note チケットには作成者（ユーザー）が設定される（必須）
+  belongs_to :creator, class_name: "User", foreign_key: "created_by"
+
   # スコープ定義
   # @note これらのスコープを使用してチケットをフィルタリングできます
 

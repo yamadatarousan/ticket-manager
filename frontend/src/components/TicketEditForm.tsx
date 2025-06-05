@@ -69,7 +69,7 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
         description: ticket.description,
         status: ticket.status,
         priority: ticket.priority,
-        assigned_to: ticket.assigned_to || ''
+        assigned_to: ticket.assigned_to ? ticket.assigned_to.toString() : ''
       });
     }
   }, [ticket]);
@@ -106,8 +106,11 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
 
     try {
       const ticketData = {
-        ...formData,
-        assigned_to: formData.assigned_to.trim() || null
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined
       };
       
       const response = await apiService.updateTicket(ticket.id, ticketData);

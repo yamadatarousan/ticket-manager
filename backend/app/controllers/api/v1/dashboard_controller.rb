@@ -45,31 +45,36 @@ class Api::V1::DashboardController < ApplicationController
   #     ]
   #   }
   def stats
+    # ステータス別チケット数を取得
+    status_counts = get_ticket_counts_by_status
+    
     # 基本的なチケット統計
     ticket_stats = {
       total: Ticket.count,
-      by_status: get_ticket_counts_by_status,
-      by_priority: get_ticket_counts_by_priority,
-      my_tickets: get_my_ticket_counts
+      open: status_counts['open'] || 0,
+      in_progress: status_counts['in_progress'] || 0,
+      resolved: status_counts['resolved'] || 0,
+      closed: status_counts['closed'] || 0
     }
 
     # 最近のチケット（直近10件）
-    recent_tickets = Ticket.order(created_at: :desc)
+    recent_tickets = Ticket.includes(:assigned_user, :creator)
+                          .order(created_at: :desc)
                           .limit(10)
                           .map { |ticket| ticket_summary(ticket) }
 
-    # 期限が近いチケット（仮想的な due_date フィールドがある場合）
-    # 現在のスキーマにはdue_dateがないため、コメントアウト
-    # upcoming_deadlines = Ticket.where('due_date BETWEEN ? AND ?', Date.current, 1.week.from_now)
-    #                           .order(:due_date)
-    #                           .limit(5)
-    #                           .map { |ticket| ticket_summary(ticket) }
+    # 現在のユーザーに割り当てられたチケット
+    assigned_tickets = Ticket.includes(:assigned_user, :creator)
+                           .where(assigned_to: @current_user.id)
+                           .order(updated_at: :desc)
+                           .limit(10)
+                           .map { |ticket| ticket_summary(ticket) }
 
     render json: {
       ticket_stats: ticket_stats,
       recent_tickets: recent_tickets,
-      # upcoming_deadlines: upcoming_deadlines,
-      generated_at: Time.current
+      assigned_tickets: assigned_tickets,
+      generated_at: Time.current.iso8601
     }
   end
 
@@ -83,25 +88,6 @@ class Api::V1::DashboardController < ApplicationController
     Ticket.group(:status).count
   end
 
-  # 優先度別チケット数を取得
-  #
-  # @return [Hash] 優先度別のチケット数
-  # @private
-  def get_ticket_counts_by_priority
-    Ticket.group(:priority).count
-  end
-
-  # 現在のユーザーに関連するチケット数を取得
-  #
-  # @return [Hash] 自分に関連するチケット数
-  # @private
-  def get_my_ticket_counts
-    {
-      assigned_to_me: Ticket.where(assigned_to: @current_user.email).count,
-      created_by_me: Ticket.where(created_by: @current_user.email).count
-    }
-  end
-
   # チケットのサマリー情報を取得
   #
   # @param ticket [Ticket] チケットオブジェクト
@@ -111,12 +97,13 @@ class Api::V1::DashboardController < ApplicationController
     {
       id: ticket.id,
       title: ticket.title,
+      description: ticket.description,
       status: ticket.status,
       priority: ticket.priority,
       assigned_to: ticket.assigned_to,
       created_by: ticket.created_by,
-      created_at: ticket.created_at,
-      updated_at: ticket.updated_at
+      created_at: ticket.created_at.iso8601,
+      updated_at: ticket.updated_at.iso8601
     }
   end
 end

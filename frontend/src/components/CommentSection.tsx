@@ -122,7 +122,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ ticketId }) => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <span className="font-medium text-gray-900">
-                    {comment.author_name}
+                    {comment.user_name}
                   </span>
                   <span className="text-sm text-gray-500">
                     ({comment.user_email})

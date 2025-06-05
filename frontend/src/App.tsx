@@ -12,6 +12,10 @@
  * - /login - ログイン画面
  * - /register - ユーザー登録画面
  * - /dashboard - ダッシュボード（要認証）
+ * - /projects - プロジェクト一覧（要認証）
+ * - /projects/new - プロジェクト作成（要管理者/マネージャー権限）
+ * - /projects/:id - プロジェクト詳細（要認証）
+ * - /projects/:id/edit - プロジェクト編集（要管理者/マネージャー権限）
  * - /tickets - チケット一覧（要認証）
  * - /tickets/new - チケット作成（要認証）
  * - /tickets/:id - チケット詳細（要認証）
@@ -25,7 +29,7 @@
  * - * - 404ページ
  */
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import { LoginForm } from './components/LoginForm';
@@ -38,7 +42,9 @@ import { UserList } from './components/UserList';
 import { UserCreateForm } from './components/UserCreateForm';
 import { UserEditForm } from './components/UserEditForm';
 import { SystemSettingsPage } from './components/SystemSettingsPage';
-import { Ticket, User, DashboardStats } from './types';
+import { ProjectList } from './components/ProjectList';
+import { ProjectCreateForm } from './components/ProjectCreateForm';
+import { Ticket, User, DashboardStats, Project } from './types';
 import { apiService } from './services/api';
 import './App.css';
 
@@ -51,6 +57,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     switch (page) {
       case 'dashboard':
         navigate('/dashboard');
+        break;
+      case 'projects':
+        navigate('/projects');
+        break;
+      case 'project-create':
+        navigate('/projects/new');
         break;
       case 'tickets':
         navigate('/tickets');
@@ -84,13 +96,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const getCurrentView = () => {
     const path = location.pathname;
     if (path === '/dashboard') return 'dashboard';
-    if (path === '/tickets') return 'tickets';
-    if (path === '/tickets/new') return 'ticket-create';
-    if (path === '/users') return 'users';
-    if (path === '/users/new') return 'user-create';
+    if (path.startsWith('/projects')) return 'projects';
+    if (path.startsWith('/tickets')) return 'tickets';
+    if (path.startsWith('/users')) return 'users';
     if (path === '/profile') return 'profile';
     if (path === '/settings') return 'settings';
-    return 'tickets';
+    return 'dashboard';
   };
 
   return (
@@ -198,132 +209,173 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 自分のチケット */}
+                {/* 未対応チケット */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-red-600">{stats.ticket_stats.open}</div>
+                    <div className="text-sm text-red-700">未対応</div>
+                  </div>
+                </div>
+
+                {/* 対応中チケット */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-yellow-600">{stats.ticket_stats.in_progress}</div>
+                    <div className="text-sm text-yellow-700">対応中</div>
+                  </div>
+                </div>
+
+                {/* 解決済みチケット */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">{stats.ticket_stats.my_tickets.assigned_to_me}</div>
-                    <div className="text-sm text-green-700">担当チケット</div>
-                  </div>
-                </div>
-
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-600">{stats.ticket_stats.my_tickets.created_by_me}</div>
-                    <div className="text-sm text-purple-700">作成チケット</div>
-                  </div>
-                </div>
-
-                {/* 最新情報更新日時 */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <div className="text-center">
-                    <div className="text-sm font-medium text-gray-600">最終更新</div>
-                    <div className="text-xs text-gray-500 mt-1">{formatDate(stats.generated_at)}</div>
+                    <div className="text-3xl font-bold text-green-600">{stats.ticket_stats.resolved}</div>
+                    <div className="text-sm text-green-700">解決済み</div>
                   </div>
                 </div>
               </div>
 
-              {/* ステータス別統計 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">ステータス別チケット数</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 最近のチケット */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">最近のチケット</h3>
                   <div className="space-y-3">
-                                         {Object.entries(stats.ticket_stats.by_status).map(([status, count]) => (
-                       <div key={status} className="flex justify-between items-center">
-                         <span className="text-sm text-gray-600">{getStatusLabel(status)}</span>
-                         <span className="text-sm font-medium text-gray-900">{count as number}件</span>
-                       </div>
-                     ))}
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">優先度別チケット数</h3>
-                  <div className="space-y-3">
-                                         {Object.entries(stats.ticket_stats.by_priority).map(([priority, count]) => (
-                       <div key={priority} className="flex justify-between items-center">
-                         <span className="text-sm text-gray-600">{getPriorityLabel(priority)}</span>
-                         <span className="text-sm font-medium text-gray-900">{count as number}件</span>
-                       </div>
-                     ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* 最近のチケット */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">最近のチケット</h3>
-                <div className="space-y-3">
-                                     {stats.recent_tickets.slice(0, 5).map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900 truncate">
-                          #{ticket.id} {ticket.title}
+                    {(stats.recent_tickets || []).slice(0, 5).map(ticket => (
+                      <div 
+                        key={ticket.id} 
+                        className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md cursor-pointer"
+                        onClick={() => navigate(`/tickets/${ticket.id}`)}
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {ticket.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatDate(ticket.created_at)}
+                          </p>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          作成者: {ticket.created_by} | {formatDate(ticket.created_at)}
+                        <div className="flex items-center space-x-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            ticket.status === 'open' ? 'bg-red-100 text-red-800' :
+                            ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                            ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {getStatusLabel(ticket.status)}
+                          </span>
                         </div>
                       </div>
-                      <div className="ml-4 flex space-x-2">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          ticket.status === 'open' ? 'bg-red-100 text-red-800' :
-                          ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                          ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {getStatusLabel(ticket.status)}
-                        </span>
-                        <button
-                          onClick={() => navigate(`/tickets/${ticket.id}`)}
-                          className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                        >
-                          詳細
-                        </button>
+                    ))}
+                  </div>
+                  {(stats.recent_tickets || []).length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      まだチケットがありません
+                    </p>
+                  )}
+                </div>
+
+                {/* 割り当てられたチケット */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">割り当てられたチケット</h3>
+                  <div className="space-y-3">
+                    {(stats.assigned_tickets || []).slice(0, 5).map(ticket => (
+                      <div 
+                        key={ticket.id} 
+                        className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md cursor-pointer"
+                        onClick={() => navigate(`/tickets/${ticket.id}`)}
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {ticket.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            優先度: {getPriorityLabel(ticket.priority)}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            ticket.priority === 'urgent' ? 'bg-red-100 text-red-800' :
+                            ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                            ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {getPriorityLabel(ticket.priority)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  {(stats.assigned_tickets || []).length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      割り当てられたチケットはありません
+                    </p>
+                  )}
                 </div>
               </div>
             </>
           )}
-
-          {/* アクション一覧 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div 
-              className="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100"
-              onClick={() => navigate('/tickets')}
-            >
-              <h3 className="text-lg font-medium text-blue-900">チケット管理</h3>
-              <p className="text-blue-700">チケットの確認・作成・編集</p>
-            </div>
-            {user && (user.role === 'admin' || user.role === 'manager') && (
-              <div 
-                className="bg-green-50 border border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100"
-                onClick={() => navigate('/users')}
-              >
-                <h3 className="text-lg font-medium text-green-900">ユーザー管理</h3>
-                <p className="text-green-700">ユーザーの確認・作成・編集</p>
-              </div>
-            )}
-            <div 
-              className="bg-purple-50 border border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100"
-              onClick={() => navigate('/profile')}
-            >
-              <h3 className="text-lg font-medium text-purple-900">プロフィール</h3>
-              <p className="text-purple-700">個人設定の確認・変更</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// チケット関連のページコンポーネント
+// プロジェクト関連ページコンポーネント
+const ProjectPages: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleProjectCreateSuccess = (project: Project) => {
+    navigate('/projects');
+  };
+
+  const handleProjectCreateCancel = () => {
+    navigate('/projects');
+  };
+
+  const handleProjectClick = (project: Project) => {
+    navigate(`/projects/${project.id}`);
+  };
+
+  const handleCreateProject = () => {
+    navigate('/projects/new');
+  };
+
+  const handleProjectEdit = (project: Project) => {
+    navigate(`/projects/${project.id}/edit`);
+  };
+
+  return (
+    <Routes>
+      <Route 
+        path="/" 
+        element={
+          <ProjectList 
+            onProjectClick={handleProjectClick}
+            onProjectEdit={handleProjectEdit}
+            onCreateProject={handleCreateProject}
+          />
+        } 
+      />
+      <Route 
+        path="/new" 
+        element={
+          <ProjectCreateForm 
+            onSuccess={handleProjectCreateSuccess}
+            onCancel={handleProjectCreateCancel}
+          />
+        } 
+      />
+      {/* TODO: プロジェクト詳細と編集ページを実装 */}
+      <Route path="/:id" element={<div>プロジェクト詳細（未実装）</div>} />
+      <Route path="/:id/edit" element={<div>プロジェクト編集（未実装）</div>} />
+    </Routes>
+  );
+};
+
+// チケット関連ページコンポーネント
 const TicketPages: React.FC = () => {
   const navigate = useNavigate();
 
   const handleTicketCreateSuccess = (ticket: Ticket) => {
-    console.log('チケットが作成されました:', ticket);
     navigate('/tickets');
   };
 
@@ -332,7 +384,6 @@ const TicketPages: React.FC = () => {
   };
 
   const handleTicketClick = (ticket: Ticket) => {
-    console.log('チケットがクリックされました:', ticket);
     navigate(`/tickets/${ticket.id}`);
   };
 
@@ -354,7 +405,7 @@ const TicketPages: React.FC = () => {
       <Route 
         path="/new" 
         element={
-          <TicketCreateForm
+          <TicketCreateForm 
             onSuccess={handleTicketCreateSuccess}
             onCancel={handleTicketCreateCancel}
           />
@@ -372,13 +423,11 @@ const TicketPages: React.FC = () => {
   );
 };
 
-// ユーザー関連のページコンポーネント
+// ユーザー関連ページコンポーネント
 const UserPages: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   const handleUserCreateSuccess = (user: User) => {
-    console.log('ユーザーが作成されました:', user);
     navigate('/users');
   };
 
@@ -387,8 +436,7 @@ const UserPages: React.FC = () => {
   };
 
   const handleUserClick = (user: User) => {
-    setSelectedUser(user);
-    navigate(`/users/${user.id}/edit`);
+    navigate(`/users/${user.id}`);
   };
 
   const handleCreateUser = () => {
@@ -396,18 +444,14 @@ const UserPages: React.FC = () => {
   };
 
   const handleUserEdit = (user: User) => {
-    setSelectedUser(user);
     navigate(`/users/${user.id}/edit`);
   };
 
   const handleUserEditSuccess = (user: User) => {
-    console.log('ユーザーが更新されました:', user);
-    setSelectedUser(null);
     navigate('/users');
   };
 
   const handleUserEditCancel = () => {
-    setSelectedUser(null);
     navigate('/users');
   };
 
@@ -416,7 +460,7 @@ const UserPages: React.FC = () => {
       <Route 
         path="/" 
         element={
-          <UserList
+          <UserList 
             onUserClick={handleUserClick}
             onCreateUser={handleCreateUser}
             onEditUser={handleUserEdit}
@@ -426,7 +470,7 @@ const UserPages: React.FC = () => {
       <Route 
         path="/new" 
         element={
-          <UserCreateForm
+          <UserCreateForm 
             onSuccess={handleUserCreateSuccess}
             onCancel={handleUserCreateCancel}
           />
@@ -435,15 +479,10 @@ const UserPages: React.FC = () => {
       <Route 
         path="/:id/edit" 
         element={
-          selectedUser ? (
-            <UserEditForm
-              user={selectedUser}
-              onSuccess={handleUserEditSuccess}
-              onCancel={handleUserEditCancel}
-            />
-          ) : (
-            <Navigate to="/users" replace />
-          )
+          <UserEditFormWithId
+            onSuccess={handleUserEditSuccess}
+            onCancel={handleUserEditCancel}
+          />
         } 
       />
     </Routes>
@@ -455,97 +494,21 @@ const ProfilePage: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            プロフィール
-          </h1>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">名前</label>
-              <p className="mt-1 text-sm text-gray-900">{user?.name}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">メールアドレス</label>
-              <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">権限</label>
-              <p className="mt-1 text-sm text-gray-900">
-                {user?.role === 'admin' && '管理者'}
-                {user?.role === 'manager' && 'マネージャー'}
-                {user?.role === 'user' && '一般ユーザー'}
-              </p>
-            </div>
-          </div>
+    <div className="max-w-2xl mx-auto bg-white rounded-lg border border-gray-200 p-6">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">プロフィール</h2>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">名前</label>
+          <p className="mt-1 text-sm text-gray-900">{user?.name}</p>
         </div>
-      </div>
-    </div>
-  );
-};
-
-// 設定ページ
-const SettingsPage: React.FC = () => {
-  return <SystemSettingsPage />;
-};
-
-// 認証済みアプリケーションのルーティング
-const AuthenticatedApp: React.FC = () => {
-  return (
-    <MainLayout>
-      <Routes>
-        <Route path="/" element={<Navigate to="/tickets" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/tickets/*" element={<TicketPages />} />
-        <Route path="/users/*" element={<UserPages />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/tickets" replace />} />
-      </Routes>
-    </MainLayout>
-  );
-};
-
-// 認証が不要なページのコンポーネント
-const UnauthenticatedApp: React.FC = () => {
-  const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">🎫</h1>
-          <h2 className="text-2xl font-bold text-gray-900">チケット管理システム</h2>
-          <p className="text-gray-600 mt-2">BacklogやRedmineを参考にした統合チケット管理</p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">メールアドレス</label>
+          <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
         </div>
-
-        {/* 認証フォーム */}
-        <Routes>
-          <Route 
-            path="/login" 
-            element={
-              <LoginForm
-                onSwitchToRegister={() => navigate('/register')}
-              />
-            } 
-          />
-          <Route 
-            path="/register" 
-            element={
-              <RegisterForm
-                onSwitchToLogin={() => navigate('/login')}
-              />
-            } 
-          />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-
-        {/* フッター */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
-            開発・テスト環境 | React + Rails + MySQL
+        <div>
+          <label className="block text-sm font-medium text-gray-700">役割</label>
+          <p className="mt-1 text-sm text-gray-900">
+            {user?.role === 'admin' ? '管理者' : user?.role === 'manager' ? 'マネージャー' : '一般ユーザー'}
           </p>
         </div>
       </div>
@@ -553,32 +516,165 @@ const UnauthenticatedApp: React.FC = () => {
   );
 };
 
-// メインアプリケーションコンポーネント
+// 認証済みアプリケーション
+const AuthenticatedApp: React.FC = () => {
+  return (
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/projects/*" element={<ProjectPages />} />
+        <Route path="/tickets/*" element={<TicketPages />} />
+        <Route path="/users/*" element={<UserPages />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SystemSettingsPage />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </MainLayout>
+  );
+};
+
+// 未認証アプリケーション
+const UnauthenticatedApp: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleLoginSuccess = () => {
+    navigate('/dashboard');
+  };
+
+  const handleRegisterSuccess = () => {
+    navigate('/dashboard');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900 mb-8">
+          チケット管理システム
+        </h1>
+      </div>
+      
+      <Routes>
+        <Route 
+          path="/login" 
+          element={<LoginForm onSuccess={handleLoginSuccess} />} 
+        />
+        <Route 
+          path="/register" 
+          element={<RegisterForm onSuccess={handleRegisterSuccess} />} 
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </div>
+  );
+};
+
+// アプリケーションコンテンツ
 const AppContent: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">認証状態を確認中...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return user ? <AuthenticatedApp /> : <UnauthenticatedApp />;
+};
+
+/**
+ * URLパラメータからユーザーIDを取得してUserEditFormにuserプロパティを渡すラッパーコンポーネント
+ */
+const UserEditFormWithId: React.FC<{
+  onSuccess: (user: User) => void;
+  onCancel: () => void;
+}> = ({ onSuccess, onCancel }) => {
+  const { id } = useParams<{ id: string }>();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!id) {
+        setError('ユーザーIDが指定されていません');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await apiService.getUser(parseInt(id, 10));
+        setUser(response.user);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'ユーザーの取得に失敗しました');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-6"></div>
+            <div className="h-4 bg-gray-200 rounded mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded mb-4 w-3/4"></div>
+            <div className="h-32 bg-gray-200 rounded mb-4"></div>
+            <div className="flex space-x-4">
+              <div className="h-10 bg-gray-200 rounded w-24"></div>
+              <div className="h-10 bg-gray-200 rounded w-24"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  return isAuthenticated ? <AuthenticatedApp /> : <UnauthenticatedApp />;
+  if (error || !user) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {error || 'ユーザーが見つかりません'}
+            </h3>
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              一覧に戻る
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <UserEditForm
+      user={user}
+      onSuccess={onSuccess}
+      onCancel={onCancel}
+    />
+  );
 };
 
-// ルートアプリケーションコンポーネント
+// メインアプリケーション
 const App: React.FC = () => {
   return (
-    <Router>
-      <AuthProvider>
+    <AuthProvider>
+      <Router>
         <AppContent />
-      </AuthProvider>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 };
 

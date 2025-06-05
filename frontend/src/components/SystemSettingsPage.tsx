@@ -156,6 +156,15 @@ export const SystemSettingsPage: React.FC = () => {
     }
   };
 
+  const formatDisplayValue = (setting: SystemSetting): string => {
+    // 表示用の値を整形
+    if (setting.setting_type === 'boolean') {
+      return setting.value === 'true' ? '有効' : '無効';
+    }
+    
+    return setting.value;
+  };
+
   const renderSettingValue = (setting: SystemSetting) => {
     if (editingSettings[setting.id]) {
       if (setting.setting_type === 'boolean') {
@@ -181,12 +190,7 @@ export const SystemSettingsPage: React.FC = () => {
       );
     }
 
-    // 表示用の値を整形
-    if (setting.setting_type === 'boolean') {
-      return setting.typed_value ? '有効' : '無効';
-    }
-    
-    return setting.value;
+    return formatDisplayValue(setting);
   };
 
   if (isLoading) {
