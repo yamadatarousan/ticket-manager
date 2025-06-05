@@ -51,6 +51,10 @@ class Ticket < ApplicationRecord
   validates :priority, presence: true
   validates :created_by, presence: true
 
+  # 関連定義
+  # @note チケットは複数のコメントを持つ
+  has_many :comments, dependent: :destroy
+
   # スコープ定義
   # @note これらのスコープを使用してチケットをフィルタリングできます
 

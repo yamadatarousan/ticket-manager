@@ -75,6 +75,40 @@ export interface Ticket {
 }
 
 /**
+ * コメント情報を表すインターフェース
+ * 
+ * チケットに対するコメント（BacklogやRedmineのようなコメント機能）の情報を定義します。
+ * コメントは進捗報告、質疑応答、ディスカッションなどに使用されます。
+ */
+export interface Comment {
+  /** コメントの一意識別子 */
+  id: number;
+  /** コメントの内容 */
+  content: string;
+  /** コメントが属するチケットのID */
+  ticket_id: number;
+  /** コメント作成者のメールアドレス */
+  user_email: string;
+  /** コメント作成者の表示名 */
+  author_name: string;
+  /** コメント作成日時（ISO 8601形式） */
+  created_at: string;
+  /** コメント最終更新日時（ISO 8601形式） */
+  updated_at: string;
+}
+
+/**
+ * コメント作成リクエストの型定義
+ * 
+ * 新しいコメントを作成する際に必要な情報を定義します。
+ * idや作成日時などの自動生成される値は含まれません。
+ */
+export interface CreateCommentRequest {
+  /** コメントの内容（必須） */
+  content: string;
+}
+
+/**
  * チケット作成リクエストの型定義
  * 
  * 新しいチケットを作成する際に必要な情報を定義します。

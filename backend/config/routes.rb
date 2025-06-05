@@ -12,7 +12,14 @@ Rails.application.routes.draw do
       get "auth/me", to: "auth#me"
 
       # リソースルート
-      resources :tickets
+      resources :tickets do
+        # ネストしたコメントリソース（チケットに紐づくコメント）
+        resources :comments, only: [:index, :create]
+      end
+      
+      # 個別のコメント操作（編集・削除など）
+      resources :comments, only: [:show, :update, :destroy]
+      
       resources :users
     end
   end

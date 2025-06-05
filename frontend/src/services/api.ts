@@ -1,4 +1,4 @@
-import { User, Ticket, AuthResponse, LoginRequest, RegisterRequest, PaginatedResponse } from '../types';
+import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse } from '../types';
 
 /** APIベースURL（環境変数または開発環境のデフォルト値） */
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
@@ -142,7 +142,10 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
         body: JSON.stringify({ user: credentials })
       });
       
@@ -660,6 +663,163 @@ class ApiService {
     
     if (!response.ok) {
       throw new Error('ユーザーの削除に失敗しました');
+    }
+  }
+
+  // ============================================================================
+  // コメント管理API
+  // ============================================================================
+
+  /**
+   * チケットのコメント一覧取得
+   * 
+   * 指定されたチケットに関連するコメントの一覧を取得します。
+   * コメントは作成日時順（古い順）で返されます。
+   * 
+   * @param ticketId - チケットID
+   * @returns コメント一覧
+   * @throws {Error} 取得失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.getComments(123);
+   *   console.log('コメント一覧:', response.comments);
+   * } catch (error) {
+   *   console.error('コメント取得失敗:', error.message);
+   * }
+   * ```
+   */
+  async getComments(ticketId: number): Promise<{ comments: Comment[] }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/comments`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      return await this.handleResponse<{ comments: Comment[] }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * コメント作成
+   * 
+   * 指定されたチケットに新しいコメントを追加します。
+   * 作成者は現在ログインしているユーザーに自動設定されます。
+   * 
+   * @param ticketId - チケットID
+   * @param commentData - コメント作成情報
+   * @param commentData.content - コメント内容
+   * @returns 作成されたコメント情報
+   * @throws {Error} 作成失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.createComment(123, {
+   *     content: '作業を開始しました'
+   *   });
+   *   console.log('コメント作成成功:', response.comment);
+   * } catch (error) {
+   *   console.error('コメント作成失敗:', error.message);
+   * }
+   * ```
+   */
+  async createComment(ticketId: number, commentData: CreateCommentRequest): Promise<{ comment: Comment }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/comments`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ comment: commentData })
+      });
+      
+      return await this.handleResponse<{ comment: Comment }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * コメント更新
+   * 
+   * 既存のコメントの内容を更新します。
+   * 自分が作成したコメントのみ更新可能です（管理者は全て更新可能）。
+   * 
+   * @param commentId - コメントID
+   * @param commentData - 更新するコメント情報
+   * @param commentData.content - 新しいコメント内容
+   * @returns 更新されたコメント情報
+   * @throws {Error} 更新失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const response = await apiService.updateComment(456, {
+   *     content: '作業が完了しました'
+   *   });
+   *   console.log('コメント更新成功:', response.comment);
+   * } catch (error) {
+   *   console.error('コメント更新失敗:', error.message);
+   * }
+   * ```
+   */
+  async updateComment(commentId: number, commentData: CreateCommentRequest): Promise<{ comment: Comment }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ comment: commentData })
+      });
+      
+      return await this.handleResponse<{ comment: Comment }>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * コメント削除
+   * 
+   * 指定されたコメントを削除します。
+   * 自分が作成したコメントのみ削除可能です（管理者は全て削除可能）。
+   * 
+   * @param commentId - 削除するコメントのID
+   * @throws {Error} 削除失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   await apiService.deleteComment(456);
+   *   console.log('コメント削除成功');
+   * } catch (error) {
+   *   console.error('コメント削除失敗:', error.message);
+   * }
+   * ```
+   */
+  async deleteComment(commentId: number): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+      
+      await this.handleResponse<void>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
+      }
+      throw error;
     }
   }
 }

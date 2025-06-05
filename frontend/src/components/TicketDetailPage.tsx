@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { Ticket } from '../types';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { CommentSection } from './CommentSection';
 
 /**
  * チケット詳細表示ページコンポーネント
@@ -308,6 +309,11 @@ export const TicketDetailPage: React.FC = () => {
               <p className="text-gray-700 whitespace-pre-wrap">{ticket.description}</p>
             </div>
           </div>
+        </div>
+
+        {/* コメントセクション */}
+        <div className="mt-8">
+          <CommentSection ticketId={ticket.id} />
         </div>
       </div>
 
