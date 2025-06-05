@@ -110,9 +110,38 @@ stateDiagram-v2
 - バックエンドのモデル: snake_case (例: `ticket.rb`)
 - テスト名: 日本語で記述
 
-### テスト
+### 便利なコマンド
+
+#### Makefileを使用（推奨）
+```bash
+make help          # 利用可能なコマンドを表示
+make setup         # 開発環境をセットアップ
+make start         # 開発サーバーを起動
+make stop          # 開発サーバーを停止
+make test          # すべてのテストを実行
+make test-be       # バックエンドのテストのみ実行
+make test-fe       # フロントエンドのテストのみ実行
+make lint          # コードリントを実行
+make lint-fix      # コードリントを実行し、自動修正
+make db-reset      # データベースをリセット
+```
+
+#### スクリプトを直接使用
+```bash
+./scripts/setup.sh    # 開発環境をセットアップ
+./scripts/start.sh    # 開発サーバーを起動
+./scripts/test.sh     # すべてのテストを実行
+./scripts/lint.sh     # コードリントを実行
+```
+
+### 個別テスト実行
 - フロントエンド: `npm test`
 - バックエンド: `bundle exec rspec`
+
+### 開発者ツール
+- **EditorConfig**: エディター間での一貫したコーディングスタイル
+- **VSCode設定**: プロジェクト固有の設定と推奨拡張機能
+- **リンター**: RuboCop（Ruby）、ESLint（JavaScript/TypeScript）
 
 ## API ドキュメント
 詳細なAPI仕様については、Swagger UIを参照してください:
