@@ -122,7 +122,7 @@ class Api::V1::TicketsController < ApplicationController
   #   }
   def create
     @ticket = Ticket.new(ticket_params)
-    @ticket.created_by = @current_user.email
+    @ticket.created_by = @current_user.id
 
     if @ticket.save
       render json: { ticket: @ticket }, status: :created
@@ -191,6 +191,6 @@ class Api::V1::TicketsController < ApplicationController
   # @return [ActionController::Parameters] 許可されたパラメータ
   # @private
   def ticket_params
-    params.require(:ticket).permit(:title, :description, :status, :priority, :assigned_to, :created_by)
+    params.require(:ticket).permit(:title, :description, :status, :priority, :assigned_to)
   end
 end

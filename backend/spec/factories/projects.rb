@@ -3,6 +3,6 @@ FactoryBot.define do
     name { "MyString" }
     description { "MyText" }
     status { 1 }
-    created_by { "" }
+    association :creator, factory: :user
   end
 end

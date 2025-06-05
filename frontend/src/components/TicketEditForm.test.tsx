@@ -41,7 +41,7 @@ describe('TicketEditForm', () => {
     );
 
     expect(screen.getByText('チケット編集')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('テストチケット')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('テスト用の説明')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Test Ticket')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Test Description')).toBeInTheDocument();
   });
 }); 

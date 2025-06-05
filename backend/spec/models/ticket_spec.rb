@@ -15,9 +15,9 @@ RSpec.describe Ticket, type: :model do
     end
 
     it '作成者が必須であること' do
-      ticket = build(:ticket, created_by: nil)
+      ticket = build(:ticket, creator: nil)
       expect(ticket).not_to be_valid
-      expect(ticket.errors[:created_by]).to include("can't be blank")
+      expect(ticket.errors[:creator]).to include("must exist")
     end
 
     it '全ての必須項目が設定されている場合は有効であること' do

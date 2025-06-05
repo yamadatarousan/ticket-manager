@@ -47,14 +47,14 @@ class Api::V1::DashboardController < ApplicationController
   def stats
     # ステータス別チケット数を取得
     status_counts = get_ticket_counts_by_status
-    
+
     # 基本的なチケット統計
     ticket_stats = {
       total: Ticket.count,
-      open: status_counts['open'] || 0,
-      in_progress: status_counts['in_progress'] || 0,
-      resolved: status_counts['resolved'] || 0,
-      closed: status_counts['closed'] || 0
+      open: status_counts["open"] || 0,
+      in_progress: status_counts["in_progress"] || 0,
+      resolved: status_counts["resolved"] || 0,
+      closed: status_counts["closed"] || 0
     }
 
     # 最近のチケット（直近10件）

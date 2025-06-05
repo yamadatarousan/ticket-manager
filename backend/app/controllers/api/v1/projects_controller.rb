@@ -239,7 +239,7 @@ class Api::V1::ProjectsController < ApplicationController
   # =end
   def destroy
     @project.destroy!
-    render json: { message: "プロジェクトが正常に削除されました" }
+    head :no_content
   rescue StandardError => e
     render json: { error: "プロジェクトの削除に失敗しました: #{e.message}" }, status: :internal_server_error
   end
