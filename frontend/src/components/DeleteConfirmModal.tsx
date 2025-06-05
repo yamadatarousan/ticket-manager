@@ -40,14 +40,16 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 
   return (
     <>
-      {/* オーバーレイ */}
+      {/* オーバーレイとモーダルコンテンツ */}
       <div 
-        className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-40"
+        className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-40"
         onClick={onCancel}
-      />
-      
-      {/* モーダルコンテンツ */}
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white z-50">
+      >
+        {/* モーダルコンテンツ */}
+        <div 
+          className="p-5 border w-96 shadow-lg rounded-md bg-white z-50 max-h-96 overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="mt-3 text-center">
           {/* 警告アイコン */}
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
@@ -108,6 +110,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               )}
             </button>
           </div>
+        </div>
         </div>
       </div>
     </>
