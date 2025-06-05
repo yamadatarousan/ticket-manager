@@ -119,4 +119,4 @@ class Api::V1::DashboardController < ApplicationController
       updated_at: ticket.updated_at
     }
   end
-end 
+end
