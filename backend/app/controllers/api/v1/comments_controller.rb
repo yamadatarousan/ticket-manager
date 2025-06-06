@@ -5,7 +5,7 @@
 # BacklogやRedmineのようなコメント機能を実現します。
 # ==============================================================================
 class Api::V1::CommentsController < ApplicationController
-  before_action :set_ticket, only: [ :index, :create ]
+  before_action :set_ticket, only: [ :index, :create, :show, :update, :destroy ]
   before_action :set_comment, only: [ :show, :update, :destroy ]
 
   # チケットのコメント一覧取得
@@ -138,7 +138,7 @@ class Api::V1::CommentsController < ApplicationController
   # @raise [ActiveRecord::RecordNotFound] コメントが見つからない場合
   # @private
   def set_comment
-    @comment = Comment.find(params[:id])
+    @comment = @ticket.comments.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: "Comment not found" }, status: :not_found
   end
