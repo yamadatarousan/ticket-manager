@@ -434,7 +434,7 @@ const Dashboard: React.FC = () => {
 const ProjectPages: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleProjectCreateSuccess = (_project: Project) => {
+  const handleProjectCreateSuccess = (project: Project) => {
     navigate('/projects');
   };
 
@@ -442,7 +442,7 @@ const ProjectPages: React.FC = () => {
     navigate('/projects');
   };
 
-  const handleProjectClick = (_project: Project) => {
+  const handleProjectClick = (project: Project) => {
     navigate(`/projects/${project.id}`);
   };
 
@@ -450,7 +450,7 @@ const ProjectPages: React.FC = () => {
     navigate('/projects/new');
   };
 
-  const handleProjectEdit = (_project: Project) => {
+  const handleProjectEdit = (project: Project) => {
     navigate(`/projects/${project.id}/edit`);
   };
 
@@ -485,7 +485,7 @@ const ProjectPages: React.FC = () => {
 const TicketPages: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleTicketCreateSuccess = (_ticket: Ticket) => {
+  const handleTicketCreateSuccess = (ticket: Ticket) => {
     navigate('/tickets');
   };
 
@@ -493,7 +493,7 @@ const TicketPages: React.FC = () => {
     navigate('/tickets');
   };
 
-  const handleTicketClick = (_ticket: Ticket) => {
+  const handleTicketClick = (ticket: Ticket) => {
     navigate(`/tickets/${ticket.id}`);
   };
 
@@ -501,7 +501,7 @@ const TicketPages: React.FC = () => {
     navigate('/tickets/new');
   };
 
-  const handleEditTicket = (_ticket: Ticket) => {
+  const handleEditTicket = (ticket: Ticket) => {
     navigate(`/tickets/${ticket.id}/edit`);
   };
 
@@ -536,7 +536,7 @@ const TicketPages: React.FC = () => {
 const UserPages: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleUserCreateSuccess = (_user: User) => {
+  const handleUserCreateSuccess = (user: User) => {
     navigate('/users');
   };
 
@@ -544,7 +544,7 @@ const UserPages: React.FC = () => {
     navigate('/users');
   };
 
-  const handleUserClick = (_user: User) => {
+  const handleUserClick = (user: User) => {
     navigate(`/users/${user.id}`);
   };
 
@@ -552,11 +552,11 @@ const UserPages: React.FC = () => {
     navigate('/users/new');
   };
 
-  const handleUserEdit = (_user: User) => {
+  const handleUserEdit = (user: User) => {
     navigate(`/users/${user.id}/edit`);
   };
 
-  const handleUserEditSuccess = (_user: User) => {
+  const handleUserEditSuccess = (user: User) => {
     navigate('/users');
   };
 
@@ -689,7 +689,7 @@ const AppContent: React.FC = () => {
  * URLパラメータからユーザーIDを取得してUserEditFormにuserプロパティを渡すラッパーコンポーネント
  */
 const UserEditFormWithId: React.FC<{
-  onSuccess: (_user: User) => void;
+  onSuccess: (user: User) => void;
   onCancel: () => void;
 }> = ({ onSuccess, onCancel }) => {
   const { id } = useParams<{ id: string }>();

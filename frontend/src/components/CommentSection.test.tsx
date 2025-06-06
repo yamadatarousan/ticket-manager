@@ -22,7 +22,6 @@ jest.mock('../context/AuthContext', () => ({
   }),
 }));
 
-const const _mockApiService = // require('../services/api').apiService;
 
 describe('CommentSection', () => {
   beforeEach(() => {
