@@ -84,7 +84,7 @@ class ApiService {
     };
 
     // デバッグ用ログ
-    console.log('API Request:', {
+    console.warn('API Request:', {
       url,
       method: options.method || 'GET',
       hasToken: !!this.token,
@@ -97,7 +97,7 @@ class ApiService {
       headers,
     });
 
-    console.log('API Response:', {
+    console.warn('API Response:', {
       status: response.status,
       statusText: response.statusText,
       ok: response.ok,
@@ -136,7 +136,7 @@ class ApiService {
 
     // デバッグ用ログ（本番環境では削除）
     if (process.env.NODE_ENV === 'development') {
-      console.log('API Headers:', { hasToken: !!token, tokenLength: token?.length });
+      console.warn('API Headers:', { hasToken: !!token, tokenLength: token?.length });
     }
 
     return headers;
@@ -237,7 +237,7 @@ class ApiService {
    *     email: 'user@example.com',
    *     password: 'password123'
    *   });
-   *   console.log('ログイン成功:', response.user);
+   *   console.warn('ログイン成功:', response.user);
    * } catch (error) {
    *   console.error('ログイン失敗:', error.message);
    * }
@@ -291,7 +291,7 @@ class ApiService {
    *     password: 'password123',
    *     name: '新規ユーザー'
    *   });
-   *   console.log('登録成功:', response.user);
+   *   console.warn('登録成功:', response.user);
    * } catch (error) {
    *   console.error('登録失敗:', error.message);
    * }
@@ -335,7 +335,7 @@ class ApiService {
    * ```typescript
    * try {
    *   await apiService.logout();
-   *   console.log('ログアウト完了');
+   *   console.warn('ログアウト完了');
    * } catch (error) {
    *   console.warn('ログアウトエラー:', error.message);
    *   // ローカルの認証状態はクリアされている
@@ -375,7 +375,7 @@ class ApiService {
    * ```typescript
    * try {
    *   const response = await apiService.getCurrentUser();
-   *   console.log('現在のユーザー:', response.user);
+   *   console.warn('現在のユーザー:', response.user);
    * } catch (error) {
    *   console.error('ユーザー情報取得失敗:', error.message);
    *   // トークンが無効な可能性があるため、ログアウト処理が必要
@@ -385,13 +385,13 @@ class ApiService {
   async getCurrentUser(): Promise<{ user: User }> {
     try {
       if (process.env.NODE_ENV === 'development') {
-        console.log('getCurrentUser API call started');
-        console.log('API_BASE_URL:', API_BASE_URL);
-        console.log('Full URL:', `${API_BASE_URL}/auth/me`);
+        console.warn('getCurrentUser API call started');
+        console.warn('API_BASE_URL:', API_BASE_URL);
+        console.warn('Full URL:', `${API_BASE_URL}/auth/me`);
 
         const token = localStorage.getItem('auth_token');
-        console.log('Token exists:', !!token);
-        console.log('Token length:', token?.length || 0);
+        console.warn('Token exists:', !!token);
+        console.warn('Token length:', token?.length || 0);
       }
 
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -400,14 +400,14 @@ class ApiService {
       });
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
+        console.warn('Response status:', response.status);
+        console.warn('Response ok:', response.ok);
       }
 
       const result = await this.handleResponse<{ user: User }>(response);
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('getCurrentUser API call successful:', result);
+        console.warn('getCurrentUser API call successful:', result);
       }
 
       return result;
@@ -443,7 +443,7 @@ class ApiService {
    * ```typescript
    * try {
    *   const stats = await apiService.getDashboardStats();
-   *   console.log('総チケット数:', stats.ticket_stats.total);
+   *   console.warn('総チケット数:', stats.ticket_stats.total);
    * } catch (error) {
    *   console.error('統計情報取得失敗:', error.message);
    * }
@@ -481,7 +481,7 @@ class ApiService {
    * ```typescript
    * try {
    *   const response = await apiService.getSystemSettings();
-   *   console.log('設定数:', response.system_settings.length);
+   *   console.warn('設定数:', response.system_settings.length);
    * } catch (error) {
    *   console.error('設定取得失敗:', error.message);
    * }
@@ -711,24 +711,24 @@ class ApiService {
    * ```typescript
    * try {
    *   const response = await apiService.getTicket(123);
-   *   console.log('チケット詳細:', response.ticket);
+   *   console.warn('チケット詳細:', response.ticket);
    * } catch (error) {
    *   console.error('チケット取得失敗:', error.message);
    * }
    * ```
    */
   async getTicket(id: number): Promise<{ ticket: Ticket }> {
-    console.log('getTicket - requesting ID:', id);
+    console.warn('getTicket - requesting ID:', id);
     const response = await this.fetchWithAuth(`/tickets/${id}`);
     const data = await response.json();
-    console.log('getTicket - received data:', data);
+    console.warn('getTicket - received data:', data);
 
     // バックエンドが既に{ticket: {...}}の形式で返す場合があるので、適切に処理
     if (data.ticket) {
-      console.log('getTicket - returning data.ticket:', data.ticket);
+      console.warn('getTicket - returning data.ticket:', data.ticket);
       return { ticket: data.ticket };
     } else {
-      console.log('getTicket - returning data as ticket:', data);
+      console.warn('getTicket - returning data as ticket:', data);
       return { ticket: data };
     }
   }
@@ -754,7 +754,7 @@ class ApiService {
    *     priority: 'high',
    *     assigned_to: 123
    *   });
-   *   console.log('チケット作成完了:', newTicket.ticket);
+   *   console.warn('チケット作成完了:', newTicket.ticket);
    * } catch (error) {
    *   console.error('チケット作成失敗:', error.message);
    * }
@@ -784,7 +784,7 @@ class ApiService {
    *     status: 'in_progress',
    *     assigned_to: 456
    *   });
-   *   console.log('チケット更新完了:', updatedTicket.ticket);
+   *   console.warn('チケット更新完了:', updatedTicket.ticket);
    * } catch (error) {
    *   console.error('チケット更新失敗:', error.message);
    * }
@@ -809,7 +809,7 @@ class ApiService {
    * ```typescript
    * try {
    *   await apiService.deleteTicket(123);
-   *   console.log('チケット削除完了');
+   *   console.warn('チケット削除完了');
    * } catch (error) {
    *   console.error('チケット削除失敗:', error.message);
    * }
@@ -835,8 +835,8 @@ class ApiService {
    * ```typescript
    * try {
    *   const users = await apiService.getUsers();
-   *   console.log('ユーザー一覧:', users.users);
-   *   console.log('総件数:', users.total_count);
+   *   console.warn('ユーザー一覧:', users.users);
+   *   console.warn('総件数:', users.total_count);
    * } catch (error) {
    *   console.error('ユーザー取得失敗:', error.message);
    * }
@@ -866,7 +866,7 @@ class ApiService {
    * ```typescript
    * try {
    *   const response = await apiService.getUser(123);
-   *   console.log('ユーザー詳細:', response.user);
+   *   console.warn('ユーザー詳細:', response.user);
    * } catch (error) {
    *   console.error('ユーザー取得失敗:', error.message);
    * }
@@ -895,7 +895,7 @@ class ApiService {
    *     password_confirmation: 'password123',
    *     role: 'user'
    *   });
-   *   console.log('ユーザー作成成功:', newUser.user);
+   *   console.warn('ユーザー作成成功:', newUser.user);
    * } catch (error) {
    *   console.error('ユーザー作成失敗:', error.message);
    * }
@@ -931,7 +931,7 @@ class ApiService {
    *     name: '新しい名前',
    *     role: 'manager'
    *   });
-   *   console.log('ユーザー更新完了:', updatedUser.user);
+   *   console.warn('ユーザー更新完了:', updatedUser.user);
    * } catch (error) {
    *   console.error('ユーザー更新失敗:', error.message);
    * }
@@ -956,7 +956,7 @@ class ApiService {
    * ```typescript
    * try {
    *   await apiService.deleteUser(123);
-   *   console.log('ユーザー削除完了');
+   *   console.warn('ユーザー削除完了');
    * } catch (error) {
    *   console.error('ユーザー削除失敗:', error.message);
    * }
@@ -986,17 +986,17 @@ class ApiService {
    * ```typescript
    * try {
    *   const response = await apiService.getComments(123);
-   *   console.log('コメント一覧:', response.comments);
+   *   console.warn('コメント一覧:', response.comments);
    * } catch (error) {
    *   console.error('コメント取得失敗:', error.message);
    * }
    * ```
    */
   async getComments(ticketId: number): Promise<{ comments: Comment[] }> {
-    console.log('getComments - ticketId:', ticketId, 'type:', typeof ticketId);
+    console.warn('getComments - ticketId:', ticketId, 'type:', typeof ticketId);
     const response = await this.fetchWithAuth(`/tickets/${ticketId}/comments`);
     const data = await response.json();
-    console.log('getComments - response data:', data);
+    console.warn('getComments - response data:', data);
     return { comments: data.comments || data };
   }
 
@@ -1018,7 +1018,7 @@ class ApiService {
    *   const response = await apiService.createComment(123, {
    *     content: '作業を開始しました'
    *   });
-   *   console.log('コメント作成成功:', response.comment);
+   *   console.warn('コメント作成成功:', response.comment);
    * } catch (error) {
    *   console.error('コメント作成失敗:', error.message);
    * }
@@ -1028,13 +1028,13 @@ class ApiService {
     ticketId: number,
     commentData: CreateCommentRequest
   ): Promise<{ comment: Comment }> {
-    console.log('createComment - ticketId:', ticketId, 'type:', typeof ticketId);
+    console.warn('createComment - ticketId:', ticketId, 'type:', typeof ticketId);
     const response = await this.fetchWithAuth(`/tickets/${ticketId}/comments`, {
       method: 'POST',
       body: JSON.stringify({ comment: commentData }),
     });
     const data = await response.json();
-    console.log('createComment - response data:', data);
+    console.warn('createComment - response data:', data);
     return { comment: data.comment || data };
   }
 
@@ -1056,7 +1056,7 @@ class ApiService {
    *   const response = await apiService.updateComment(456, {
    *     content: '作業が完了しました'
    *   });
-   *   console.log('コメント更新成功:', response.comment);
+   *   console.warn('コメント更新成功:', response.comment);
    * } catch (error) {
    *   console.error('コメント更新失敗:', error.message);
    * }
@@ -1087,7 +1087,7 @@ class ApiService {
    * ```typescript
    * try {
    *   await apiService.deleteComment(456);
-   *   console.log('コメント削除成功');
+   *   console.warn('コメント削除成功');
    * } catch (error) {
    *   console.error('コメント削除失敗:', error.message);
    * }
@@ -1116,7 +1116,7 @@ class ApiService {
    * ```typescript
    * try {
    *   const projects = await apiService.getProjects();
-   *   console.log('プロジェクト一覧:', projects.projects);
+   *   console.warn('プロジェクト一覧:', projects.projects);
    * } catch (error) {
    *   console.error('プロジェクト取得失敗:', error.message);
    * }
@@ -1139,7 +1139,7 @@ class ApiService {
    * ```typescript
    * try {
    *   const response = await apiService.getProject(123);
-   *   console.log('プロジェクト詳細:', response.project);
+   *   console.warn('プロジェクト詳細:', response.project);
    * } catch (error) {
    *   console.error('プロジェクト取得失敗:', error.message);
    * }
@@ -1171,7 +1171,7 @@ class ApiService {
    *     status: 'active',
    *     created_by: 123
    *   });
-   *   console.log('プロジェクト作成完了:', newProject.project);
+   *   console.warn('プロジェクト作成完了:', newProject.project);
    * } catch (error) {
    *   console.error('プロジェクト作成失敗:', error.message);
    * }
@@ -1201,7 +1201,7 @@ class ApiService {
    *     title: '更新されたプロジェクトタイトル',
    *     description: '更新されたプロジェクトの詳細説明'
    *   });
-   *   console.log('プロジェクト更新完了:', updatedProject.project);
+   *   console.warn('プロジェクト更新完了:', updatedProject.project);
    * } catch (error) {
    *   console.error('プロジェクト更新失敗:', error.message);
    * }
@@ -1226,7 +1226,7 @@ class ApiService {
    * ```typescript
    * try {
    *   await apiService.deleteProject(123);
-   *   console.log('プロジェクト削除完了');
+   *   console.warn('プロジェクト削除完了');
    * } catch (error) {
    *   console.error('プロジェクト削除失敗:', error.message);
    * }

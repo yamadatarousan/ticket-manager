@@ -41,11 +41,11 @@ export const UserList: React.FC<UserListProps> = ({ onUserClick, onUserEdit, onC
         setError(null);
 
         // デバッグ用ログ
-        console.log('ユーザー一覧取得開始');
-        console.log('認証トークン:', localStorage.getItem('auth_token'));
+        console.warn('ユーザー一覧取得開始');
+        console.warn('認証トークン:', localStorage.getItem('auth_token'));
 
         const usersData = await apiService.getUsers();
-        console.log('取得したユーザーデータ:', usersData);
+        console.warn('取得したユーザーデータ:', usersData);
 
         setUsers(Array.isArray(usersData.items) ? usersData.items : []);
       } catch (err) {

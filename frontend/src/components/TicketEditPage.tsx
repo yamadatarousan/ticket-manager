@@ -55,7 +55,7 @@ export const TicketEditPage: React.FC = () => {
 
   const handleSuccess = (updatedTicket: Ticket) => {
     // 成功メッセージを表示（将来的に通知システムを実装）
-    console.log('チケットが更新されました:', updatedTicket);
+    console.warn('チケットが更新されました:', updatedTicket);
 
     // チケット一覧ページに戻る
     navigate('/tickets');

@@ -86,12 +86,12 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({ onSuccess, onCan
 
     try {
       // デバッグ用ログ
-      console.log('ユーザー作成開始');
-      console.log('送信データ:', formData);
-      console.log('認証トークン:', localStorage.getItem('auth_token'));
+      console.warn('ユーザー作成開始');
+      console.warn('送信データ:', formData);
+      console.warn('認証トークン:', localStorage.getItem('auth_token'));
 
       const response = await apiService.createUser(formData);
-      console.log('ユーザー作成成功:', response);
+      console.warn('ユーザー作成成功:', response);
 
       onSuccess(response.user);
     } catch (err) {
@@ -100,8 +100,8 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({ onSuccess, onCan
       console.error('エラーのメッセージ:', err instanceof Error ? err.message : String(err));
 
       if (err instanceof Error) {
-        console.log('Error Message:', err.message);
-        console.log('Message starts with "{":', err.message.startsWith('{'));
+        console.warn('Error Message:', err.message);
+        console.warn('Message starts with "{":', err.message.startsWith('{'));
 
         // エラーメッセージを解析
         if (err.message.startsWith('{')) {
