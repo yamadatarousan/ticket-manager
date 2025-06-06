@@ -44,6 +44,7 @@ import { UserEditForm } from './components/UserEditForm';
 import { SystemSettingsPage } from './components/SystemSettingsPage';
 import { ProjectList } from './components/ProjectList';
 import { ProjectCreateForm } from './components/ProjectCreateForm';
+import { ProjectDetailPage } from './components/ProjectDetailPage';
 import { Ticket, User, DashboardStats, Project } from './types';
 import { apiService } from './services/api';
 import './App.css';
@@ -364,8 +365,7 @@ const ProjectPages: React.FC = () => {
           />
         } 
       />
-      {/* TODO: プロジェクト詳細と編集ページを実装 */}
-      <Route path="/:id" element={<div>プロジェクト詳細（未実装）</div>} />
+      <Route path="/:id" element={<ProjectDetailPage />} />
       <Route path="/:id/edit" element={<div>プロジェクト編集（未実装）</div>} />
     </Routes>
   );
