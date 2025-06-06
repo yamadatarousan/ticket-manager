@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 import { apiService } from '../services/api';
 import { TicketEditForm } from './TicketEditForm';
 
@@ -25,7 +25,7 @@ import { TicketEditForm } from './TicketEditForm';
 export const TicketEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export const TicketEditPage: React.FC = () => {
   const handleSuccess = (updatedTicket: Ticket) => {
     // 成功メッセージを表示（将来的に通知システムを実装）
     console.log('チケットが更新されました:', updatedTicket);
-    
+
     // チケット一覧ページに戻る
     navigate('/tickets');
   };

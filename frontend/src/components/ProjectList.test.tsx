@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { ProjectList } from './ProjectList';
 
 // AuthContextをモック
@@ -25,6 +26,14 @@ jest.mock('../services/api', () => ({
 
 const mockApiService = require('../services/api').apiService;
 
+const renderWithRouter = (ui: React.ReactElement) => {
+  return render(
+    <MemoryRouter>
+      {ui}
+    </MemoryRouter>
+  );
+};
+
 describe('ProjectList', () => {
   const defaultProps = {
     onProjectClick: jest.fn(),
@@ -38,11 +47,17 @@ describe('ProjectList', () => {
 
   test('ローディング状態が正常に表示されること', () => {
     // APIが遅延するようにモック設定
-    mockApiService.getProjects.mockReturnValue(new Promise(() => {}));
+    mockApiService.getProjects.mockReturnValue(new Promise(() => { }));
 
-    render(<ProjectList {...defaultProps} />);
+    renderWithRouter(<ProjectList {...defaultProps} />);
 
-    // ローディング表示の確認
-    expect(screen.getByText('プロジェクトを読み込み中...')).toBeInTheDocument();
+    // ローディングスピナーの確認（実際の実装に合わせて）
+    const loadingElement = document.querySelector('.animate-spin');
+    expect(loadingElement).toBeInTheDocument();
+    expect(loadingElement).toHaveClass('animate-spin', 'rounded-full', 'h-12', 'w-12', 'border-b-2', 'border-blue-500');
+
+    // ローディング状態のコンテナの確認
+    const loadingContainer = document.querySelector('.flex.justify-center.items-center.h-64');
+    expect(loadingContainer).toBeInTheDocument();
   });
 }); 

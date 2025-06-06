@@ -6,6 +6,7 @@ FactoryBot.define do
     priority { :medium }
     association :assigned_user, factory: :user
     association :creator, factory: :user
+    association :project
 
     trait :in_progress do
       status { :in_progress }

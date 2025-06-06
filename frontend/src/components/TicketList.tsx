@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -64,13 +64,13 @@ export const TicketList: React.FC<TicketListProps> = ({ refreshKey = 0, onTicket
     try {
       setLoading(true);
       setError(null);
-      
+
       const filterParams = Object.fromEntries(
         Object.entries(filters).filter(([_, value]) => value)
       );
-      
+
       const response = await apiService.getTickets(filterParams);
-      setTickets(response.tickets || []);
+      setTickets(response.items || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'チケットの取得に失敗しました');
     } finally {
@@ -276,8 +276,8 @@ export const TicketList: React.FC<TicketListProps> = ({ refreshKey = 0, onTicket
           <div className="text-gray-400 text-6xl mb-4">📝</div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">チケットが見つかりません</h3>
           <p className="text-gray-500 mb-4">
-            {Object.values(filters).some(v => v) 
-              ? 'フィルター条件に一致するチケットがありません。' 
+            {Object.values(filters).some(v => v)
+              ? 'フィルター条件に一致するチケットがありません。'
               : 'まだチケットが作成されていません。'
             }
           </p>
@@ -341,7 +341,7 @@ export const TicketList: React.FC<TicketListProps> = ({ refreshKey = 0, onTicket
                       {ticket.assigned_to || '未割り当て'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {ticket.created_by}
+                      {ticket.created_by_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(ticket.created_at)}

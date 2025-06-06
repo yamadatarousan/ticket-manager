@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { User, LoginRequest, RegisterRequest } from '../types';
+import { User, LoginRequest, RegisterRequest } from '../types/index';
 import { apiService } from '../services/api';
 
 /**

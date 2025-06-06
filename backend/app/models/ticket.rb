@@ -9,6 +9,7 @@
 # priority     :integer          default(1), not null
 # assigned_to  :bigint
 # created_by   :bigint           not null
+# project_id   :bigint           not null
 # created_at   :datetime         not null
 # updated_at   :datetime         not null
 #
@@ -17,12 +18,13 @@
 #   index_tickets_on_created_by (created_by)
 #   index_tickets_on_status (status)
 #   index_tickets_on_priority (priority)
+#   index_tickets_on_project_id (project_id)
 #
 # ==============================================================================
 # チケットモデル
 #
 # システム内のタスク、問題、要望を管理するためのチケットモデル。
-# ステータス管理、優先度設定、担当者割り当てなどの機能を提供します。
+# ステータス管理、優先度設定、担当者割り当て、プロジェクト関連付けなどの機能を提供します。
 # ==============================================================================
 class Ticket < ApplicationRecord
   # ステータスのenum定義
@@ -44,7 +46,7 @@ class Ticket < ApplicationRecord
   }
 
   # バリデーション
-  # @note タイトル、説明、ステータス、優先度、作成者は必須
+  # @note タイトル、説明、ステータス、優先度、作成者、プロジェクトは必須
   validates :title, presence: true, length: { maximum: 255 }
   validates :description, presence: true
   validates :status, presence: true
@@ -59,6 +61,9 @@ class Ticket < ApplicationRecord
 
   # @note チケットには作成者（ユーザー）が設定される（必須）
   belongs_to :creator, class_name: "User", foreign_key: "created_by", required: true
+
+  # @note チケットは特定のプロジェクトに属する（必須）
+  belongs_to :project, required: true
 
   # スコープ定義
   # @note これらのスコープを使用してチケットをフィルタリングできます
@@ -90,4 +95,11 @@ class Ticket < ApplicationRecord
   # @example
   #   Ticket.created_by_user(1) # ユーザーID:1が作成したチケットを取得
   scope :created_by_user, ->(user) { where(created_by: user) }
+
+  # 指定されたプロジェクトのチケットを取得
+  # @param project [Integer] プロジェクトID
+  # @return [ActiveRecord::Relation] 指定したプロジェクトのチケットのコレクション
+  # @example
+  #   Ticket.by_project(1) # プロジェクトID:1のチケットを取得
+  scope :by_project, ->(project) { where(project_id: project) }
 end

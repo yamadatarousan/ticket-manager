@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { RegisterRequest } from '../types';
+import { RegisterRequest } from '../types/index';
 
 /**
  * ユーザー登録フォームのプロパティ
@@ -37,7 +37,7 @@ interface RegisterFormProps {
  */
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin }) => {
   const { register, isLoading, error, clearError } = useAuth();
-  
+
   /**
    * フォームの入力データを管理するstate
    */
@@ -47,7 +47,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
     password: '',
     password_confirmation: ''
   });
-  
+
   /**
    * フォームのバリデーションエラーを管理するstate
    */
@@ -107,7 +107,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     clearError();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -136,7 +136,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
       ...prev,
       [name]: value
     }));
-    
+
     // エラーをクリア
     if (formErrors[name]) {
       setFormErrors(prev => ({
@@ -167,9 +167,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formErrors.name ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.name ? 'border-red-500' : 'border-gray-300'
+              }`}
             placeholder="山田太郎"
             disabled={isLoading}
           />
@@ -189,9 +188,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formErrors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
             placeholder="your@example.com"
             disabled={isLoading}
           />
@@ -211,9 +209,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formErrors.password ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
             placeholder="6文字以上のパスワード"
             disabled={isLoading}
           />
@@ -233,9 +230,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             name="password_confirmation"
             value={formData.password_confirmation}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              formErrors.password_confirmation ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${formErrors.password_confirmation ? 'border-red-500' : 'border-gray-300'
+              }`}
             placeholder="パスワードをもう一度入力"
             disabled={isLoading}
           />
@@ -255,11 +251,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-            isLoading
-              ? 'bg-gray-400 cursor-not-allowed text-white'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
-          }`}
+          className={`w-full py-2 px-4 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isLoading
+            ? 'bg-gray-400 cursor-not-allowed text-white'
+            : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">

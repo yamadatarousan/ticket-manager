@@ -33,7 +33,8 @@ RSpec.describe 'api/v1/tickets', type: :request do
                        status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
                        priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
                        assigned_to: { type: [ :string, :null ] },
-                       created_by: { type: :string }
+                       created_by: { type: :string },
+                       project_id: { type: :integer }
                      }
                    }
                  },
@@ -79,9 +80,10 @@ RSpec.describe 'api/v1/tickets', type: :request do
               status: { type: :string, enum: [ 'open', 'in_progress', 'resolved', 'closed' ] },
               priority: { type: :string, enum: [ 'low', 'medium', 'high', 'urgent' ] },
               assigned_to: { type: [ :string, :null ] },
-              creator_id: { type: :integer }
+              creator_id: { type: :integer },
+              project_id: { type: :integer }
             },
-            required: [ 'title', 'description', 'status', 'priority', 'creator_id' ]
+            required: [ 'title', 'description', 'status', 'priority', 'creator_id', 'project_id' ]
           }
         }
       }
@@ -98,12 +100,14 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      status: { type: :string },
                      priority: { type: :string },
                      assigned_to: { type: [ :string, :null ] },
-                     creator_id: { type: :integer }
+                     creator_id: { type: :integer },
+                     project_id: { type: :integer }
                    }
                  }
                }
 
-        let(:ticket) { { ticket: { title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator_id: admin_user.id } } }
+        let(:project) { create(:project, creator: admin_user) }
+        let(:ticket) { { ticket: { title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator_id: admin_user.id, project_id: project.id } } }
         let(:Authorization) { "Bearer #{admin_user.generate_jwt_token}" }
         run_test!
       end
@@ -145,13 +149,15 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      status: { type: :string },
                      priority: { type: :string },
                      assigned_to: { type: [ :string, :null ] },
-                     creator_id: { type: :integer }
+                     creator_id: { type: :integer },
+                     project_id: { type: :integer }
                    }
                  }
                }
 
         let(:Authorization) { "Bearer #{admin_user.generate_jwt_token}" }
-        let(:id) { create(:ticket, title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator: admin_user).id }
+        let(:project) { create(:project, creator: admin_user) }
+        let(:id) { create(:ticket, title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator: admin_user, project: project).id }
         run_test!
       end
 
@@ -203,13 +209,15 @@ RSpec.describe 'api/v1/tickets', type: :request do
                      status: { type: :string },
                      priority: { type: :string },
                      assigned_to: { type: [ :string, :null ] },
-                     creator_id: { type: :integer }
+                     creator_id: { type: :integer },
+                     project_id: { type: :integer }
                    }
                  }
                }
 
         let(:Authorization) { "Bearer #{admin_user.generate_jwt_token}" }
-        let(:id) { create(:ticket, title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator: admin_user).id }
+        let(:project) { create(:project, creator: admin_user) }
+        let(:id) { create(:ticket, title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator: admin_user, project: project).id }
         let(:ticket) { { ticket: { title: '更新されたチケット' } } }
         run_test!
       end
@@ -222,7 +230,8 @@ RSpec.describe 'api/v1/tickets', type: :request do
 
       response(204, '削除成功') do
         let(:Authorization) { "Bearer #{admin_user.generate_jwt_token}" }
-        let(:id) { create(:ticket, title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator: admin_user).id }
+        let(:project) { create(:project, creator: admin_user) }
+        let(:id) { create(:ticket, title: 'テストチケット', description: 'テスト説明', status: 'open', priority: 'medium', creator: admin_user, project: project).id }
         run_test!
       end
     end
@@ -251,6 +260,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
   end
 
   describe "POST /api/v1/tickets" do
+    let(:project) { create(:project, creator: admin_user) }
     let(:valid_ticket_params) do
       {
         ticket: {
@@ -259,7 +269,8 @@ RSpec.describe 'api/v1/tickets', type: :request do
           status: "open",
           priority: "medium",
           assigned_to: "user@example.com",
-          created_by: "admin@example.com"
+          created_by: "admin@example.com",
+          project_id: project.id
         }
       }
     end
@@ -340,6 +351,7 @@ RSpec.describe 'api/v1/tickets', type: :request do
       it "チケットを削除できること" do
         delete "/api/v1/tickets/#{ticket.id}", headers: auth_headers
         expect(response).to have_http_status(:no_content)
+        expect(Ticket.find_by(id: ticket.id)).to be_nil
       end
     end
 

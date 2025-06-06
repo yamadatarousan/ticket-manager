@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SystemSetting, SystemSettingRequest } from '../types';
+import { SystemSetting, SystemSettingRequest } from '../types/index';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -66,7 +66,7 @@ export const SystemSettingsPage: React.FC = () => {
     try {
       const newValue = editValues[setting.id];
       await apiService.updateSystemSetting(setting.id, { value: newValue });
-      
+
       setEditingSettings(prev => ({ ...prev, [setting.id]: false }));
       setSuccess('設定を更新しました');
       await fetchSettings();
@@ -102,17 +102,17 @@ export const SystemSettingsPage: React.FC = () => {
 
   const validateForm = () => {
     const errors: string[] = [];
-    
+
     if (!newSetting.key.trim()) {
       errors.push('設定キーは必須です');
     } else if (!/^[a-zA-Z0-9_-]+$/.test(newSetting.key)) {
       errors.push('設定キーは英数字、アンダースコア（_）、ハイフン（-）のみ使用可能です');
     }
-    
+
     if (!newSetting.value.trim()) {
       errors.push('設定値は必須です');
     }
-    
+
     return errors;
   };
 
@@ -122,7 +122,7 @@ export const SystemSettingsPage: React.FC = () => {
       setError(validationErrors.join('\n'));
       return;
     }
-    
+
     try {
       await apiService.createSystemSetting(newSetting);
       setSuccess('新しい設定を作成しました');
@@ -161,7 +161,7 @@ export const SystemSettingsPage: React.FC = () => {
     if (setting.setting_type === 'boolean') {
       return setting.value === 'true' ? '有効' : '無効';
     }
-    
+
     return setting.value;
   };
 
@@ -179,7 +179,7 @@ export const SystemSettingsPage: React.FC = () => {
           </select>
         );
       }
-      
+
       return (
         <input
           type={setting.setting_type === 'integer' ? 'number' : 'text'}
@@ -216,7 +216,7 @@ export const SystemSettingsPage: React.FC = () => {
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
           <div className="text-sm whitespace-pre-line">{error}</div>
-          <button 
+          <button
             onClick={() => setError(null)}
             className="text-red-500 hover:text-red-700 text-xs mt-2"
           >
@@ -228,7 +228,7 @@ export const SystemSettingsPage: React.FC = () => {
       {success && (
         <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
           <p className="text-sm">{success}</p>
-          <button 
+          <button
             onClick={() => setSuccess(null)}
             className="text-green-500 hover:text-green-700 text-xs mt-1"
           >
@@ -333,7 +333,7 @@ export const SystemSettingsPage: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">設定一覧</h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -380,11 +380,10 @@ export const SystemSettingsPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      setting.is_public 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${setting.is_public
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                    }`}>
+                      }`}>
                       {setting.is_public ? '公開' : '非公開'}
                     </span>
                   </td>

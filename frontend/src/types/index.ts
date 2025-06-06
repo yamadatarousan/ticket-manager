@@ -7,6 +7,7 @@
  * 含まれる型：
  * - User: ユーザー情報
  * - Ticket: チケット情報
+ * - Project: プロジェクト情報
  * - API リクエスト/レスポンス型
  * - 認証関連の型
  * - ページネーション型
@@ -38,6 +39,50 @@ export interface User {
 }
 
 /**
+ * プロジェクト情報の型定義
+ */
+export interface Project {
+  /** プロジェクトの一意識別子 */
+  id: number;
+  /** プロジェクトの表示名 */
+  name: string;
+  /** プロジェクトの詳細説明 */
+  description?: string;
+  /** プロジェクトのステータス
+   * - planning: 計画中
+   * - active: 進行中
+   * - on_hold: 保留中
+   * - completed: 完了
+   * - cancelled: キャンセル
+   */
+  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
+  /** プロジェクトのステータスラベル */
+  status_label: string;
+  /** プロジェクトの開始日（ISO 8601形式） */
+  start_date?: string;
+  /** プロジェクトの終了日（ISO 8601形式） */
+  end_date?: string;
+  /** プロジェクト作成者のユーザーID */
+  created_by: number;
+  /** プロジェクト作成者のユーザーID（旧フィールド、created_byと同一） */
+  creator_id: number;
+  /** プロジェクト作成者の表示名 */
+  creator_name: string;
+  /** プロジェクトの進捗率 */
+  progress_rate: number;
+  /** プロジェクトの残り日数 */
+  days_remaining?: number;
+  /** プロジェクトの遅延フラグ */
+  overdue: boolean;
+  /** プロジェクトの期間文字列 */
+  duration_string: string;
+  /** プロジェクト作成日時（ISO 8601形式） */
+  created_at: string;
+  /** プロジェクト最終更新日時（ISO 8601形式） */
+  updated_at: string;
+}
+
+/**
  * チケット情報を表すインターフェース
  * 
  * タスクや問題を管理するためのチケットの情報を定義します。
@@ -57,6 +102,8 @@ export interface Ticket {
    * - closed: 完了・クローズ
    */
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  /** ステータスの表示ラベル */
+  status_label?: string;
   /** チケットの優先度
    * - low: 低優先度（緊急性なし）
    * - medium: 中優先度（通常の作業）
@@ -64,10 +111,20 @@ export interface Ticket {
    * - urgent: 緊急（即座の対応が必要）
    */
   priority: 'low' | 'medium' | 'high' | 'urgent';
+  /** 優先度の表示ラベル */
+  priority_label?: string;
   /** 担当者のユーザーID（未割り当ての場合はnull） */
   assigned_to?: number;
+  /** 担当者の表示名 */
+  assigned_to_name?: string;
   /** チケット作成者のユーザーID */
   created_by: number;
+  /** チケット作成者の表示名 */
+  created_by_name?: string;
+  /** チケットが属するプロジェクトのID */
+  project_id: number;
+  /** プロジェクトの表示名 */
+  project_name?: string;
   /** チケット作成日時（ISO 8601形式） */
   created_at: string;
   /** チケット最終更新日時（ISO 8601形式） */
@@ -127,6 +184,24 @@ export interface CreateTicketRequest {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   /** 担当者のユーザーID（オプション、未指定の場合はnull） */
   assigned_to?: string | null;
+  /** チケットが属するプロジェクトのID */
+  project_id: number;
+}
+
+/**
+ * プロジェクト作成・更新リクエストの型定義
+ */
+export interface ProjectRequest {
+  /** プロジェクトの表示名（必須） */
+  name: string;
+  /** プロジェクトの詳細説明（オプション） */
+  description?: string;
+  /** プロジェクトのステータス（必須） */
+  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
+  /** プロジェクトの開始日（オプション） */
+  start_date?: string;
+  /** プロジェクトの終了日（オプション） */
+  end_date?: string;
 }
 
 /**
@@ -202,26 +277,24 @@ export interface ApiResponse<T> {
  * ```typescript
  * // チケット一覧のページネーション
  * const ticketResponse: PaginatedResponse<Ticket> = await apiService.getTickets();
- * console.log('チケット:', ticketResponse.tickets);
- * console.log('総件数:', ticketResponse.total_count);
+ * console.log('チケット:', ticketResponse.items);
+ * console.log('総件数:', ticketResponse.total);
  * 
  * // ユーザー一覧のページネーション
  * const userResponse: PaginatedResponse<User> = await apiService.getUsers();
- * console.log('ユーザー:', userResponse.users);
- * console.log('現在のページ:', userResponse.current_page);
+ * console.log('ユーザー:', userResponse.items);
+ * console.log('現在のページ:', userResponse.page);
  * ```
  */
 export interface PaginatedResponse<T> {
-  /** チケットの配列（TがTicketの場合に設定） */
-  tickets?: T[] & Ticket[];
-  /** ユーザーの配列（TがUserの場合に設定） */
-  users?: T[] & User[];
+  /** データの配列 */
+  items: T[];
   /** 全体の総件数 */
-  total_count: number;
+  total: number;
   /** 総ページ数 */
   total_pages: number;
   /** 現在のページ番号（1から開始） */
-  current_page: number;
+  page: number;
   /** 1ページあたりの件数 */
   per_page: number;
 }
@@ -302,62 +375,4 @@ export interface SystemSettingRequest {
   setting_type: 'string' | 'integer' | 'boolean' | 'json';
   /** 公開設定（必須） */
   is_public: boolean;
-}
-
-/**
- * プロジェクト情報の型定義
- */
-export interface Project {
-  /** プロジェクトの一意識別子 */
-  id: number;
-  /** プロジェクトの表示名 */
-  name: string;
-  /** プロジェクトの詳細説明 */
-  description?: string;
-  /** プロジェクトのステータス
-   * - planning: 計画中
-   * - active: 進行中
-   * - on_hold: 保留中
-   * - completed: 完了
-   * - cancelled: キャンセル
-   */
-  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
-  /** プロジェクトのステータスラベル */
-  status_label: string;
-  /** プロジェクトの開始日（ISO 8601形式） */
-  start_date?: string;
-  /** プロジェクトの終了日（ISO 8601形式） */
-  end_date?: string;
-  /** プロジェクト作成者のユーザーID */
-  created_by: number;
-  /** プロジェクト作成者の表示名 */
-  creator_name: string;
-  /** プロジェクトの進捗率 */
-  progress_rate: number;
-  /** プロジェクトの残り日数 */
-  days_remaining?: number;
-  /** プロジェクトの遅延フラグ */
-  overdue: boolean;
-  /** プロジェクトの期間文字列 */
-  duration_string: string;
-  /** プロジェクト作成日時（ISO 8601形式） */
-  created_at: string;
-  /** プロジェクト最終更新日時（ISO 8601形式） */
-  updated_at: string;
-}
-
-/**
- * プロジェクト作成・更新リクエストの型定義
- */
-export interface ProjectRequest {
-  /** プロジェクトの表示名（必須） */
-  name: string;
-  /** プロジェクトの詳細説明（オプション） */
-  description?: string;
-  /** プロジェクトのステータス（必須） */
-  status: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
-  /** プロジェクトの開始日（オプション） */
-  start_date?: string;
-  /** プロジェクトの終了日（オプション） */
-  end_date?: string;
 } 

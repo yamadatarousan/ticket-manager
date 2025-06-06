@@ -1,46 +1,121 @@
-# Getting Started with Create React App
+# チケット管理システム（フロントエンド）
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+このプロジェクトは、React + TypeScriptで構築されたチケット管理システムのフロントエンドです。
+Tailwind CSSを使用したシンプルで使いやすいUIを提供しています。
 
-## Available Scripts
+## 技術スタック
 
-In the project directory, you can run:
+- React (Create React App)
+- TypeScript
+- Tailwind CSS (CDN)
+- Jest + React Testing Library
 
-### `npm start`
+## 主要コンポーネント構成
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```mermaid
+flowchart TD
+    A[App] --> B[AuthProvider]
+    B --> C[Router]
+    C --> D[PrivateRoute]
+    D --> E[Layout]
+    E --> F[Navbar]
+    E --> G[MainContent]
+    
+    G --> H[DashboardPage]
+    G --> I[TicketsPage]
+    G --> J[ProjectsPage]
+    G --> K[UsersPage]
+    G --> L[SystemSettingsPage]
+    
+    I --> I1[TicketList]
+    I --> I2[TicketCreateForm]
+    I --> I3[TicketDetail]
+    I --> I4[TicketEditForm]
+    
+    J --> J1[ProjectList]
+    J --> J2[ProjectCreateForm]
+    J --> J3[ProjectDetail]
+    J --> J4[ProjectEditForm]
+    
+    K --> K1[UserList]
+    K --> K2[UserCreateForm]
+    K --> K3[UserDetail]
+    K --> K4[UserEditForm]
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 開発環境のセットアップ
 
-### `npm test`
+```bash
+# 依存関係のインストール
+npm install
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# 開発サーバーの起動
+npm start
 
-### `npm run build`
+# テストの実行
+npm test
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# プロダクションビルドの作成
+npm run build
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## API連携
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+バックエンドAPIとの連携は、`src/api`ディレクトリ内のモジュールを通じて行われます。
+すべてのAPIリクエストは、Axios経由で処理されます。
 
-### `npm run eject`
+```typescript
+// 例: チケット一覧の取得
+import { fetchTickets } from '../api/tickets';
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+const MyComponent = () => {
+  const [tickets, setTickets] = useState([]);
+  
+  useEffect(() => {
+    const getTickets = async () => {
+      const data = await fetchTickets();
+      setTickets(data);
+    };
+    
+    getTickets();
+  }, []);
+  
+  // ...
+};
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## テスト方針
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- コンポーネントの基本的な機能と表示を検証するユニットテスト
+- 主要なユーザーフローを検証する統合テスト
+- モックを使用したAPI連携のテスト
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```bash
+# 全テストを実行
+npm test
 
-## Learn More
+# 特定のテストファイルを実行
+npm test -- src/components/TicketList.test.tsx
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# カバレッジレポートを生成
+npm test -- --coverage
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## フォルダ構造
+
+```
+src/
+├── api/            # APIリクエスト関連のモジュール
+├── assets/         # 静的アセット（画像など）
+├── components/     # 再利用可能なコンポーネント
+├── context/        # Reactコンテキスト
+├── hooks/          # カスタムフック
+├── pages/          # ページコンポーネント
+├── types/          # TypeScript型定義
+└── utils/          # ユーティリティ関数
+```
+
+## Create React App情報
+
+このプロジェクトは [Create React App](https://github.com/facebook/create-react-app) を使用して構築されています。
+詳細は [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) を参照してください。

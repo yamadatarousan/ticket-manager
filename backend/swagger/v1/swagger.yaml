@@ -36,6 +36,12 @@ paths:
         required: false
         schema:
           type: string
+      - name: project_id
+        in: query
+        description: プロジェクトIDでフィルタ
+        required: false
+        schema:
+          type: integer
       - name: limit
         in: query
         description: 取得件数制限
@@ -85,6 +91,8 @@ paths:
                           type: string
                         created_by:
                           type: string
+                        project_id:
+                          type: integer
                         created_at:
                           type: string
                           format: datetime
@@ -140,12 +148,15 @@ paths:
                       type: string
                     created_by:
                       type: string
+                    project_id:
+                      type: integer
                   required:
                   - title
                   - description
                   - status
                   - priority
                   - created_by
+                  - project_id
   "/api/v1/tickets/{id}":
     parameters:
     - name: id
@@ -162,6 +173,43 @@ paths:
       responses:
         '200':
           description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                    - open
+                    - in_progress
+                    - resolved
+                    - closed
+                  priority:
+                    type: string
+                    enum:
+                    - low
+                    - medium
+                    - high
+                    - urgent
+                  assigned_to:
+                    type: string
+                  created_by:
+                    type: string
+                  project_id:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: datetime
+                  updated_at:
+                    type: string
+                    format: datetime
         '404':
           description: 見つからない
     patch:
@@ -204,6 +252,8 @@ paths:
                       type: string
                     created_by:
                       type: string
+                    project_id:
+                      type: integer
     delete:
       summary: チケット削除
       tags:
@@ -212,6 +262,275 @@ paths:
       responses:
         '204':
           description: 削除成功
+  "/api/v1/projects":
+    get:
+      summary: プロジェクト一覧取得
+      tags:
+      - Projects
+      description: プロジェクト一覧を取得
+      parameters:
+      - name: status
+        in: query
+        description: ステータスでフィルタ
+        required: false
+        schema:
+          type: string
+          enum:
+          - planning
+          - active
+          - on_hold
+          - completed
+          - cancelled
+      - name: created_by
+        in: query
+        description: 作成者でフィルタ
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                          - planning
+                          - active
+                          - on_hold
+                          - completed
+                          - cancelled
+                        status_label:
+                          type: string
+                        start_date:
+                          type: string
+                          format: date
+                        end_date:
+                          type: string
+                          format: date
+                        created_by:
+                          type: integer
+                        creator_name:
+                          type: string
+                        progress_rate:
+                          type: number
+                        days_remaining:
+                          type: integer
+                        overdue:
+                          type: boolean
+                        duration_string:
+                          type: string
+                        created_at:
+                          type: string
+                          format: datetime
+                        updated_at:
+                          type: string
+                          format: datetime
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+    post:
+      summary: プロジェクト作成
+      tags:
+      - Projects
+      description: プロジェクトを作成
+      parameters: []
+      responses:
+        '201':
+          description: 作成成功
+        '422':
+          description: バリデーションエラー
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - planning
+                      - active
+                      - on_hold
+                      - completed
+                      - cancelled
+                    start_date:
+                      type: string
+                      format: date
+                    end_date:
+                      type: string
+                      format: date
+                  required:
+                  - name
+                  - description
+                  - status
+  "/api/v1/projects/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: プロジェクトID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: プロジェクト詳細取得
+      tags:
+      - Projects
+      description: プロジェクト詳細を取得
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                    - planning
+                    - active
+                    - on_hold
+                    - completed
+                    - cancelled
+                  status_label:
+                    type: string
+                  start_date:
+                    type: string
+                    format: date
+                  end_date:
+                    type: string
+                    format: date
+                  created_by:
+                    type: integer
+                  creator_name:
+                    type: string
+                  progress_rate:
+                    type: number
+                  days_remaining:
+                    type: integer
+                  overdue:
+                    type: boolean
+                  duration_string:
+                    type: string
+                  created_at:
+                    type: string
+                    format: datetime
+                  updated_at:
+                    type: string
+                    format: datetime
+                  tickets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        status:
+                          type: string
+                        status_label:
+                          type: string
+                        priority:
+                          type: string
+                        priority_label:
+                          type: string
+                        assigned_to:
+                          type: string
+                        assigned_to_name:
+                          type: string
+                        creator_id:
+                          type: integer
+                        creator_name:
+                          type: string
+                        created_at:
+                          type: string
+                          format: datetime
+                        updated_at:
+                          type: string
+                          format: datetime
+        '404':
+          description: 見つからない
+    patch:
+      summary: プロジェクト更新
+      tags:
+      - Projects
+      description: プロジェクトを更新
+      parameters: []
+      responses:
+        '200':
+          description: 更新成功
+        '422':
+          description: バリデーションエラー
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                      - planning
+                      - active
+                      - on_hold
+                      - completed
+                      - cancelled
+                    start_date:
+                      type: string
+                      format: date
+                    end_date:
+                      type: string
+                      format: date
+    delete:
+      summary: プロジェクト削除
+      tags:
+      - Projects
+      description: プロジェクトを削除
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: 見つからない
 servers:
 - url: http://localhost:3001
   description: 開発環境

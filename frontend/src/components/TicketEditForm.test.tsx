@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TicketEditForm } from './TicketEditForm';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 
 // モックチケットデータ
 const mockTicket: Ticket = {
@@ -10,10 +10,12 @@ const mockTicket: Ticket = {
   description: 'Test Description',
   status: 'open',
   priority: 'medium',
-  assigned_to: 2,
-  created_by: 3,
-  created_at: '2024-01-01T00:00:00.000Z',
-  updated_at: '2024-01-01T00:00:00.000Z'
+  assigned_to: 1,
+  project_id: 1,
+  created_by: 1,
+  created_by_name: 'Test User',
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z'
 };
 
 // APIサービスのモック

@@ -1,1 +1,41 @@
+# プロジェクト共通
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+node_modules/
+tmp/
+coverage/
+.vscode/
+.idea/
+
+# フロントエンド
+frontend/node_modules/
+frontend/build/
+frontend/coverage/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
 frontend/jest-results.json
+frontend/.pnp
+frontend/.pnp.js
+
+# バックエンド
+backend/log/
+backend/tmp/
+backend/storage/
+backend/public/assets/
+backend/public/packs/
+backend/public/packs-test/
+backend/coverage/
+backend/.bundle/
+backend/vendor/bundle/
+backend/db/*.sqlite3
+backend/db/*.sqlite3-*
+backend/config/master.key
+backend/config/credentials/*.key
+backend/.byebug_history
+backend/swagger/swagger.yaml
+backend/swagger-ui/
+.editorconfig

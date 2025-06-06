@@ -5,13 +5,14 @@
  * 管理者・マネージャーにはプロジェクト作成・編集・削除機能も提供します。
  */
 import React, { useState, useEffect } from 'react';
-import { Project } from '../types';
+import { Link } from 'react-router-dom';
+import { Project } from '../types/index';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 interface ProjectListProps {
-  onProjectClick: (project: Project) => void;
+  onProjectClick?: (project: Project) => void;
   onProjectEdit: (project: Project) => void;
   onCreateProject: () => void;
 }
@@ -28,8 +29,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'name' | 'status' | 'created_at' | 'end_date'>('created_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortField, setSortField] = useState<keyof Project>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [deleteProject, setDeleteProject] = useState<Project | null>(null);
 
   const canManageProjects = user?.role === 'admin' || user?.role === 'manager';
@@ -40,23 +41,38 @@ export const ProjectList: React.FC<ProjectListProps> = ({
 
   useEffect(() => {
     applyFiltersAndSort();
-  }, [projects, searchTerm, statusFilter, sortBy, sortOrder]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projects, searchTerm, statusFilter, sortField, sortDirection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const params = statusFilter ? { status: statusFilter } : undefined;
-      const projectList = await apiService.getProjects(params);
-      setProjects(projectList);
+      const projectList = await apiService.getProjects();
+
+      // レスポンスが配列であることを確認
+      if (Array.isArray(projectList)) {
+        setProjects(projectList);
+      } else {
+        console.error('Unexpected API response format:', projectList);
+        setProjects([]);
+        setError('APIレスポンスの形式が不正です');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'プロジェクトの取得に失敗しました');
+      console.error('Error fetching projects:', err);
+      setProjects([]); // エラー時は空配列を設定
     } finally {
       setIsLoading(false);
     }
   };
 
   const applyFiltersAndSort = () => {
+    // projectsが配列でない場合は空配列を使用
+    if (!Array.isArray(projects)) {
+      setFilteredProjects([]);
+      return;
+    }
+
     let filtered = [...projects];
 
     // 検索フィルター
@@ -64,46 +80,32 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       filtered = filtered.filter(project =>
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.creator_name.toLowerCase().includes(searchTerm.toLowerCase())
+        project.creator_name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
+    }
+
+    // ステータスフィルター
+    if (statusFilter) {
+      filtered = filtered.filter(project => project.status === statusFilter);
     }
 
     // ソート
     filtered.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
 
-      switch (sortBy) {
-        case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        case 'created_at':
-          aValue = new Date(a.created_at);
-          bValue = new Date(b.created_at);
-          break;
-        case 'end_date':
-          aValue = a.end_date ? new Date(a.end_date) : new Date('9999-12-31');
-          bValue = b.end_date ? new Date(b.end_date) : new Date('9999-12-31');
-          break;
-        default:
-          aValue = a.created_at;
-          bValue = b.created_at;
+      if (sortField === 'start_date' || sortField === 'end_date') {
+        aValue = aValue ? new Date(aValue) : new Date('9999-12-31');
+        bValue = bValue ? new Date(bValue) : new Date('9999-12-31');
       }
 
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
 
     setFilteredProjects(filtered);
   };
-
-
 
   const handleDeleteProject = async () => {
     if (!deleteProject) return;
@@ -117,36 +119,32 @@ export const ProjectList: React.FC<ProjectListProps> = ({
     }
   };
 
-  const getStatusBadgeClass = (status: string) => {
+  const getStatusBadgeClass = (status: Project['status']) => {
     switch (status) {
       case 'planning':
         return 'bg-blue-100 text-blue-800';
       case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'on_hold':
         return 'bg-yellow-100 text-yellow-800';
       case 'completed':
         return 'bg-gray-100 text-gray-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
+      case 'on_hold':
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getProgressBarClass = (progressRate: number) => {
-    if (progressRate >= 0.8) return 'bg-green-500';
-    if (progressRate >= 0.5) return 'bg-yellow-500';
-    return 'bg-blue-500';
+  const getProgressBarClass = (progress: number) => {
+    if (progress >= 0.8) return 'bg-green-500';
+    if (progress >= 0.5) return 'bg-yellow-500';
+    if (progress >= 0.2) return 'bg-blue-500';
+    return 'bg-red-500';
   };
-
-
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">プロジェクトを読み込み中...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -162,15 +160,15 @@ export const ProjectList: React.FC<ProjectListProps> = ({
           </p>
         </div>
         {canManageProjects && (
-          <button
-            onClick={onCreateProject}
+          <Link
+            to="/projects/new"
             className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             新規プロジェクト
-          </button>
+          </Link>
         )}
       </div>
 
@@ -220,7 +218,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({
               <option value="active">進行中</option>
               <option value="on_hold">一時停止</option>
               <option value="completed">完了</option>
-              <option value="cancelled">キャンセル</option>
             </select>
           </div>
 
@@ -232,8 +229,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
             <div className="flex space-x-2">
               <select
                 id="sort"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'name' | 'status' | 'created_at' | 'end_date')}
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value as keyof Project)}
                 className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="created_at">作成日時</option>
@@ -242,10 +239,10 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 <option value="end_date">終了日</option>
               </select>
               <button
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
               >
-                {sortOrder === 'asc' ? '↑' : '↓'}
+                {sortDirection === 'asc' ? '↑' : '↓'}
               </button>
             </div>
           </div>
@@ -265,7 +262,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 <div className="flex-1">
                   <h3
                     className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600"
-                    onClick={() => onProjectClick(project)}
+                    onClick={() => onProjectClick?.(project)}
                   >
                     {project.name}
                   </h3>
@@ -317,20 +314,20 @@ export const ProjectList: React.FC<ProjectListProps> = ({
 
               {/* アクションボタン */}
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => onProjectClick(project)}
+                <Link
+                  to={`/projects/${project.id}`}
                   className="text-sm text-blue-600 hover:text-blue-500"
                 >
                   詳細を見る
-                </button>
+                </Link>
                 {canManageProjects && (
                   <div className="flex space-x-2">
-                    <button
-                      onClick={() => onProjectEdit(project)}
+                    <Link
+                      to={`/projects/${project.id}/edit`}
                       className="text-sm text-gray-600 hover:text-gray-500"
                     >
                       編集
-                    </button>
+                    </Link>
                     <button
                       onClick={() => setDeleteProject(project)}
                       className="text-sm text-red-600 hover:text-red-500"
@@ -357,15 +354,15 @@ export const ProjectList: React.FC<ProjectListProps> = ({
           </p>
           {canManageProjects && !searchTerm && !statusFilter && (
             <div className="mt-6">
-              <button
-                onClick={onCreateProject}
+              <Link
+                to="/projects/new"
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 最初のプロジェクトを作成
-              </button>
+              </Link>
             </div>
           )}
         </div>
