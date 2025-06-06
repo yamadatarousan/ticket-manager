@@ -44,8 +44,8 @@ class Project < ApplicationRecord
             allow_blank: true, if: :start_date?
 
   # 関連定義
-  # @note プロジェクトは複数のチケットを持つ（将来的に追加予定）
-  # has_many :tickets, dependent: :destroy
+  # @note プロジェクトは複数のチケットを持つ
+  has_many :tickets, dependent: :destroy
 
   # プロジェクト作成者との関連
   belongs_to :creator, class_name: "User", foreign_key: "created_by"
@@ -76,20 +76,16 @@ class Project < ApplicationRecord
 
   # インスタンスメソッド
 
-  # プロジェクトの進行率を計算（将来的にチケットベースで実装）
+  # プロジェクトの進行率を計算（チケットのステータスベース）
   # @return [Float] 進行率（0.0〜1.0）
   def progress_rate
-    # 現在はダミー実装、将来的にチケットのステータスベースで計算
-    case status
-    when "planning"
-      0.0
-    when "active"
-      0.5
-    when "completed"
-      1.0
-    else
-      0.0
-    end
+    return 1.0 if completed?
+    return 0.0 if tickets.count == 0
+
+    total_tickets = tickets.count
+    completed_tickets = tickets.where(status: [ :resolved, :closed ]).count
+
+    completed_tickets.to_f / total_tickets
   end
 
   # プロジェクトの残り日数を計算

@@ -31,9 +31,14 @@ export const TicketDetailPage: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
+        console.log('fetchTicket - requesting ticket ID:', id, 'parsed:', parseInt(id));
         const response = await apiService.getTicket(parseInt(id));
+        console.log('fetchTicket - received response:', response);
+        console.log('fetchTicket - response.ticket:', response.ticket);
+        console.log('fetchTicket - response.ticket.id:', response.ticket?.id, 'type:', typeof response.ticket?.id);
         setTicket(response.ticket);
       } catch (err) {
+        console.error('fetchTicket error:', err);
         setError(err instanceof Error ? err.message : 'チケットの取得に失敗しました');
       } finally {
         setIsLoading(false);
@@ -42,6 +47,13 @@ export const TicketDetailPage: React.FC = () => {
 
     fetchTicket();
   }, [id]);
+
+  // デバッグ用 - ticketが読み込まれた時のログ
+  useEffect(() => {
+    if (ticket) {
+      console.log('TicketDetailPage - ticket.id:', ticket.id, 'type:', typeof ticket.id);
+    }
+  }, [ticket]);
 
   /**
    * ステータスの日本語表示を取得
@@ -117,7 +129,7 @@ export const TicketDetailPage: React.FC = () => {
     try {
       setIsDeleting(true);
       await apiService.deleteTicket(ticket.id);
-      
+
       // 削除成功後、チケット一覧に戻る
       navigate('/tickets');
     } catch (err) {
@@ -276,7 +288,7 @@ export const TicketDetailPage: React.FC = () => {
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">作成者</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{ticket.created_by}</dd>
+                    <dd className="mt-1 text-sm text-gray-900">{ticket.created_by_name}</dd>
                   </div>
                 </dl>
               </div>
@@ -312,9 +324,11 @@ export const TicketDetailPage: React.FC = () => {
         </div>
 
         {/* コメントセクション */}
-        <div className="mt-8">
-          <CommentSection ticketId={ticket.id} />
-        </div>
+        {ticket && (
+          <div className="mt-8">
+            <CommentSection ticketId={ticket.id} />
+          </div>
+        )}
       </div>
 
       {/* 削除確認モーダル */}

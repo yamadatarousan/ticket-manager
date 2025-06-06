@@ -53,7 +53,7 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -65,9 +65,9 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
       // 空文字列の日付をundefinedに変換
       const submitData: ProjectRequest = {
         ...formData,
-        start_date: formData.start_date || undefined,
-        end_date: formData.end_date || undefined,
-        description: formData.description || undefined
+        start_date: formData.start_date || '',
+        end_date: formData.end_date || '',
+        description: formData.description || ''
       };
 
       const newProject = await apiService.createProject(submitData);
@@ -85,7 +85,7 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
       ...prev,
       [name]: value
     }));
-    
+
     // 該当フィールドのバリデーションエラーをクリア
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
@@ -134,11 +134,10 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
             required
             value={formData.name}
             onChange={handleChange}
-            className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              validationErrors.name
+            className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.name
                 ? 'border-red-300 focus:border-red-500'
                 : 'border-gray-300 focus:border-blue-500'
-            }`}
+              }`}
             placeholder="プロジェクト名を入力してください"
           />
           {validationErrors.name && (
@@ -211,11 +210,10 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
               name="end_date"
               value={formData.end_date}
               onChange={handleChange}
-              className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                validationErrors.end_date
+              className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.end_date
                   ? 'border-red-300 focus:border-red-500'
                   : 'border-gray-300 focus:border-blue-500'
-              }`}
+                }`}
             />
             {validationErrors.end_date && (
               <p className="mt-1 text-sm text-red-600">{validationErrors.end_date}</p>

@@ -90,12 +90,12 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       setError('タイトルを入力してください');
       return;
     }
-    
+
     if (!formData.description.trim()) {
       setError('説明を入力してください');
       return;
@@ -112,7 +112,7 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
         priority: formData.priority,
         assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined
       };
-      
+
       const response = await apiService.updateTicket(ticket.id, ticketData);
       onSuccess(response.ticket);
     } catch (err) {
@@ -144,7 +144,7 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
             </div>
             <div>
               <span className="font-medium text-gray-700">作成者:</span>
-              <span className="ml-2 text-gray-900">{ticket.created_by}</span>
+              <span className="ml-2 text-gray-900">{ticket.created_by_name}</span>
             </div>
             <div>
               <span className="font-medium text-gray-700">作成日:</span>

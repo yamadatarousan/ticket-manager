@@ -101,6 +101,9 @@ class Api::V1::ProjectsController < ApplicationController
   # }
   # =end
   def show
+    # プロジェクトに関連するチケットを取得
+    tickets = @project.tickets.includes(:creator, :assigned_user)
+
     render json: {
       id: @project.id,
       name: @project.name,
@@ -116,7 +119,24 @@ class Api::V1::ProjectsController < ApplicationController
       overdue: @project.overdue?,
       duration_string: @project.duration_string,
       created_at: @project.created_at,
-      updated_at: @project.updated_at
+      updated_at: @project.updated_at,
+      tickets: tickets.map do |ticket|
+        {
+          id: ticket.id,
+          title: ticket.title,
+          description: ticket.description,
+          status: ticket.status,
+          status_label: ticket.status&.humanize,
+          priority: ticket.priority,
+          priority_label: ticket.priority&.humanize,
+          assigned_to: ticket.assigned_to,
+          assigned_to_name: ticket.assigned_user&.name,
+          creator_id: ticket.created_by,
+          creator_name: ticket.creator&.name,
+          created_at: ticket.created_at,
+          updated_at: ticket.updated_at
+        }
+      end
     }
   rescue StandardError => e
     render json: { error: "プロジェクト詳細の取得に失敗しました: #{e.message}" }, status: :internal_server_error

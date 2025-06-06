@@ -618,7 +618,7 @@ class ApiService {
       }
     });
 
-    const response = await this.fetchWithAuth(`/tickets?${queryParams.toString()}`);
+    const response = await this.fetchWithAuth(`/api/tickets?${queryParams.toString()}`);
     const data = await response.json();
 
     // バックエンドの応答形式に合わせて変換
@@ -692,12 +692,12 @@ class ApiService {
    * ```
    */
   async createTicket(data: CreateTicketRequest): Promise<Ticket> {
-    const response = await this.fetchWithAuth('/tickets', {
+    const response = await this.fetchWithAuth('/api/tickets', {
       method: 'POST',
-      body: JSON.stringify({ ticket: data })
+      body: JSON.stringify(data)
     });
     const ticketData = await response.json();
-    return ticketData.ticket || ticketData;
+    return ticketData;
   }
 
   /**
@@ -722,7 +722,7 @@ class ApiService {
    * ```
    */
   async updateTicket(id: number, ticketData: Partial<Ticket>): Promise<{ ticket: Ticket }> {
-    const response = await this.fetchWithAuth(`/tickets/${id}`, {
+    const response = await this.fetchWithAuth(`/api/tickets/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ ticket: ticketData })
     });
@@ -747,7 +747,7 @@ class ApiService {
    * ```
    */
   async deleteTicket(id: number): Promise<void> {
-    await this.fetchWithAuth(`/tickets/${id}`, {
+    await this.fetchWithAuth(`/api/tickets/${id}`, {
       method: 'DELETE'
     });
   }

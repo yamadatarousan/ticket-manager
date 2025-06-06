@@ -4,9 +4,9 @@ import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 interface UserListProps {
-  onUserClick: (user: User) => void;
-  onCreateUser: () => void;
-  onEditUser: (user: User) => void;
+  onUserClick?: (user: User) => void;
+  onCreateUser?: () => void;
+  onEditUser?: (user: User) => void;
 }
 
 export const UserList: React.FC<UserListProps> = ({
@@ -30,7 +30,7 @@ export const UserList: React.FC<UserListProps> = ({
       setIsLoading(true);
       setError(null);
       const response = await apiService.getUsers();
-      setUsers(response.users || []);
+      setUsers(response.items || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ユーザーの読み込みに失敗しました');
     } finally {
@@ -58,7 +58,7 @@ export const UserList: React.FC<UserListProps> = ({
 
   const filteredUsers = users.filter(user => {
     const matchesName = user.name.toLowerCase().includes(filter.toLowerCase()) ||
-                       user.email.toLowerCase().includes(filter.toLowerCase());
+      user.email.toLowerCase().includes(filter.toLowerCase());
     const matchesRole = roleFilter === '' || user.role === roleFilter;
     return matchesName && matchesRole;
   });
@@ -207,7 +207,7 @@ export const UserList: React.FC<UserListProps> = ({
                   <tr
                     key={user.id}
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => onUserClick(user)}
+                    onClick={() => onUserClick?.(user)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -245,7 +245,10 @@ export const UserList: React.FC<UserListProps> = ({
                         <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
                           {isAdmin && (
                             <button
-                              onClick={() => onEditUser(user)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEditUser?.(user);
+                              }}
                               className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded"
                               data-testid={`edit-user-button-${user.id}`}
                             >
@@ -254,7 +257,10 @@ export const UserList: React.FC<UserListProps> = ({
                           )}
                           {isAdmin && user.id !== currentUser?.id && (
                             <button
-                              onClick={() => handleDeleteUser(user)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteUser(user);
+                              }}
                               className="text-red-600 hover:text-red-900 px-2 py-1 rounded"
                               data-testid={`delete-user-button-${user.id}`}
                             >

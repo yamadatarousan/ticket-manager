@@ -1,71 +1,96 @@
-import React, { useState } from 'react';
-import { Ticket, CreateTicketRequest } from '../types';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
+import { Ticket, CreateTicketRequest, Project } from '../types';
 
 interface TicketCreateFormProps {
-  onSuccess: (ticket: Ticket) => void;
-  onCancel: () => void;
+  /** チケット作成後のコールバック関数 */
+  onSuccess?: (ticket: Ticket) => void;
+  /** チケット作成をキャンセルするコールバック関数 */
+  onCancel?: () => void;
+  /** プロジェクトID（指定された場合、そのプロジェクトに紐づくチケットを作成） */
+  projectId?: number;
 }
 
-interface FormData extends CreateTicketRequest {
-  assigned_to: string;
-}
-
+/**
+ * チケット作成フォームコンポーネント
+ * 
+ * 新しいチケットを作成するためのフォームを提供します。
+ * プロジェクトIDが指定された場合、そのプロジェクトに紐づくチケットを作成します。
+ */
 export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
   onSuccess,
-  onCancel
+  onCancel,
+  projectId
 }) => {
-  const [formData, setFormData] = useState<FormData>({
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<CreateTicketRequest>({
     title: '',
     description: '',
     status: 'open',
     priority: 'medium',
-    assigned_to: ''
+    project_id: projectId || 0
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  // プロジェクト一覧を取得
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (projectId) return; // プロジェクトIDが指定されている場合は取得不要
+
+      setIsLoadingProjects(true);
+      try {
+        const projectsData = await apiService.getProjects();
+        setProjects(projectsData || []);
+      } catch (err) {
+        console.error('プロジェクト一覧の取得に失敗しました:', err);
+        setError('プロジェクト一覧の取得に失敗しました');
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+  }, [projectId]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: name === 'project_id' ? parseInt(value, 10) : value
     }));
-    // エラーをクリア
-    if (error) {
-      setError(null);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title.trim()) {
-      setError('タイトルを入力してください');
-      return;
-    }
-    
-    if (!formData.description.trim()) {
-      setError('説明を入力してください');
-      return;
-    }
-
-    setIsSubmitting(true);
     setError(null);
+    setIsSubmitting(true);
 
     try {
-      const ticketData = {
-        title: formData.title,
-        description: formData.description,
-        status: formData.status,
-        priority: formData.priority,
-        assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined
+      // 必須項目のバリデーション
+      if (!formData.title.trim()) {
+        throw new Error('タイトルは必須です');
+      }
+      if (!formData.description.trim()) {
+        throw new Error('説明は必須です');
+      }
+      if (!formData.project_id) {
+        throw new Error('プロジェクトを選択してください');
+      }
+
+      const ticketData: CreateTicketRequest = {
+        ...formData,
+        project_id: formData.project_id
       };
-      
-      const response = await apiService.createTicket(ticketData);
-      onSuccess(response.ticket);
+
+      const newTicket = await apiService.createTicket(ticketData);
+      if (onSuccess) {
+        onSuccess(newTicket);
+      }
+      navigate(`/tickets/${newTicket.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'チケットの作成に失敗しました');
     } finally {
@@ -74,139 +99,111 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">新規チケット作成</h2>
-          <button
-            onClick={onCancel}
-            className="text-gray-600 hover:text-gray-800 text-sm font-medium"
-          >
-            ← 一覧に戻る
-          </button>
-        </div>
-
+    <div className="bg-white shadow sm:rounded-lg">
+      <div className="px-4 py-5 sm:p-6">
+        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+          新規チケット作成
+        </h3>
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md" role="alert">
             <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* タイトル */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              タイトル <span className="text-red-500">*</span>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              タイトル
             </label>
             <input
               type="text"
               id="title"
               name="title"
               value={formData.title}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="チケットのタイトルを入力してください"
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
-          {/* 説明 */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              説明 <span className="text-red-500">*</span>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              説明
             </label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
-              onChange={handleInputChange}
-              rows={5}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="チケットの詳細な説明を入力してください"
+              onChange={handleChange}
+              rows={4}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
-          {/* ステータスと優先度 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* プロジェクト選択（プロジェクトIDが指定されていない場合のみ表示） */}
+          {!projectId && (
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                ステータス
+              <label htmlFor="project_id" className="block text-sm font-medium text-gray-700">
+                プロジェクト
               </label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="open">オープン</option>
-                <option value="in_progress">進行中</option>
-                <option value="resolved">解決済み</option>
-                <option value="closed">クローズ</option>
-              </select>
+              {isLoadingProjects ? (
+                <div className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 bg-gray-50">
+                  プロジェクト一覧を読み込み中...
+                </div>
+              ) : (
+                <select
+                  id="project_id"
+                  name="project_id"
+                  value={formData.project_id}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="">プロジェクトを選択してください</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
+          )}
 
-            <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
-                優先度
-              </label>
-              <select
-                id="priority"
-                name="priority"
-                value={formData.priority}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="low">低</option>
-                <option value="medium">中</option>
-                <option value="high">高</option>
-                <option value="urgent">緊急</option>
-              </select>
-            </div>
-          </div>
-
-          {/* 担当者 */}
           <div>
-            <label htmlFor="assigned_to" className="block text-sm font-medium text-gray-700 mb-2">
-              担当者（メールアドレス）
+            <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
+              優先度
             </label>
-            <input
-              type="email"
-              id="assigned_to"
-              name="assigned_to"
-              value={formData.assigned_to}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="担当者のメールアドレス（任意）"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              担当者を指定しない場合は空欄のままにしてください
-            </p>
+            <select
+              id="priority"
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="low">低</option>
+              <option value="medium">中</option>
+              <option value="high">高</option>
+              <option value="urgent">緊急</option>
+            </select>
           </div>
 
-          {/* ボタン */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              キャンセル
-            </button>
+          <div className="flex justify-end space-x-3">
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                キャンセル
+              </button>
+            )}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? (
-                <>
-                  <span className="inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  作成中...
-                </>
-              ) : (
-                'チケットを作成'
-              )}
+              {isSubmitting ? '作成中...' : '作成'}
             </button>
           </div>
         </form>
