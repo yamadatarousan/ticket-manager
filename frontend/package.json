@@ -37,7 +37,6 @@
     "extends": [
       "react-app",
       "react-app/jest",
-      "prettier",
       "prettier"
     ],
     "plugins": [
@@ -60,7 +59,11 @@
             "error"
           ]
         }
-      ]
+      ],
+      "testing-library/no-wait-for-multiple-assertions": "warn",
+      "testing-library/no-wait-for-side-effects": "warn",
+      "testing-library/no-unnecessary-act": "warn",
+      "testing-library/no-node-access": "warn"
     }
   },
   "browserslist": {
