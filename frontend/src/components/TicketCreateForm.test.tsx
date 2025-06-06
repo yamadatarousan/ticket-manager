@@ -8,16 +8,12 @@ import { apiService } from '../services/api';
 jest.mock('../services/api', () => ({
   apiService: {
     createTicket: jest.fn(),
-    getProjects: jest.fn()
-  }
+    getProjects: jest.fn(),
+  },
 }));
 
 const renderWithRouter = (ui: React.ReactElement) => {
-  return render(
-    <MemoryRouter>
-      {ui}
-    </MemoryRouter>
-  );
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
 };
 
 describe('TicketCreateForm', () => {
@@ -29,17 +25,12 @@ describe('TicketCreateForm', () => {
     // デフォルトのモック設定
     (apiService.getProjects as jest.Mock).mockResolvedValue([
       { id: 1, name: 'テストプロジェクト1' },
-      { id: 2, name: 'テストプロジェクト2' }
+      { id: 2, name: 'テストプロジェクト2' },
     ]);
   });
 
   it('フォームの初期表示が正しいこと', async () => {
-    renderWithRouter(
-      <TicketCreateForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-      />
-    );
+    renderWithRouter(<TicketCreateForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     expect(screen.getByText('新規チケット作成')).toBeInTheDocument();
     expect(screen.getByLabelText('タイトル')).toBeInTheDocument();
@@ -60,11 +51,7 @@ describe('TicketCreateForm', () => {
 
   it('プロジェクトIDが指定されている場合、プロジェクト選択フィールドが表示されないこと', () => {
     renderWithRouter(
-      <TicketCreateForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-        projectId={1}
-      />
+      <TicketCreateForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} projectId={1} />
     );
 
     expect(screen.queryByLabelText('プロジェクト')).not.toBeInTheDocument();
@@ -81,17 +68,12 @@ describe('TicketCreateForm', () => {
       creator_id: 1,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
-      created_by: 1
+      created_by: 1,
     };
 
     (apiService.createTicket as jest.Mock).mockResolvedValue(mockTicket);
 
-    renderWithRouter(
-      <TicketCreateForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-      />
-    );
+    renderWithRouter(<TicketCreateForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // プロジェクト一覧が読み込まれるまで待機
     await waitFor(() => {
@@ -100,13 +82,13 @@ describe('TicketCreateForm', () => {
 
     // フォームに入力
     fireEvent.change(screen.getByLabelText('タイトル'), {
-      target: { value: 'テストチケット' }
+      target: { value: 'テストチケット' },
     });
     fireEvent.change(screen.getByLabelText('説明'), {
-      target: { value: 'テスト説明' }
+      target: { value: 'テスト説明' },
     });
     fireEvent.change(screen.getByLabelText('プロジェクト'), {
-      target: { value: '1' }
+      target: { value: '1' },
     });
 
     // フォーム送信
@@ -118,7 +100,7 @@ describe('TicketCreateForm', () => {
         description: 'テスト説明',
         status: 'open',
         priority: 'medium',
-        project_id: 1
+        project_id: 1,
       });
       expect(mockOnSuccess).toHaveBeenCalledWith(mockTicket);
     });
@@ -127,12 +109,7 @@ describe('TicketCreateForm', () => {
   it('フォーム送信が失敗した場合、エラーメッセージが表示されること', async () => {
     (apiService.createTicket as jest.Mock).mockRejectedValue(new Error('作成に失敗しました'));
 
-    renderWithRouter(
-      <TicketCreateForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-      />
-    );
+    renderWithRouter(<TicketCreateForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // プロジェクト一覧が読み込まれるまで待機
     await waitFor(() => {
@@ -141,13 +118,13 @@ describe('TicketCreateForm', () => {
 
     // フォームに入力
     fireEvent.change(screen.getByLabelText('タイトル'), {
-      target: { value: 'テストチケット' }
+      target: { value: 'テストチケット' },
     });
     fireEvent.change(screen.getByLabelText('説明'), {
-      target: { value: 'テスト説明' }
+      target: { value: 'テスト説明' },
     });
     fireEvent.change(screen.getByLabelText('プロジェクト'), {
-      target: { value: '1' }
+      target: { value: '1' },
     });
 
     // フォーム送信
@@ -159,12 +136,7 @@ describe('TicketCreateForm', () => {
   });
 
   it('プロジェクトIDが指定されていない場合、エラーメッセージが表示されること', async () => {
-    renderWithRouter(
-      <TicketCreateForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-      />
-    );
+    renderWithRouter(<TicketCreateForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // プロジェクト一覧が読み込まれるまで待機
     await waitFor(() => {
@@ -173,10 +145,10 @@ describe('TicketCreateForm', () => {
 
     // フォームに入力（プロジェクトは選択しない）
     fireEvent.change(screen.getByLabelText('タイトル'), {
-      target: { value: 'テストチケット' }
+      target: { value: 'テストチケット' },
     });
     fireEvent.change(screen.getByLabelText('説明'), {
-      target: { value: 'テスト説明' }
+      target: { value: 'テスト説明' },
     });
 
     // フォーム送信
@@ -184,20 +156,16 @@ describe('TicketCreateForm', () => {
 
     // エラーメッセージの確認（より具体的なセレクターを使用）
     await waitFor(() => {
-      const errorMessage = screen.getByRole('alert') || screen.getByText(/プロジェクトを選択してください/);
+      const errorMessage =
+        screen.getByRole('alert') || screen.getByText(/プロジェクトを選択してください/);
       expect(errorMessage).toBeInTheDocument();
     });
   });
 
   it('キャンセルボタンが正しく動作すること', () => {
-    renderWithRouter(
-      <TicketCreateForm
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-      />
-    );
+    renderWithRouter(<TicketCreateForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     fireEvent.click(screen.getByText('キャンセル'));
     expect(mockOnCancel).toHaveBeenCalled();
   });
-}); 
+});

@@ -17,18 +17,14 @@ interface UserEditFormData {
   password_confirmation?: string;
 }
 
-export const UserEditForm: React.FC<UserEditFormProps> = ({
-  user,
-  onSuccess,
-  onCancel
-}) => {
+export const UserEditForm: React.FC<UserEditFormProps> = ({ user, onSuccess, onCancel }) => {
   const { user: currentUser } = useAuth();
   const [formData, setFormData] = useState<UserEditFormData>({
     name: user.name,
     email: user.email,
     role: user.role,
     password: '',
-    password_confirmation: ''
+    password_confirmation: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,14 +34,14 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // エラーをクリア
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
@@ -87,7 +83,7 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -99,7 +95,7 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
       const updateData: Partial<User> & { password?: string; password_confirmation?: string } = {
         name: formData.name,
         email: formData.email,
-        role: formData.role
+        role: formData.role,
       };
 
       if (changePassword && formData.password) {
@@ -138,10 +134,7 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">ユーザー編集</h2>
-          <button
-            onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={onCancel} className="text-gray-500 hover:text-gray-700">
             ✕
           </button>
         </div>
@@ -179,9 +172,7 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
               }`}
               placeholder="山田 太郎"
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-            )}
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
           </div>
 
           {/* メールアドレス */}
@@ -200,9 +191,7 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
               }`}
               placeholder="user@example.com"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
 
           {/* ロール */}
@@ -224,12 +213,12 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
               <option value="manager">マネージャー</option>
               <option value="admin">管理者</option>
             </select>
-            {errors.role && (
-              <p className="mt-1 text-sm text-red-600">{errors.role}</p>
-            )}
+            {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
             {!canChangeRole && (
               <p className="mt-1 text-sm text-gray-500">
-                {isCurrentUser ? '自分自身のロールは変更できません' : 'ロールの変更には管理者権限が必要です'}
+                {isCurrentUser
+                  ? '自分自身のロールは変更できません'
+                  : 'ロールの変更には管理者権限が必要です'}
               </p>
             )}
           </div>
@@ -241,7 +230,7 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
                 type="checkbox"
                 id="changePassword"
                 checked={changePassword}
-                onChange={(e) => setChangePassword(e.target.checked)}
+                onChange={e => setChangePassword(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="changePassword" className="ml-2 block text-sm text-gray-900">
@@ -268,13 +257,14 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
                   }`}
                   placeholder="6文字以上で入力してください"
                 />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
 
               <div>
-                <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="password_confirmation"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   パスワード確認 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -299,9 +289,15 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
           <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
             <h4 className="text-sm font-medium text-gray-800 mb-2">ユーザー情報</h4>
             <div className="text-sm text-gray-600 space-y-1">
-              <p><strong>ID:</strong> {user.id}</p>
-              <p><strong>作成日:</strong> {new Date(user.created_at).toLocaleDateString('ja-JP')}</p>
-              <p><strong>最終更新:</strong> {new Date(user.updated_at).toLocaleDateString('ja-JP')}</p>
+              <p>
+                <strong>ID:</strong> {user.id}
+              </p>
+              <p>
+                <strong>作成日:</strong> {new Date(user.created_at).toLocaleDateString('ja-JP')}
+              </p>
+              <p>
+                <strong>最終更新:</strong> {new Date(user.updated_at).toLocaleDateString('ja-JP')}
+              </p>
             </div>
           </div>
 
@@ -334,4 +330,4 @@ export const UserEditForm: React.FC<UserEditFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

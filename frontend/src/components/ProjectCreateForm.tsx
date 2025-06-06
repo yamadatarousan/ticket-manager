@@ -1,6 +1,6 @@
 /**
  * プロジェクト作成フォームコンポーネント
- * 
+ *
  * 新しいプロジェクトを作成するためのフォームです。
  * バリデーション機能と適切なエラーハンドリングを提供します。
  */
@@ -13,16 +13,13 @@ interface ProjectCreateFormProps {
   onCancel: () => void;
 }
 
-export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
-  onSuccess,
-  onCancel
-}) => {
+export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState<ProjectRequest>({
     name: '',
     description: '',
     status: 'planning',
     start_date: '',
-    end_date: ''
+    end_date: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +64,7 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
         ...formData,
         start_date: formData.start_date || '',
         end_date: formData.end_date || '',
-        description: formData.description || ''
+        description: formData.description || '',
       };
 
       const newProject = await apiService.createProject(submitData);
@@ -79,18 +76,20 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // 該当フィールドのバリデーションエラーをクリア
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
@@ -114,7 +113,11 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
         <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
           <div className="flex">
             <svg className="w-5 h-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
             </svg>
             <p className="text-sm whitespace-pre-line">{error}</p>
           </div>
@@ -134,10 +137,11 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
             required
             value={formData.name}
             onChange={handleChange}
-            className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.name
+            className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              validationErrors.name
                 ? 'border-red-300 focus:border-red-500'
                 : 'border-gray-300 focus:border-blue-500'
-              }`}
+            }`}
             placeholder="プロジェクト名を入力してください"
           />
           {validationErrors.name && (
@@ -210,10 +214,11 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
               name="end_date"
               value={formData.end_date}
               onChange={handleChange}
-              className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.end_date
+              className={`block w-full border rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                validationErrors.end_date
                   ? 'border-red-300 focus:border-red-500'
                   : 'border-gray-300 focus:border-blue-500'
-                }`}
+              }`}
             />
             {validationErrors.end_date && (
               <p className="mt-1 text-sm text-red-600">{validationErrors.end_date}</p>
@@ -237,9 +242,24 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting && (
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
             )}
             {isSubmitting ? '作成中...' : '作成する'}
@@ -248,4 +268,4 @@ export const ProjectCreateForm: React.FC<ProjectCreateFormProps> = ({
       </form>
     </div>
   );
-}; 
+};

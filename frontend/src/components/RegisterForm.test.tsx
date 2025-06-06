@@ -9,14 +9,14 @@ jest.mock('../context/AuthContext', () => ({
     register: jest.fn(),
     isLoading: false,
     error: null,
-    clearError: jest.fn()
-  })
+    clearError: jest.fn(),
+  }),
 }));
 
 describe('RegisterForm', () => {
   it('登録フォームが正しく表示されること', () => {
     render(<RegisterForm />);
-    
+
     // フォームの主要な要素が存在することを確認
     expect(screen.getByLabelText('名前')).toBeInTheDocument();
     expect(screen.getByLabelText('メールアドレス')).toBeInTheDocument();
@@ -24,4 +24,4 @@ describe('RegisterForm', () => {
     expect(screen.getByLabelText('パスワード（確認）')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '登録する' })).toBeInTheDocument();
   });
-}); 
+});

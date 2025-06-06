@@ -18,20 +18,20 @@ interface FormData {
 
 /**
  * チケット編集フォームコンポーネント
- * 
+ *
  * 既存のチケット情報を編集するためのフォームコンポーネントです。
  * 以下の機能を提供します：
  * - チケット情報の表示と編集
  * - バリデーション機能
  * - エラーハンドリング
  * - 読み込み状態の表示
- * 
+ *
  * @param props - コンポーネントのプロパティ
  * @param props.ticket - 編集対象のチケット情報
  * @param props.onSuccess - 編集成功時のコールバック関数
  * @param props.onCancel - キャンセル時のコールバック関数
  * @returns チケット編集フォームのReactコンポーネント
- * 
+ *
  * @example
  * ```tsx
  * <TicketEditForm
@@ -46,17 +46,13 @@ interface FormData {
  * />
  * ```
  */
-export const TicketEditForm: React.FC<TicketEditFormProps> = ({
-  ticket,
-  onSuccess,
-  onCancel
-}) => {
+export const TicketEditForm: React.FC<TicketEditFormProps> = ({ ticket, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     status: 'open',
     priority: 'medium',
-    assigned_to: ''
+    assigned_to: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +65,7 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
         description: ticket.description,
         status: ticket.status,
         priority: ticket.priority,
-        assigned_to: ticket.assigned_to ? ticket.assigned_to.toString() : ''
+        assigned_to: ticket.assigned_to ? ticket.assigned_to.toString() : '',
       });
     }
   }, [ticket]);
@@ -80,7 +76,7 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // エラーをクリア
     if (error) {
@@ -110,7 +106,7 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
         description: formData.description,
         status: formData.status,
         priority: formData.priority,
-        assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined
+        assigned_to: formData.assigned_to ? parseInt(formData.assigned_to, 10) : undefined,
       };
 
       const response = await apiService.updateTicket(ticket.id, ticketData);
@@ -288,4 +284,4 @@ export const TicketEditForm: React.FC<TicketEditFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

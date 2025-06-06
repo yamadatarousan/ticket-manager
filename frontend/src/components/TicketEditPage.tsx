@@ -6,16 +6,16 @@ import { TicketEditForm } from './TicketEditForm';
 
 /**
  * チケット編集ページコンポーネント
- * 
+ *
  * URLパラメータからチケットIDを取得し、該当チケットの編集フォームを表示します。
  * 以下の機能を提供します：
  * - チケット情報の取得
  * - ローディング状態の表示
  * - エラーハンドリング
  * - 編集完了後のリダイレクト
- * 
+ *
  * @returns チケット編集ページのReactコンポーネント
- * 
+ *
  * @example
  * ```tsx
  * // ルーティング設定例
@@ -55,7 +55,7 @@ export const TicketEditPage: React.FC = () => {
 
   const handleSuccess = (updatedTicket: Ticket) => {
     // 成功メッセージを表示（将来的に通知システムを実装）
-    console.log('チケットが更新されました:', updatedTicket);
+    console.warn('チケットが更新されました:', updatedTicket);
 
     // チケット一覧ページに戻る
     navigate('/tickets');
@@ -104,9 +104,7 @@ export const TicketEditPage: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              エラーが発生しました
-            </h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">エラーが発生しました</h3>
             <p className="text-sm text-gray-600 mb-6">{error}</p>
             <div className="flex justify-center space-x-4">
               <button
@@ -148,9 +146,7 @@ export const TicketEditPage: React.FC = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              チケットが見つかりません
-            </h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">チケットが見つかりません</h3>
             <p className="text-sm text-gray-600 mb-6">
               指定されたチケットは存在しないか、アクセス権限がありません。
             </p>
@@ -166,11 +162,5 @@ export const TicketEditPage: React.FC = () => {
     );
   }
 
-  return (
-    <TicketEditForm
-      ticket={ticket}
-      onSuccess={handleSuccess}
-      onCancel={handleCancel}
-    />
-  );
-}; 
+  return <TicketEditForm ticket={ticket} onSuccess={handleSuccess} onCancel={handleCancel} />;
+};

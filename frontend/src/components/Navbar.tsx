@@ -1,418 +1,342 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+/**
+ * ナビゲーションバー - ハイセンスデザイン
+ *
+ * アプリケーションのメインナビゲーションを提供するコンポーネント。
+ * モダンなデザインシステムを適用し、ユーザー体験を向上させます。
+ *
+ * 機能：
+ * - メインナビゲーション（ダッシュボード、プロジェクト、チケット、ユーザー）
+ * - ユーザー情報表示
+ * - ログアウト機能
+ * - レスポンシブデザイン対応
+ * - アクセシビリティ対応
+ */
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-/**
- * ナビゲーションバーコンポーネントのプロパティ
- */
 interface NavbarProps {
-  /** ナビゲーション発生時に呼び出されるコールバック関数（後方互換性のため残す） */
-  onNavigate?: (page: string) => void;
-  /** 現在表示中のビュー名（後方互換性のため残す） */
-  currentView?: string;
+  /** ナビゲーション選択時のコールバック関数 */
+  onNavigate: (page: string) => void;
+  /** 現在表示中のビュー */
+  currentView: string;
 }
 
 /**
  * ナビゲーションバーコンポーネント
- * 
- * アプリケーション全体のナビゲーションバーを提供します。
- * このコンポーネントは以下の機能を実装しています：
- * - ページ間のナビゲーションリンク（React Router Link使用）
- * - ユーザー権限に基づいたメニュー表示制御
- * - ログイン状態の表示・ログアウト機能
- * - モバイル対応のレスポンシブデザイン
- * - 現在のページのハイライト（URL基準）
- * 
- * @returns ナビゲーションバーのReactコンポーネント
- * 
- * @example
- * ```tsx
- * // アプリケーションのルートコンポーネントで使用
- * <div className="app-container">
- *   <Navbar />
- *   <main>{children}</main>
- * </div>
- * ```
  */
-const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const location = useLocation();
-  
-  // モバイルメニューの開閉状態
+const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
+  const { user, logout } = useAuth();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // ユーザーメニューの開閉状態
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * 現在のパスがナビゲーションリンクと一致するかチェックする
-   * 
-   * @param path - チェックするパス
-   * @returns 現在のパスに一致する場合はtrue、それ以外はfalse
-   */
-  const isActive = (path: string): boolean => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
+  // プロフィールドロップダウンの外側クリック検知
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
 
-  /**
-   * ログアウト処理を行い、ログインページに遷移する
-   */
-  const handleLogout = async (): Promise<void> => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
     try {
       await logout();
+      onNavigate('login');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('ログアウトエラー:', error);
     }
   };
 
-  /**
-   * モバイルメニューの開閉を切り替える
-   */
-  const toggleMobileMenu = (): void => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+  const navigationItems = [
+    {
+      id: 'dashboard',
+      label: 'ダッシュボード',
+      icon: '🏠',
+      description: 'プロジェクトの概要',
+    },
+    {
+      id: 'projects',
+      label: 'プロジェクト',
+      icon: '📁',
+      description: 'プロジェクト管理',
+    },
+    {
+      id: 'tickets',
+      label: 'チケット',
+      icon: '🎫',
+      description: 'タスク管理',
+    },
+    ...(user?.role === 'admin' || user?.role === 'manager'
+      ? [
+          {
+            id: 'users',
+            label: 'ユーザー',
+            icon: '👥',
+            description: 'ユーザー管理',
+          },
+        ]
+      : []),
+    ...(user?.role === 'admin'
+      ? [
+          {
+            id: 'settings',
+            label: '設定',
+            icon: '⚙️',
+            description: 'システム設定',
+          },
+        ]
+      : []),
+  ];
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return '管理者';
+      case 'manager':
+        return 'マネージャー';
+      case 'user':
+        return 'ユーザー';
+      default:
+        return role;
+    }
   };
 
-  /**
-   * ユーザーメニューの開閉を切り替える
-   */
-  const toggleUserMenu = (): void => {
-    setIsUserMenuOpen(!isUserMenuOpen);
-  };
-
-  /**
-   * ナビゲーションリンクの共通スタイルを取得する
-   * 
-   * @param path - リンクのパス
-   * @returns CSSクラス名
-   */
-  const getLinkStyles = (path: string): string => {
-    return `px-3 py-2 rounded-md text-sm font-medium ${
-      isActive(path)
-        ? 'bg-gray-900 text-white'
-        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-    }`;
-  };
-
-  /**
-   * モバイルナビゲーションリンクの共通スタイルを取得する
-   * 
-   * @param path - リンクのパス
-   * @returns CSSクラス名
-   */
-  const getMobileLinkStyles = (path: string): string => {
-    return `block px-3 py-2 rounded-md text-base font-medium ${
-      isActive(path)
-        ? 'bg-gray-900 text-white'
-        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-    }`;
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-red-100 text-red-800';
+      case 'manager':
+        return 'bg-blue-100 text-blue-800';
+      case 'user':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
-    <nav className="bg-gray-800">
+    <nav className="relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* ロゴとデスクトップナビゲーションリンク */}
-          <div className="flex items-center">
-            {/* ロゴ */}
-            <div className="flex-shrink-0">
-              <Link 
-                to="/tickets"
-                className="text-white font-bold text-xl hover:text-gray-300"
-              >
-                チケット管理
-              </Link>
-            </div>
-            
-            {/* デスクトップナビゲーションリンク */}
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                {isAuthenticated && (
-                  <>
-                    <Link 
-                      to="/dashboard"
-                      className={getLinkStyles('/dashboard')}
-                    >
-                      ダッシュボード
-                    </Link>
-                    <Link 
-                      to="/projects"
-                      className={getLinkStyles('/projects')}
-                    >
-                      プロジェクト
-                    </Link>
-                    <Link 
-                      to="/tickets"
-                      className={getLinkStyles('/tickets')}
-                    >
-                      チケット
-                    </Link>
-                    {/* 管理者またはマネージャーのみ表示 */}
-                    {user && (user.role === 'admin' || user.role === 'manager') && (
-                      <Link 
-                        to="/users"
-                        className={getLinkStyles('/users')}
-                      >
-                        ユーザー管理
-                      </Link>
-                    )}
-                    {/* 管理者のみ表示 */}
-                    {user && user.role === 'admin' && (
-                      <Link 
-                        to="/settings"
-                        className={getLinkStyles('/settings')}
-                      >
-                        設定
-                      </Link>
-                    )}
-                  </>
-                )}
-                
-                {!isAuthenticated && (
-                  <>
-                    <Link 
-                      to="/login"
-                      className={getLinkStyles('/login')}
-                    >
-                      ログイン
-                    </Link>
-                    <Link 
-                      to="/register"
-                      className={getLinkStyles('/register')}
-                    >
-                      新規登録
-                    </Link>
-                  </>
-                )}
+          {/* ロゴ・ブランド */}
+          <div className="flex items-center space-x-4">
+            <div
+              className="flex items-center space-x-3 cursor-pointer hover-lift"
+              onClick={() => onNavigate('dashboard')}
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <span className="text-white text-xl font-bold">T</span>
+              </div>
+              <div className="hidden md:block">
+                <h1 className="text-xl font-bold gradient-text">Ticket Manager</h1>
+                <p className="text-xs text-gray-500 -mt-1">プロジェクト管理システム</p>
               </div>
             </div>
           </div>
-          
-          {/* ユーザーメニューとモバイルメニューボタン */}
-          <div className="flex items-center">
-            {/* ユーザー情報（認証済みの場合） */}
-            {isAuthenticated && user && (
-              <div className="ml-3 relative">
-                <div>
-                  <button
-                    onClick={toggleUserMenu}
-                    className="max-w-xs bg-gray-800 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-                    id="user-menu-button"
-                    aria-expanded="false"
-                    aria-haspopup="true"
-                  >
-                    <span className="sr-only">ユーザーメニューを開く</span>
-                    <div className="h-8 w-8 rounded-full bg-gray-500 flex items-center justify-center text-white">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                  </button>
+
+          {/* デスクトップナビゲーション */}
+          <div className="hidden md:flex items-center space-x-2">
+            {navigationItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`nav-item group relative ${currentView === item.id ? 'active' : ''}`}
+                title={item.description}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="font-medium">{item.label}</span>
                 </div>
-                
-                {/* ユーザーメニュードロップダウン */}
-                {isUserMenuOpen && (
-                  <div
-                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
-                    role="menu"
-                    aria-orientation="vertical"
-                    aria-labelledby="user-menu-button"
-                    tabIndex={-1}
+
+                {/* ホバー時のツールチップ */}
+                <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap pointer-events-none z-50">
+                  {item.description}
+                  <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* ユーザープロフィール */}
+          <div className="flex items-center space-x-4">
+            {/* プロフィールドロップダウン */}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center space-x-3 p-2 rounded-xl hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user?.name || 'ユーザー'}
+                    </p>
+                    <p
+                      className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(user?.role || 'user')}`}
+                    >
+                      {getRoleLabel(user?.role || 'user')}
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden md:block">
+                  <svg
+                    className={`w-4 h-4 text-gray-500 transition-transform ${
+                      isProfileOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
                   >
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                      <div className="font-medium">{user.name}</div>
-                      <div className="text-gray-500">{user.email}</div>
-                      <div className="text-xs mt-1 bg-gray-100 px-2 py-1 rounded">
-                        {user.role === 'admin' && '管理者'}
-                        {user.role === 'manager' && 'マネージャー'}
-                        {user.role === 'user' && '一般ユーザー'}
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </button>
+
+              {/* プロフィールドロップダウンメニュー */}
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50 animate-bounce-in">
+                  {/* ユーザー情報ヘッダー */}
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">
+                          {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold">{user?.name || 'ユーザー'}</p>
+                        <p className="text-blue-100 text-sm">{user?.email}</p>
+                        <p className="text-blue-200 text-xs mt-1">
+                          {getRoleLabel(user?.role || 'user')}
+                        </p>
                       </div>
                     </div>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                      tabIndex={-1}
-                      id="user-menu-item-0"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      プロフィール
-                    </Link>
+                  </div>
+
+                  {/* メニューアイテム */}
+                  <div className="py-2">
                     <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                      tabIndex={-1}
-                      id="user-menu-item-2"
+                      onClick={() => {
+                        onNavigate('profile');
+                        setIsProfileOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left hover:bg-gray-50 transition-colors flex items-center space-x-3"
                     >
-                      ログアウト
+                      <span className="text-xl">👤</span>
+                      <div>
+                        <p className="font-medium text-gray-900">プロフィール</p>
+                        <p className="text-sm text-gray-500">アカウント設定を編集</p>
+                      </div>
+                    </button>
+
+                    {user?.role === 'admin' && (
+                      <button
+                        onClick={() => {
+                          onNavigate('settings');
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full px-6 py-3 text-left hover:bg-gray-50 transition-colors flex items-center space-x-3"
+                      >
+                        <span className="text-xl">⚙️</span>
+                        <div>
+                          <p className="font-medium text-gray-900">システム設定</p>
+                          <p className="text-sm text-gray-500">管理者設定</p>
+                        </div>
+                      </button>
+                    )}
+
+                    <div className="border-t border-gray-100 my-2"></div>
+
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left hover:bg-red-50 transition-colors flex items-center space-x-3 text-red-600"
+                    >
+                      <span className="text-xl">🚪</span>
+                      <div>
+                        <p className="font-medium">ログアウト</p>
+                        <p className="text-sm text-red-500">セッションを終了</p>
+                      </div>
                     </button>
                   </div>
-                )}
-              </div>
-            )}
-            
-            {/* モバイルメニューボタン */}
-            <div className="ml-4 flex md:hidden">
-              <button
-                onClick={toggleMobileMenu}
-                className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-                aria-controls="mobile-menu"
-                aria-expanded="false"
-              >
-                <span className="sr-only">メニューを開く</span>
-                {/* アイコン（メニュー閉じている時） */}
-                {!isMobileMenuOpen && (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                )}
-                {/* アイコン（メニュー開いている時） */}
-                {isMobileMenuOpen && (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                )}
-              </button>
+                </div>
+              )}
             </div>
+
+            {/* モバイルメニューボタン */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-xl hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isMobileMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* モバイルメニュー */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden" id="mobile-menu">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {isAuthenticated && (
-              <>
-                <Link 
-                  to="/dashboard"
-                  className={getMobileLinkStyles('/dashboard')}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  ダッシュボード
-                </Link>
-                <Link 
-                  to="/projects"
-                  className={getMobileLinkStyles('/projects')}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  プロジェクト
-                </Link>
-                <Link 
-                  to="/tickets"
-                  className={getMobileLinkStyles('/tickets')}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  チケット
-                </Link>
-                {/* 管理者またはマネージャーのみ表示 */}
-                {user && (user.role === 'admin' || user.role === 'manager') && (
-                  <Link 
-                    to="/users"
-                    className={getMobileLinkStyles('/users')}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    ユーザー管理
-                  </Link>
-                )}
-                {/* 管理者のみ表示 */}
-                {user && user.role === 'admin' && (
-                  <Link 
-                    to="/settings"
-                    className={getMobileLinkStyles('/settings')}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    設定
-                  </Link>
-                )}
-              </>
-            )}
-            
-            {!isAuthenticated && (
-              <>
-                <Link 
-                  to="/login"
-                  className={getMobileLinkStyles('/login')}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  ログイン
-                </Link>
-                <Link 
-                  to="/register"
-                  className={getMobileLinkStyles('/register')}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  新規登録
-                </Link>
-              </>
-            )}
-          </div>
-          
-          {/* モバイルユーザーメニュー（認証済みの場合） */}
-          {isAuthenticated && user && (
-            <div className="pt-4 pb-3 border-t border-gray-700">
-              <div className="flex items-center px-5">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-gray-500 flex items-center justify-center text-white">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <div className="text-base font-medium leading-none text-white">{user.name}</div>
-                  <div className="text-sm font-medium leading-none text-gray-400 mt-1">{user.email}</div>
-                  <div className="text-xs mt-1 bg-gray-700 text-gray-300 px-2 py-1 rounded inline-block">
-                    {user.role === 'admin' && '管理者'}
-                    {user.role === 'manager' && 'マネージャー'}
-                    {user.role === 'user' && '一般ユーザー'}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 px-2 space-y-1">
-                <Link
-                  to="/profile"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  プロフィール
-                </Link>
+        {/* モバイルナビゲーションメニュー */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-xl animate-slide-up">
+            <div className="px-4 py-6 space-y-2">
+              {navigationItems.map(item => (
                 <button
+                  key={item.id}
                   onClick={() => {
-                    handleLogout();
+                    onNavigate(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
+                  className={`w-full nav-item text-left ${currentView === item.id ? 'active' : ''}`}
                 >
-                  ログアウト
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xl">{item.icon}</span>
+                    <div>
+                      <p className="font-medium">{item.label}</p>
+                      <p className="text-xs text-gray-500">{item.description}</p>
+                    </div>
+                  </div>
                 </button>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </nav>
   );
 };
 
-export default Navbar; 
+export default Navbar;

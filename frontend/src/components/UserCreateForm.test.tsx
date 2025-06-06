@@ -5,7 +5,7 @@ import { UserCreateForm } from './UserCreateForm';
 
 // APIのモック
 jest.mock('../services/api', () => ({
-  createUser: jest.fn().mockResolvedValue({})
+  createUser: jest.fn().mockResolvedValue({}),
 }));
 
 // AuthContextのモック
@@ -14,19 +14,14 @@ jest.mock('../context/AuthContext', () => ({
     user: { id: 1, email: 'admin@example.com', role: 'admin' },
     isAuthenticated: true,
     isLoading: false,
-    error: null
-  })
+    error: null,
+  }),
 }));
 
 describe('UserCreateForm', () => {
   it('ユーザー作成フォームが正しく表示されること', () => {
-    render(
-      <UserCreateForm 
-        onSuccess={() => {}} 
-        onCancel={() => {}} 
-      />
-    );
-    
+    render(<UserCreateForm onSuccess={() => {}} onCancel={() => {}} />);
+
     // フォームの主要な要素が存在することを確認
     expect(screen.getByLabelText(/メールアドレス/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/名前/i)).toBeInTheDocument();
@@ -34,4 +29,4 @@ describe('UserCreateForm', () => {
     expect(screen.getByLabelText('パスワード確認 *')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ユーザー作成/ })).toBeInTheDocument();
   });
-}); 
+});

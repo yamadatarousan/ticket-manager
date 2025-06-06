@@ -15,14 +15,14 @@ const mockTicket: Ticket = {
   created_by: 1,
   created_by_name: 'Test User',
   created_at: '2024-01-01T00:00:00Z',
-  updated_at: '2024-01-01T00:00:00Z'
+  updated_at: '2024-01-01T00:00:00Z',
 };
 
 // APIサービスのモック
 jest.mock('../services/api', () => ({
   apiService: {
-    updateTicket: jest.fn()
-  }
+    updateTicket: jest.fn(),
+  },
 }));
 
 describe('TicketEditForm', () => {
@@ -35,15 +35,11 @@ describe('TicketEditForm', () => {
 
   test('チケット編集フォームが正常にレンダリングされること', () => {
     render(
-      <TicketEditForm
-        ticket={mockTicket}
-        onSuccess={mockOnSuccess}
-        onCancel={mockOnCancel}
-      />
+      <TicketEditForm ticket={mockTicket} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
     );
 
     expect(screen.getByText('チケット編集')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Ticket')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Description')).toBeInTheDocument();
   });
-}); 
+});

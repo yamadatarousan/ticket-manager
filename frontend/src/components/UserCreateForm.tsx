@@ -15,16 +15,13 @@ interface UserFormData {
   role: 'user' | 'manager' | 'admin';
 }
 
-export const UserCreateForm: React.FC<UserCreateFormProps> = ({
-  onSuccess,
-  onCancel
-}) => {
+export const UserCreateForm: React.FC<UserCreateFormProps> = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState<UserFormData>({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
-    role: 'user'
+    role: 'user',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -33,14 +30,14 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // エラーをクリア
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
@@ -80,7 +77,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -88,20 +85,49 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await apiService.register(formData);
+      // デバッグ用ログ
+      console.warn('ユーザー作成開始');
+      console.warn('送信データ:', formData);
+      console.warn('認証トークン:', localStorage.getItem('auth_token'));
+
+      const response = await apiService.createUser(formData);
+      console.warn('ユーザー作成成功:', response);
+
       onSuccess(response.user);
     } catch (err) {
+      console.error('ユーザー作成エラー:', err);
+      console.error('エラーのタイプ:', typeof err);
+      console.error('エラーのメッセージ:', err instanceof Error ? err.message : String(err));
+
       if (err instanceof Error) {
-        // サーバーからのバリデーションエラーを処理
-        try {
-          const errorMessage = err.message;
-          if (errorMessage.includes('email')) {
-            setErrors({ email: 'このメールアドレスは既に使用されています' });
-          } else {
-            setErrors({ general: errorMessage });
+        console.warn('Error Message:', err.message);
+        console.warn('Message starts with "{":', err.message.startsWith('{'));
+
+        // エラーメッセージを解析
+        if (err.message.startsWith('{')) {
+          try {
+            const errorData = JSON.parse(err.message);
+            const newErrors: Record<string, string> = {};
+
+            if (errorData.email) {
+              newErrors.email = 'このメールアドレスは既に使用されています';
+            }
+            if (errorData.name) {
+              newErrors.name = '名前を入力してください';
+            }
+            if (errorData.password) {
+              newErrors.password = 'パスワードは6文字以上で入力してください';
+            }
+            if (errorData.password_confirmation) {
+              newErrors.password_confirmation = 'パスワードが一致しません';
+            }
+
+            setErrors(newErrors);
+          } catch {
+            setErrors({ general: '入力内容に問題があります' });
           }
-        } catch {
-          setErrors({ general: 'ユーザーの作成に失敗しました' });
+        } else {
+          setErrors({ general: err.message });
         }
       } else {
         setErrors({ general: 'ユーザーの作成に失敗しました' });
@@ -116,10 +142,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">新規ユーザー作成</h2>
-          <button
-            onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={onCancel} className="text-gray-500 hover:text-gray-700">
             ✕
           </button>
         </div>
@@ -148,9 +171,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               }`}
               placeholder="山田 太郎"
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-            )}
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
           </div>
 
           {/* メールアドレス */}
@@ -169,9 +190,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               }`}
               placeholder="user@example.com"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
 
           {/* ロール */}
@@ -192,9 +211,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               <option value="manager">マネージャー</option>
               <option value="admin">管理者</option>
             </select>
-            {errors.role && (
-              <p className="mt-1 text-sm text-red-600">{errors.role}</p>
-            )}
+            {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
             <p className="mt-1 text-sm text-gray-500">
               ロールによってシステム内での権限が決まります
             </p>
@@ -216,14 +233,15 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               }`}
               placeholder="6文字以上で入力してください"
             />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-            )}
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
           </div>
 
           {/* パスワード確認 */}
           <div>
-            <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password_confirmation"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               パスワード確認 <span className="text-red-500">*</span>
             </label>
             <input
@@ -246,9 +264,15 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <h4 className="text-sm font-medium text-blue-800 mb-2">ロールの権限について</h4>
             <ul className="text-sm text-blue-700 space-y-1">
-              <li><strong>一般ユーザー:</strong> チケットの閲覧、作成、自分のチケットの編集</li>
-              <li><strong>マネージャー:</strong> 全チケットの管理、ユーザー情報の閲覧</li>
-              <li><strong>管理者:</strong> 全機能へのアクセス、ユーザー管理</li>
+              <li>
+                <strong>一般ユーザー:</strong> チケットの閲覧、作成、自分のチケットの編集
+              </li>
+              <li>
+                <strong>マネージャー:</strong> 全チケットの管理、ユーザー情報の閲覧
+              </li>
+              <li>
+                <strong>管理者:</strong> 全機能へのアクセス、ユーザー管理
+              </li>
             </ul>
           </div>
 
@@ -281,4 +305,4 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
       </div>
     </div>
   );
-}; 
+};
