@@ -39,20 +39,21 @@ class Api::V1::TicketsController < ApplicationController
   #     }
   #   }
   def index
-    @tickets = Ticket.all
+    @tickets = Ticket.includes(:project, :creator, :assigned_user)
 
     # フィルタリング
     @tickets = @tickets.by_status(params[:status]) if params[:status].present?
     @tickets = @tickets.by_priority(params[:priority]) if params[:priority].present?
     @tickets = @tickets.assigned_to_user(params[:assigned_to]) if params[:assigned_to].present?
     @tickets = @tickets.created_by_user(params[:created_by]) if params[:created_by].present?
+    @tickets = @tickets.by_project(params[:project_id]) if params[:project_id].present?
 
     # ページネーション（将来的に実装可能）
     @tickets = @tickets.limit(params[:limit] || 50)
     @tickets = @tickets.offset(params[:offset] || 0)
 
     render json: {
-      tickets: @tickets,
+      tickets: @tickets.map { |ticket| ticket_with_associations(ticket) },
       meta: {
         total: Ticket.count,
         count: @tickets.count
@@ -191,6 +192,29 @@ class Api::V1::TicketsController < ApplicationController
   # @return [ActionController::Parameters] 許可されたパラメータ
   # @private
   def ticket_params
-    params.require(:ticket).permit(:title, :description, :status, :priority, :assigned_to)
+    params.require(:ticket).permit(:title, :description, :status, :priority, :assigned_to, :project_id)
+  end
+
+  # チケット情報に関連データを含めて返すヘルパーメソッド
+  def ticket_with_associations(ticket)
+    {
+      id: ticket.id,
+      title: ticket.title,
+      description: ticket.description,
+      status: ticket.status,
+      status_label: ticket.status&.humanize,
+      priority: ticket.priority,
+      priority_label: ticket.priority&.humanize,
+      assigned_to: ticket.assigned_to,
+      assigned_to_name: ticket.assigned_user&.name,
+      project_id: ticket.project_id,
+      project_name: ticket.project&.name,
+      creator_id: ticket.created_by,
+      creator_name: ticket.creator&.name,
+      created_at: ticket.created_at,
+      updated_at: ticket.updated_at,
+      created_by: ticket.created_by,
+      created_by_name: ticket.creator&.name
+    }
   end
 end

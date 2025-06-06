@@ -694,10 +694,10 @@ class ApiService {
   async createTicket(data: CreateTicketRequest): Promise<Ticket> {
     const response = await this.fetchWithAuth('/tickets', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify({ ticket: data })
     });
     const ticketData = await response.json();
-    return ticketData;
+    return ticketData.ticket || ticketData;
   }
 
   /**
