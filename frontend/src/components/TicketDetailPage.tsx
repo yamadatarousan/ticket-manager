@@ -1,45 +1,42 @@
+/**
+ * チケット詳細ページ - ハイセンスデザイン
+ * 
+ * チケットの詳細情報を美しいレイアウトで表示し、コメント機能を提供します。
+ * モダンなデザインシステムを適用し、ユーザビリティと視覚的魅力を両立します。
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Ticket, User, Comment } from '../types/index';
 import { apiService } from '../services/api';
-import { Ticket } from '../types/index';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { CommentSection } from './CommentSection';
+import { useAuth } from '../context/AuthContext';
 
-/**
- * チケット詳細表示ページコンポーネント
- * 
- * 指定されたIDのチケット詳細情報を読み取り専用で表示します。
- * 編集ボタンからチケット編集ページに遷移できます。
- */
 export const TicketDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const ticketId = parseInt(id || '0', 10);
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+
   const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchTicket = async () => {
-      if (!id) {
-        setError('チケットIDが指定されていません');
-        setIsLoading(false);
-        return;
-      }
+      if (!id) return;
 
       try {
         setIsLoading(true);
         setError(null);
-        console.log('fetchTicket - requesting ticket ID:', id, 'parsed:', parseInt(id));
-        const response = await apiService.getTicket(parseInt(id));
-        console.log('fetchTicket - received response:', response);
-        console.log('fetchTicket - response.ticket:', response.ticket);
-        console.log('fetchTicket - response.ticket.id:', response.ticket?.id, 'type:', typeof response.ticket?.id);
+
+        const response = await apiService.getTicket(parseInt(id, 10));
         setTicket(response.ticket);
+
+        const commentsResponse = await apiService.getComments(parseInt(id, 10));
+        setComments(commentsResponse.comments);
       } catch (err) {
-        console.error('fetchTicket error:', err);
-        setError(err instanceof Error ? err.message : 'チケットの取得に失敗しました');
+        setError(err instanceof Error ? err.message : 'チケット情報の取得に失敗しました');
       } finally {
         setIsLoading(false);
       }
@@ -48,104 +45,142 @@ export const TicketDetailPage: React.FC = () => {
     fetchTicket();
   }, [id]);
 
-  // デバッグ用 - ticketが読み込まれた時のログ
-  useEffect(() => {
+  const handleEditClick = () => {
     if (ticket) {
-      console.log('TicketDetailPage - ticket.id:', ticket.id, 'type:', typeof ticket.id);
+      navigate(`/tickets/${ticket.id}/edit`);
     }
-  }, [ticket]);
-
-  /**
-   * ステータスの日本語表示を取得
-   */
-  const getStatusLabel = (status: string): string => {
-    const statusMap: Record<string, string> = {
-      'open': '未着手',
-      'in_progress': '進行中',
-      'resolved': '解決済み',
-      'closed': '完了'
-    };
-    return statusMap[status] || status;
   };
 
-  /**
-   * 優先度の日本語表示を取得
-   */
-  const getPriorityLabel = (priority: string): string => {
-    const priorityMap: Record<string, string> = {
-      'low': '低',
-      'medium': '中',
-      'high': '高',
-      'urgent': '緊急'
-    };
-    return priorityMap[priority] || priority;
-  };
-
-  /**
-   * 優先度に応じたCSSクラスを取得
-   */
-  const getPriorityClass = (priority: string): string => {
-    const priorityClassMap: Record<string, string> = {
-      'low': 'bg-green-100 text-green-800',
-      'medium': 'bg-yellow-100 text-yellow-800',
-      'high': 'bg-orange-100 text-orange-800',
-      'urgent': 'bg-red-100 text-red-800'
-    };
-    return priorityClassMap[priority] || 'bg-gray-100 text-gray-800';
-  };
-
-  /**
-   * ステータスに応じたCSSクラスを取得
-   */
-  const getStatusClass = (status: string): string => {
-    const statusClassMap: Record<string, string> = {
-      'open': 'bg-blue-100 text-blue-800',
-      'in_progress': 'bg-yellow-100 text-yellow-800',
-      'resolved': 'bg-green-100 text-green-800',
-      'closed': 'bg-gray-100 text-gray-800'
-    };
-    return statusClassMap[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const handleEdit = () => {
-    navigate(`/tickets/${id}/edit`);
-  };
-
-  const handleBack = () => {
-    navigate('/tickets');
-  };
-
-  const handleDelete = () => {
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteCancel = () => {
-    setShowDeleteModal(false);
-  };
-
-  const handleDeleteConfirm = async () => {
+  const handleDeleteClick = async () => {
     if (!ticket) return;
 
-    try {
-      setIsDeleting(true);
-      await apiService.deleteTicket(ticket.id);
-
-      // 削除成功後、チケット一覧に戻る
-      navigate('/tickets');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'チケットの削除に失敗しました');
-      setShowDeleteModal(false);
-    } finally {
-      setIsDeleting(false);
+    if (window.confirm(`チケット「${ticket.title}」を削除してもよろしいですか？`)) {
+      try {
+        await apiService.deleteTicket(ticket.id);
+        navigate('/tickets');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'チケットの削除に失敗しました');
+      }
     }
+  };
+
+  // 新しいコメントが追加された時に更新
+  const handleCommentAdded = (newComment: Comment) => {
+    setComments([...comments, newComment]);
+  };
+
+  // コメント削除時の処理
+  const handleCommentDeleted = (commentId: number) => {
+    setComments(comments.filter(comment => comment.id !== commentId));
+  };
+
+  // ステータスを日本語に変換
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'open': return '未対応';
+      case 'in_progress': return '対応中';
+      case 'resolved': return '解決済み';
+      case 'closed': return 'クローズ';
+      default: return status;
+    }
+  };
+
+  // 優先度を日本語に変換
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'low': return '低';
+      case 'medium': return '中';
+      case 'high': return '高';
+      case 'urgent': return '緊急';
+      default: return priority;
+    }
+  };
+
+  // 日付フォーマット
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // 編集権限の確認
+  const canEditTicket = () => {
+    if (!currentUser || !ticket) return false;
+
+    // 管理者は全て編集可能
+    if (currentUser.role === 'admin') return true;
+
+    // マネージャーは自分のプロジェクトのチケットを編集可能
+    if (currentUser.role === 'manager') return true;
+
+    // 作成者または担当者は編集可能
+    return (
+      ticket.created_by === currentUser.id ||
+      ticket.assigned_to === currentUser.id
+    );
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">チケットを読み込み中...</p>
+      <div className="animate-fade-in space-y-8">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 flex-1">
+            <div className="loading-skeleton h-8 w-2/3 rounded-lg"></div>
+            <div className="flex space-x-2">
+              <div className="loading-skeleton h-6 w-20 rounded-full"></div>
+              <div className="loading-skeleton h-6 w-20 rounded-full"></div>
+            </div>
+          </div>
+          <div className="loading-skeleton h-10 w-24 rounded-lg"></div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <div className="card animate-pulse">
+              <div className="card-header">
+                <div className="loading-skeleton h-6 w-40 rounded"></div>
+              </div>
+              <div className="card-body space-y-4">
+                <div className="loading-skeleton h-4 w-full rounded"></div>
+                <div className="loading-skeleton h-4 w-full rounded"></div>
+                <div className="loading-skeleton h-4 w-3/4 rounded"></div>
+              </div>
+            </div>
+
+            <div className="mt-8 card animate-pulse">
+              <div className="card-header">
+                <div className="loading-skeleton h-6 w-32 rounded"></div>
+              </div>
+              <div className="card-body space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="loading-skeleton h-10 w-10 rounded-full"></div>
+                  <div className="flex-1">
+                    <div className="loading-skeleton h-4 w-full rounded"></div>
+                    <div className="loading-skeleton h-4 w-full rounded mt-2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="card animate-pulse">
+              <div className="card-header">
+                <div className="loading-skeleton h-6 w-32 rounded"></div>
+              </div>
+              <div className="card-body space-y-4">
+                <div className="loading-skeleton h-5 w-full rounded"></div>
+                <div className="loading-skeleton h-5 w-full rounded"></div>
+                <div className="loading-skeleton h-5 w-full rounded"></div>
+                <div className="loading-skeleton h-5 w-full rounded"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -153,24 +188,24 @@ export const TicketDetailPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
+      <div className="card border-red-200 bg-red-50 animate-bounce-in">
+        <div className="card-body">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-red-600 text-xl">⚠️</span>
             </div>
-            <h3 className="mt-4 text-lg font-medium text-gray-900">エラーが発生しました</h3>
-            <p className="mt-2 text-sm text-gray-500">{error}</p>
-            <div className="mt-6">
-              <button
-                onClick={handleBack}
-                className="w-full inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                チケット一覧に戻る
-              </button>
+            <div>
+              <h3 className="font-semibold text-red-800">エラーが発生しました</h3>
+              <p className="text-red-700">{error}</p>
             </div>
+          </div>
+          <div className="mt-4">
+            <button
+              onClick={() => navigate('/tickets')}
+              className="btn-secondary"
+            >
+              チケット一覧に戻る
+            </button>
           </div>
         </div>
       </div>
@@ -179,166 +214,232 @@ export const TicketDetailPage: React.FC = () => {
 
   if (!ticket) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-900">チケットが見つかりません</h3>
-            <p className="mt-2 text-sm text-gray-500">指定されたチケットは存在しないか、削除されている可能性があります。</p>
-            <div className="mt-6">
-              <button
-                onClick={handleBack}
-                className="w-full inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                チケット一覧に戻る
-              </button>
-            </div>
+      <div className="card animate-bounce-in">
+        <div className="card-body text-center py-16">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">🎫</span>
           </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">チケットが見つかりません</h3>
+          <p className="text-gray-600 mb-6">
+            指定されたチケットは存在しないか、アクセス権限がありません。
+          </p>
+          <button
+            onClick={() => navigate('/tickets')}
+            className="btn-primary"
+          >
+            チケット一覧に戻る
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* ページヘッダー */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">チケット詳細</h1>
-              <p className="mt-2 text-sm text-gray-600">チケット #{ticket.id}</p>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={handleBack}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                一覧に戻る
-              </button>
-              <button
-                onClick={handleEdit}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg                >
-                編集
-              </button>
-              <button
-                onClick={handleDelete}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                削除
-              </button>
-            </div>
+    <div className="space-y-8 animate-slide-up">
+      {/* ヘッダーセクション */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold gradient-text">{ticket.title}</h1>
+          <div className="flex items-center mt-2 flex-wrap gap-2">
+            <span className={`status-badge ${ticket.status === 'open' ? 'status-open' :
+              ticket.status === 'in_progress' ? 'status-in-progress' :
+                ticket.status === 'resolved' ? 'status-resolved' : 'status-closed'
+              }`}>
+              {getStatusLabel(ticket.status)}
+            </span>
+            <span className={`status-badge ${ticket.priority === 'low' ? 'priority-low' :
+              ticket.priority === 'medium' ? 'priority-medium' :
+                ticket.priority === 'high' ? 'priority-high' : 'priority-urgent'
+              }`}>
+              優先度: {getPriorityLabel(ticket.priority)}
+            </span>
+            <span className="text-gray-600 text-sm">
+              #{ticket.id} • 作成日: {formatDate(ticket.created_at)}
+            </span>
           </div>
         </div>
 
-        {/* チケット詳細情報 */}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="px-6 py-6 border-b border-gray-200">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">{ticket.title}</h2>
-                <div className="flex flex-wrap items-center gap-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(ticket.status)}`}>
-                    {getStatusLabel(ticket.status)}
-                  </span>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityClass(ticket.priority)}`}>
-                    優先度: {getPriorityLabel(ticket.priority)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-6 py-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* 基本情報 */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">基本情報</h3>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">ステータス</dt>
-                    <dd className="mt-1">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(ticket.status)}`}>
-                        {getStatusLabel(ticket.status)}
-                      </span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">優先度</dt>
-                    <dd className="mt-1">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityClass(ticket.priority)}`}>
-                        {getPriorityLabel(ticket.priority)}
-                      </span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">担当者</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      {ticket.assigned_to || '未割り当て'}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">作成者</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{ticket.created_by_name}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              {/* 日時情報 */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">日時情報</h3>
-                <dl className="space-y-3">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">作成日時</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      {new Date(ticket.created_at).toLocaleString('ja-JP')}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">更新日時</dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      {new Date(ticket.updated_at).toLocaleString('ja-JP')}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
-          </div>
-
-          {/* 説明 */}
-          <div className="px-6 py-6 border-t border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">説明</h3>
-            <div className="prose max-w-none">
-              <p className="text-gray-700 whitespace-pre-wrap">{ticket.description}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* コメントセクション */}
-        {ticket && (
-          <div className="mt-8">
-            <CommentSection ticketId={ticket.id} />
+        {canEditTicket() && (
+          <div className="flex space-x-3">
+            <button
+              onClick={handleEditClick}
+              className="btn-secondary hover-lift flex items-center space-x-2"
+            >
+              <span className="text-lg">✏️</span>
+              <span>編集</span>
+            </button>
+            <button
+              onClick={handleDeleteClick}
+              className="btn-secondary hover-lift flex items-center space-x-2 border-red-300 text-red-600 hover:bg-red-50"
+            >
+              <span className="text-lg">🗑️</span>
+              <span>削除</span>
+            </button>
           </div>
         )}
       </div>
 
-      {/* 削除確認モーダル */}
-      <DeleteConfirmModal
-        isOpen={showDeleteModal}
-        itemName={`チケット #${ticket.id}: ${ticket.title}`}
-        isLoading={isDeleting}
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-      />
+      {/* メインコンテンツエリア */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* 左側：チケット詳細とコメント */}
+        <div className="md:col-span-2 space-y-8">
+          {/* チケット詳細 */}
+          <div className="card hover-lift">
+            <div className="card-header">
+              <h2 className="text-xl font-bold text-gray-900">詳細情報</h2>
+            </div>
+            <div className="card-body">
+              <div className="prose max-w-none">
+                {ticket.description ? (
+                  <p className="whitespace-pre-wrap">{ticket.description}</p>
+                ) : (
+                  <p className="text-gray-500 italic">説明はありません</p>
+                )}
+              </div>
+
+              {ticket.project_name && (
+                <div className="mt-6 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                  プロジェクト: {ticket.project_name}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* コメントセクション */}
+          <div className="card-glass hover-lift">
+            <div className="card-header">
+              <h2 className="text-xl font-bold text-gray-900">コメント</h2>
+            </div>
+            <div className="card-body">
+              <CommentSection
+                ticketId={ticketId}
+                comments={comments}
+                onCommentAdded={handleCommentAdded}
+                onCommentDeleted={handleCommentDeleted}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 右側：詳細情報 */}
+        <div>
+          <div className="card hover-lift">
+            <div className="card-header">
+              <h2 className="text-xl font-bold text-gray-900">チケット情報</h2>
+            </div>
+            <div className="card-body">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-500">ステータス</p>
+                  <p className="font-medium">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${ticket.status === 'open' ? 'bg-blue-100 text-blue-800' :
+                      ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                        ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
+                      }`}>
+                      {getStatusLabel(ticket.status)}
+                    </span>
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">優先度</p>
+                  <p className="font-medium">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${ticket.priority === 'low' ? 'bg-green-100 text-green-800' :
+                      ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                        ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                          'bg-red-100 text-red-800'
+                      }`}>
+                      {getPriorityLabel(ticket.priority)}
+                    </span>
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">担当者</p>
+                  <p className="font-medium">
+                    {ticket.assigned_to_name || '未割り当て'}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">作成者</p>
+                  <p className="font-medium">{ticket.created_by_name || '不明'}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">作成日時</p>
+                  <p className="font-medium">{formatDate(ticket.created_at)}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">更新日時</p>
+                  <p className="font-medium">{formatDate(ticket.updated_at)}</p>
+                </div>
+
+                {ticket.project_name && (
+                  <div>
+                    <p className="text-sm text-gray-500">プロジェクト</p>
+                    <p className="font-medium">{ticket.project_name}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* チケット履歴またはアクティビティ */}
+          <div className="card hover-lift mt-6">
+            <div className="card-header">
+              <h2 className="text-xl font-bold text-gray-900">アクティビティ</h2>
+            </div>
+            <div className="card-body">
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-sm">📝</span>
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-900">作成されました</p>
+                    <p className="text-xs text-gray-500">{formatDate(ticket.created_at)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="text-green-600 text-sm">🔄</span>
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-900">最終更新</p>
+                    <p className="text-xs text-gray-500">{formatDate(ticket.updated_at)}</p>
+                  </div>
+                </div>
+
+                {comments.length > 0 && (
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-purple-600 text-sm">💬</span>
+                      </div>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-gray-900">
+                        {comments.length}件のコメント
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        最新: {formatDate(comments[comments.length - 1].created_at)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }; 

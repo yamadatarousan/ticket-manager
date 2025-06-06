@@ -14,20 +14,26 @@ jest.mock('../context/AuthContext', () => ({
 }));
 
 // テスト用のナビゲーションバーラッパー
-const NavbarWrapper: React.FC<{ initialEntries?: string[] }> = ({ 
-  initialEntries = ['/tickets'] 
+const NavbarWrapper: React.FC<{ initialEntries?: string[] }> = ({
+  initialEntries = ['/tickets']
 }) => (
-  <MemoryRouter initialEntries={initialEntries}>
-    <Navbar />
+  <MemoryRouter
+    initialEntries={initialEntries}
+    future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+  >
+    <Navbar
+      onNavigate={() => { }}
+      currentView="tickets"
+    />
   </MemoryRouter>
 );
 
 describe('Navbar', () => {
   it('ナビゲーションバーが正しく表示されること', () => {
     render(<NavbarWrapper />);
-    
+
     // ナビゲーションバーの主要な要素が存在することを確認
-    expect(screen.getByText('チケット管理')).toBeInTheDocument();
+    expect(screen.getByText('Ticket Manager')).toBeInTheDocument();
     expect(screen.getByText('ダッシュボード')).toBeInTheDocument();
     expect(screen.getByText('チケット')).toBeInTheDocument();
   });
