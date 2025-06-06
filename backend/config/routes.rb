@@ -37,9 +37,6 @@ Rails.application.routes.draw do
         resources :comments, only: [ :index, :create, :show, :update, :destroy ]
       end
 
-      # 個別のコメント操作（編集・削除など）
-      resources :comments, only: [ :show, :update, :destroy ]
-
       resources :users, except: [ :new, :edit ]
 
       # プロジェクト管理
