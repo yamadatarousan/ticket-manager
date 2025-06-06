@@ -14,7 +14,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project } from '../types/index';
 import { apiService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
 
 interface ProjectListProps {
   /** プロジェクトクリック時のコールバック関数 */
@@ -30,7 +29,6 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   onProjectEdit,
   onCreateProject
 }) => {
-  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

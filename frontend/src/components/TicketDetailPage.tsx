@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Ticket, User, Comment } from '../types/index';
+import { Ticket, Comment } from '../types/index';
 import { apiService } from '../services/api';
 import { CommentSection } from './CommentSection';
 import { useAuth } from '../context/AuthContext';

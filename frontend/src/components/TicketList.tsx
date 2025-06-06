@@ -12,7 +12,7 @@
  * - アクセシビリティ対応
  */
 import React, { useState, useEffect, useMemo } from 'react';
-import { Ticket, Project, PaginatedResponse } from '../types/index';
+import { Ticket, Project } from '../types/index';
 import { apiService } from '../services/api';
 
 interface TicketListProps {

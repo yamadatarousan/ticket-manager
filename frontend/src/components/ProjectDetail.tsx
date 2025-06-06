@@ -8,20 +8,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Project, Ticket } from '../types/index';
 import { apiService } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const canManageProjects = user?.role === 'admin' || user?.role === 'manager';
 
   useEffect(() => {
     fetchProject();
@@ -51,17 +45,6 @@ export const ProjectDetail: React.FC = () => {
     navigate(`/projects/${project.id}/edit`);
   };
 
-  const handleDelete = async () => {
-    if (!project) return;
-
-    try {
-      await apiService.deleteProject(project.id);
-      navigate('/projects');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'プロジェクトの削除に失敗しました');
-    }
-  };
-
   const handleCreateTicket = () => {
     if (!project) return;
     navigate(`/tickets/new?project_id=${project.id}`);
@@ -71,58 +54,7 @@ export const ProjectDetail: React.FC = () => {
     navigate(`/tickets/${ticket.id}`);
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'planning':
-        return 'bg-blue-100 text-blue-800';
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'on_hold':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'completed':
-        return 'bg-gray-100 text-gray-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
-  const getProgressBarClass = (progressRate: number) => {
-    if (progressRate >= 0.8) return 'bg-green-500';
-    if (progressRate >= 0.5) return 'bg-yellow-500';
-    return 'bg-blue-500';
-  };
-
-  const getTicketStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'open':
-        return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'resolved':
-        return 'bg-green-100 text-green-800';
-      case 'closed':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getTicketPriorityBadgeClass = (priority: string) => {
-    switch (priority) {
-      case 'low':
-        return 'bg-gray-100 text-gray-800';
-      case 'medium':
-        return 'bg-blue-100 text-blue-800';
-      case 'high':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'urgent':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
