@@ -6,7 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Project } from '../types';
+import { Project } from '../types/index';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
@@ -123,7 +123,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
     switch (status) {
       case 'planning':
         return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
+      case 'active':
         return 'bg-yellow-100 text-yellow-800';
       case 'completed':
         return 'bg-gray-100 text-gray-800';
@@ -215,7 +215,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
             >
               <option value="">すべて</option>
               <option value="planning">計画中</option>
-              <option value="in_progress">進行中</option>
+              <option value="active">進行中</option>
               <option value="on_hold">一時停止</option>
               <option value="completed">完了</option>
             </select>

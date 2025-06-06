@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 import { apiService } from '../services/api';
 
 interface TicketEditFormProps {

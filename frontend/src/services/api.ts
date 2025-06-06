@@ -1,4 +1,4 @@
-import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats, SystemSetting, SystemSettingRequest, Project, ProjectRequest, CreateTicketRequest } from '../types';
+import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats, SystemSetting, SystemSettingRequest, Project, ProjectRequest, CreateTicketRequest } from '../types/index';
 
 /** APIベースURL（環境変数または開発環境のデフォルト値） */
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';

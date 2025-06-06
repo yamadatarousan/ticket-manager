@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User } from '../types';
+import { User } from '../types/index';
 import { apiService } from '../services/api';
 
 interface UserCreateFormProps {

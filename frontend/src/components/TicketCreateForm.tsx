@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
-import { Ticket, CreateTicketRequest, Project } from '../types';
+import { Ticket, CreateTicketRequest, Project } from '../types/index';
 
 interface TicketCreateFormProps {
   /** チケット作成後のコールバック関数 */

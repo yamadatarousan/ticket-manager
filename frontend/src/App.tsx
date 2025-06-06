@@ -45,7 +45,7 @@ import { SystemSettingsPage } from './components/SystemSettingsPage';
 import { ProjectList } from './components/ProjectList';
 import { ProjectCreateForm } from './components/ProjectCreateForm';
 import { ProjectDetail } from './components/ProjectDetail';
-import { Ticket, User, DashboardStats, Project } from './types';
+import { Ticket, User, DashboardStats, Project } from './types/index';
 import { apiService } from './services/api';
 import './App.css';
 

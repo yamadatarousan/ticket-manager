@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { CommentSection } from './CommentSection';
 

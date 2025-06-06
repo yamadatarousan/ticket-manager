@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TicketEditForm } from './TicketEditForm';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 
 // モックチケットデータ
 const mockTicket: Ticket = {
@@ -12,7 +12,6 @@ const mockTicket: Ticket = {
   priority: 'medium',
   assigned_to: 1,
   project_id: 1,
-  creator_id: 1,
   created_by: 1,
   created_by_name: 'Test User',
   created_at: '2024-01-01T00:00:00Z',

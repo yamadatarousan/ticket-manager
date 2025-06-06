@@ -5,7 +5,7 @@
  * バリデーション機能と適切なエラーハンドリングを提供します。
  */
 import React, { useState } from 'react';
-import { ProjectRequest } from '../types';
+import { ProjectRequest } from '../types/index';
 import { apiService } from '../services/api';
 
 interface ProjectCreateFormProps {

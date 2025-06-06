@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
-import { Comment, CreateCommentRequest } from '../types';
+import { Comment, CreateCommentRequest } from '../types/index';
 
 interface CommentSectionProps {
   /** コメントを表示するチケットのID */

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Ticket } from '../types';
+import { Ticket } from '../types/index';
 import { apiService } from '../services/api';
 import { TicketEditForm } from './TicketEditForm';
 

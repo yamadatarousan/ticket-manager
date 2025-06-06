@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SystemSetting, SystemSettingRequest } from '../types';
+import { SystemSetting, SystemSettingRequest } from '../types/index';
 import { apiService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
