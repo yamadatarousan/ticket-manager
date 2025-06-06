@@ -1,4 +1,19 @@
-import { User, Ticket, Comment, AuthResponse, LoginRequest, RegisterRequest, CreateCommentRequest, PaginatedResponse, DashboardStats, SystemSetting, SystemSettingRequest, Project, ProjectRequest, CreateTicketRequest } from '../types/index';
+import {
+  User,
+  Ticket,
+  Comment,
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  CreateCommentRequest,
+  PaginatedResponse,
+  DashboardStats,
+  SystemSetting,
+  SystemSettingRequest,
+  Project,
+  ProjectRequest,
+  CreateTicketRequest,
+} from '../types/index';
 
 /** APIベースURL（環境変数または開発環境のデフォルト値） */
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api/v1';
@@ -14,7 +29,7 @@ export interface TicketFilterParams {
 
 /**
  * APIサービスクラス
- * 
+ *
  * バックエンドAPIとの通信を管理するサービスクラスです。
  * 以下の機能を提供します：
  * - 認証（ログイン、登録、ログアウト、ユーザー情報取得）
@@ -22,21 +37,21 @@ export interface TicketFilterParams {
  * - ユーザー管理（一覧取得、更新、削除）
  * - エラーハンドリング
  * - 認証トークンの自動処理
- * 
+ *
  * このクラスは以下の責任を持ちます：
  * - HTTPリクエストの実行
  * - 認証ヘッダーの管理
  * - レスポンスの処理とエラーハンドリング
  * - データ形式の変換
- * 
+ *
  * @example
  * ```typescript
  * // ログイン
  * const response = await apiService.login({ email: 'user@example.com', password: 'password' });
- * 
+ *
  * // チケット一覧取得
  * const tickets = await apiService.getTickets({ status: 'open' });
- * 
+ *
  * // チケット作成
  * const newTicket = await apiService.createTicket({
  *   title: '新しいタスク',
@@ -46,7 +61,8 @@ export interface TicketFilterParams {
  */
 class ApiService {
   private token: string | null = null;
-  private readonly API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api/v1';
+  private readonly API_BASE_URL =
+    process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api/v1';
 
   constructor() {
     this.token = localStorage.getItem('auth_token');
@@ -63,8 +79,8 @@ class ApiService {
 
     const headers = {
       'Content-Type': 'application/json',
-      ...(this.token ? { 'Authorization': `Bearer ${this.token}` } : {}),
-      ...options.headers
+      ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
+      ...options.headers,
     };
 
     // デバッグ用ログ
@@ -73,18 +89,18 @@ class ApiService {
       method: options.method || 'GET',
       hasToken: !!this.token,
       tokenLength: this.token?.length,
-      headers
+      headers,
     });
 
     const response = await fetch(url, {
       ...options,
-      headers
+      headers,
     });
 
     console.log('API Response:', {
       status: response.status,
       statusText: response.statusText,
-      ok: response.ok
+      ok: response.ok,
     });
 
     if (!response.ok) {
@@ -104,10 +120,10 @@ class ApiService {
 
   /**
    * 認証ヘッダーを生成する
-   * 
+   *
    * ローカルストレージからトークンを取得し、
    * APIリクエストに必要なヘッダーを生成します。
-   * 
+   *
    * @returns HTTPリクエストヘッダー
    * @private
    */
@@ -115,7 +131,7 @@ class ApiService {
     const token = localStorage.getItem('auth_token');
     const headers = {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      ...(token && { Authorization: `Bearer ${token}` }),
     };
 
     // デバッグ用ログ（本番環境では削除）
@@ -128,10 +144,10 @@ class ApiService {
 
   /**
    * HTTPレスポンスを処理する
-   * 
+   *
    * APIからのレスポンスを処理し、エラーハンドリングを行います。
    * ステータスコードに応じた適切なエラーメッセージを生成します。
-   * 
+   *
    * @template T - レスポンスデータの型
    * @param response - fetch APIのレスポンスオブジェクト
    * @returns パースされたレスポンスデータ
@@ -158,7 +174,11 @@ class ApiService {
         }
       } catch (parseError) {
         // parseError が Error インスタンスで、422エラーの場合は再投げ
-        if (parseError instanceof Error && parseError.message.startsWith('{') && response.status === 422) {
+        if (
+          parseError instanceof Error &&
+          parseError.message.startsWith('{') &&
+          response.status === 422
+        ) {
           throw parseError;
         }
 
@@ -200,16 +220,16 @@ class ApiService {
 
   /**
    * ユーザーログイン
-   * 
+   *
    * メールアドレスとパスワードを使用してユーザー認証を行います。
    * 成功時はトークンをローカルストレージに保存します。
-   * 
+   *
    * @param credentials - ログイン認証情報
    * @param credentials.email - メールアドレス
    * @param credentials.password - パスワード
    * @returns 認証結果（ユーザー情報とトークン）
    * @throws {Error} 認証失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -229,9 +249,9 @@ class ApiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getAuthHeaders()
+          ...this.getAuthHeaders(),
         },
-        body: JSON.stringify({ user: credentials })
+        body: JSON.stringify({ user: credentials }),
       });
 
       const data = await this.handleResponse<AuthResponse>(response);
@@ -252,17 +272,17 @@ class ApiService {
 
   /**
    * ユーザー登録
-   * 
+   *
    * 新しいユーザーアカウントを作成し、自動的にログインします。
    * 成功時はトークンをローカルストレージに保存します。
-   * 
+   *
    * @param userData - ユーザー登録情報
    * @param userData.email - メールアドレス
    * @param userData.password - パスワード
    * @param userData.name - ユーザー名（オプション）
    * @returns 認証結果（ユーザー情報とトークン）
    * @throws {Error} 登録失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -282,9 +302,9 @@ class ApiService {
       const response = await fetch(`${API_BASE_URL}/users`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user: userData })
+        body: JSON.stringify({ user: userData }),
       });
 
       const data = await this.handleResponse<AuthResponse>(response);
@@ -305,12 +325,12 @@ class ApiService {
 
   /**
    * ユーザーログアウト
-   * 
+   *
    * サーバーにログアウト要求を送信し、ローカルストレージからトークンを削除します。
    * ネットワークエラーが発生してもローカルのトークンは確実に削除されます。
-   * 
+   *
    * @throws {Error} ネットワークエラーの場合（ローカルの状態はクリアされる）
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -326,7 +346,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       // レスポンスが成功かどうかに関わらず、ローカルのトークンは削除
@@ -344,13 +364,13 @@ class ApiService {
 
   /**
    * 現在のユーザー情報を取得
-   * 
+   *
    * ローカルストレージのトークンを使用して、サーバーから
    * 現在認証されているユーザーの情報を取得します。
-   * 
+   *
    * @returns 現在のユーザー情報
    * @throws {Error} 認証失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -376,7 +396,7 @@ class ApiService {
 
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         method: 'GET',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (process.env.NODE_ENV === 'development') {
@@ -413,12 +433,12 @@ class ApiService {
 
   /**
    * ダッシュボード統計情報を取得
-   * 
+   *
    * ダッシュボード表示に必要な統計情報（チケット数、ステータス別分布など）を取得します。
-   * 
+   *
    * @returns ダッシュボード統計情報
    * @throws {Error} 取得失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -433,7 +453,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
         method: 'GET',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       return await this.handleResponse<DashboardStats>(response);
@@ -451,12 +471,12 @@ class ApiService {
 
   /**
    * システム設定一覧を取得
-   * 
+   *
    * 管理者のみアクセス可能。システム全体の設定項目一覧を取得します。
-   * 
+   *
    * @returns システム設定一覧
    * @throws {Error} 取得失敗、認証エラー、権限エラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -471,7 +491,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/system_settings`, {
         method: 'GET',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       return await this.handleResponse<{ system_settings: SystemSetting[] }>(response);
@@ -485,7 +505,7 @@ class ApiService {
 
   /**
    * 個別システム設定を取得
-   * 
+   *
    * @param id システム設定ID
    * @returns システム設定情報
    * @throws {Error} 取得失敗、認証エラー、権限エラーの場合
@@ -494,7 +514,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
         method: 'GET',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       return await this.handleResponse<{ system_setting: SystemSetting }>(response);
@@ -508,23 +528,27 @@ class ApiService {
 
   /**
    * システム設定を作成
-   * 
+   *
    * @param systemSetting システム設定データ
    * @returns 作成されたシステム設定情報
    * @throws {Error} 作成失敗、認証エラー、権限エラーの場合
    */
-  async createSystemSetting(systemSetting: SystemSettingRequest): Promise<{ system_setting: SystemSetting; message: string }> {
+  async createSystemSetting(
+    systemSetting: SystemSettingRequest
+  ): Promise<{ system_setting: SystemSetting; message: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/system_settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getAuthHeaders()
+          ...this.getAuthHeaders(),
         },
-        body: JSON.stringify({ system_setting: systemSetting })
+        body: JSON.stringify({ system_setting: systemSetting }),
       });
 
-      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(response);
+      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(
+        response
+      );
     } catch (error) {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
@@ -535,24 +559,29 @@ class ApiService {
 
   /**
    * システム設定を更新
-   * 
+   *
    * @param id システム設定ID
    * @param systemSetting 更新するシステム設定データ
    * @returns 更新されたシステム設定情報
    * @throws {Error} 更新失敗、認証エラー、権限エラーの場合
    */
-  async updateSystemSetting(id: number, systemSetting: Partial<SystemSettingRequest>): Promise<{ system_setting: SystemSetting; message: string }> {
+  async updateSystemSetting(
+    id: number,
+    systemSetting: Partial<SystemSettingRequest>
+  ): Promise<{ system_setting: SystemSetting; message: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getAuthHeaders()
+          ...this.getAuthHeaders(),
         },
-        body: JSON.stringify({ system_setting: systemSetting })
+        body: JSON.stringify({ system_setting: systemSetting }),
       });
 
-      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(response);
+      return await this.handleResponse<{ system_setting: SystemSetting; message: string }>(
+        response
+      );
     } catch (error) {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
@@ -563,7 +592,7 @@ class ApiService {
 
   /**
    * システム設定を削除
-   * 
+   *
    * @param id システム設定ID
    * @returns 削除結果
    * @throws {Error} 削除失敗、認証エラー、権限エラーの場合
@@ -572,7 +601,7 @@ class ApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/system_settings/${id}`, {
         method: 'DELETE',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       return await this.handleResponse<{ message: string }>(response);
@@ -586,23 +615,27 @@ class ApiService {
 
   /**
    * システム設定を一括更新
-   * 
+   *
    * @param settings 設定キーと値のハッシュ
    * @returns 更新結果
    * @throws {Error} 更新失敗、認証エラー、権限エラーの場合
    */
-  async bulkUpdateSystemSettings(settings: Record<string, any>): Promise<{ system_settings: SystemSetting[]; message: string }> {
+  async bulkUpdateSystemSettings(
+    settings: Record<string, any>
+  ): Promise<{ system_settings: SystemSetting[]; message: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/system_settings/bulk_update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getAuthHeaders()
+          ...this.getAuthHeaders(),
         },
-        body: JSON.stringify({ settings })
+        body: JSON.stringify({ settings }),
       });
 
-      return await this.handleResponse<{ system_settings: SystemSetting[]; message: string }>(response);
+      return await this.handleResponse<{ system_settings: SystemSetting[]; message: string }>(
+        response
+      );
     } catch (error) {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('サーバーに接続できませんでした。ネットワーク接続を確認してください。');
@@ -617,10 +650,10 @@ class ApiService {
 
   /**
    * チケット一覧を取得
-   * 
+   *
    * 指定したフィルター条件に基づいてチケット一覧を取得します。
    * ページネーション情報も含まれた結果を返します。
-   * 
+   *
    * @param params - フィルター条件（オプション）
    * @param params.status - チケットのステータス（open, in_progress, closed等）
    * @param params.priority - チケットの優先度（low, medium, high等）
@@ -629,15 +662,15 @@ class ApiService {
    * @param params.per_page - 1ページあたりの件数
    * @returns ページネーション付きチケット一覧
    * @throws {Error} 取得失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * // 全てのチケットを取得
    * const allTickets = await apiService.getTickets();
-   * 
+   *
    * // オープンなチケットのみを取得
    * const openTickets = await apiService.getTickets({ status: 'open' });
-   * 
+   *
    * // 高優先度のチケットを2ページ目から取得
    * const highPriorityTickets = await apiService.getTickets({
    *   priority: 'high',
@@ -663,17 +696,17 @@ class ApiService {
       total: data.total_count || data.length || 0,
       page: data.current_page || 1,
       per_page: data.per_page || 10,
-      total_pages: data.total_pages || 1
+      total_pages: data.total_pages || 1,
     };
   }
 
   /**
    * 指定IDのチケット詳細を取得
-   * 
+   *
    * @param id - チケットID
    * @returns チケット詳細情報
    * @throws {Error} チケットが見つからない場合またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -702,7 +735,7 @@ class ApiService {
 
   /**
    * 新しいチケットを作成
-   * 
+   *
    * @param data - 作成するチケットの情報
    * @param data.title - チケットのタイトル（必須）
    * @param data.description - チケットの説明
@@ -711,7 +744,7 @@ class ApiService {
    * @param data.status - ステータス（デフォルト: 'open'）
    * @returns 作成されたチケット情報
    * @throws {Error} 作成失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -730,7 +763,7 @@ class ApiService {
   async createTicket(data: CreateTicketRequest): Promise<Ticket> {
     const response = await this.fetchWithAuth('/tickets', {
       method: 'POST',
-      body: JSON.stringify({ ticket: data })
+      body: JSON.stringify({ ticket: data }),
     });
     const ticketData = await response.json();
     return ticketData.ticket || ticketData;
@@ -738,12 +771,12 @@ class ApiService {
 
   /**
    * 既存のチケットを更新
-   * 
+   *
    * @param id - 更新するチケットのID
    * @param ticketData - 更新するチケットの情報（部分更新可能）
    * @returns 更新されたチケット情報
    * @throws {Error} 更新失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -760,7 +793,7 @@ class ApiService {
   async updateTicket(id: number, ticketData: Partial<Ticket>): Promise<{ ticket: Ticket }> {
     const response = await this.fetchWithAuth(`/tickets/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ ticket: ticketData })
+      body: JSON.stringify({ ticket: ticketData }),
     });
     const data = await response.json();
     return { ticket: data };
@@ -768,10 +801,10 @@ class ApiService {
 
   /**
    * チケットを削除
-   * 
+   *
    * @param id - 削除するチケットのID
    * @throws {Error} 削除失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -784,7 +817,7 @@ class ApiService {
    */
   async deleteTicket(id: number): Promise<void> {
     await this.fetchWithAuth(`/tickets/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   }
 
@@ -794,10 +827,10 @@ class ApiService {
 
   /**
    * ユーザー一覧を取得
-   * 
+   *
    * @returns ページネーション付きユーザー一覧
    * @throws {Error} 取得失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -818,17 +851,17 @@ class ApiService {
       total: data.total_count || data.length || 0,
       page: data.current_page || 1,
       per_page: data.per_page || 10,
-      total_pages: data.total_pages || 1
+      total_pages: data.total_pages || 1,
     };
   }
 
   /**
    * 指定IDのユーザー詳細を取得
-   * 
+   *
    * @param id - ユーザーID
    * @returns ユーザー詳細情報
    * @throws {Error} ユーザーが見つからない場合またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -847,11 +880,11 @@ class ApiService {
 
   /**
    * 新しいユーザーを作成
-   * 
+   *
    * @param userData - 作成するユーザーの情報
    * @returns 作成されたユーザー情報
    * @throws {Error} 作成失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -877,7 +910,7 @@ class ApiService {
   }): Promise<{ user: User; token: string; message: string }> {
     const response = await this.fetchWithAuth('/users', {
       method: 'POST',
-      body: JSON.stringify({ user: userData })
+      body: JSON.stringify({ user: userData }),
     });
     const data = await response.json();
     return data;
@@ -885,12 +918,12 @@ class ApiService {
 
   /**
    * ユーザー情報を更新
-   * 
+   *
    * @param id - 更新するユーザーのID
    * @param userData - 更新するユーザーの情報（部分更新可能）
    * @returns 更新されたユーザー情報
    * @throws {Error} 更新失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -907,7 +940,7 @@ class ApiService {
   async updateUser(id: number, userData: Partial<User>): Promise<{ user: User }> {
     const response = await this.fetchWithAuth(`/users/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ user: userData })
+      body: JSON.stringify({ user: userData }),
     });
     const data = await response.json();
     return { user: data };
@@ -915,10 +948,10 @@ class ApiService {
 
   /**
    * ユーザーを削除
-   * 
+   *
    * @param id - 削除するユーザーのID
    * @throws {Error} 削除失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -931,7 +964,7 @@ class ApiService {
    */
   async deleteUser(id: number): Promise<void> {
     await this.fetchWithAuth(`/users/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   }
 
@@ -941,14 +974,14 @@ class ApiService {
 
   /**
    * チケットのコメント一覧取得
-   * 
+   *
    * 指定されたチケットに関連するコメントの一覧を取得します。
    * コメントは作成日時順（古い順）で返されます。
-   * 
+   *
    * @param ticketId - チケットID
    * @returns コメント一覧
    * @throws {Error} 取得失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -969,16 +1002,16 @@ class ApiService {
 
   /**
    * コメント作成
-   * 
+   *
    * 指定されたチケットに新しいコメントを追加します。
    * 作成者は現在ログインしているユーザーに自動設定されます。
-   * 
+   *
    * @param ticketId - チケットID
    * @param commentData - コメント作成情報
    * @param commentData.content - コメント内容
    * @returns 作成されたコメント情報
    * @throws {Error} 作成失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -991,11 +1024,14 @@ class ApiService {
    * }
    * ```
    */
-  async createComment(ticketId: number, commentData: CreateCommentRequest): Promise<{ comment: Comment }> {
+  async createComment(
+    ticketId: number,
+    commentData: CreateCommentRequest
+  ): Promise<{ comment: Comment }> {
     console.log('createComment - ticketId:', ticketId, 'type:', typeof ticketId);
     const response = await this.fetchWithAuth(`/tickets/${ticketId}/comments`, {
       method: 'POST',
-      body: JSON.stringify({ comment: commentData })
+      body: JSON.stringify({ comment: commentData }),
     });
     const data = await response.json();
     console.log('createComment - response data:', data);
@@ -1004,16 +1040,16 @@ class ApiService {
 
   /**
    * コメント更新
-   * 
+   *
    * 既存のコメントの内容を更新します。
    * 自分が作成したコメントのみ更新可能です（管理者は全て更新可能）。
-   * 
+   *
    * @param commentId - コメントID
    * @param commentData - 更新するコメント情報
    * @param commentData.content - 新しいコメント内容
    * @returns 更新されたコメント情報
    * @throws {Error} 更新失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1026,10 +1062,13 @@ class ApiService {
    * }
    * ```
    */
-  async updateComment(commentId: number, commentData: CreateCommentRequest): Promise<{ comment: Comment }> {
+  async updateComment(
+    commentId: number,
+    commentData: CreateCommentRequest
+  ): Promise<{ comment: Comment }> {
     const response = await this.fetchWithAuth(`/api/comments/${commentId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ comment: commentData })
+      body: JSON.stringify({ comment: commentData }),
     });
     const data = await response.json();
     return { comment: data };
@@ -1037,13 +1076,13 @@ class ApiService {
 
   /**
    * コメント削除
-   * 
+   *
    * 指定されたコメントを削除します。
    * 自分が作成したコメントのみ削除可能です（管理者は全て削除可能）。
-   * 
+   *
    * @param commentId - 削除するコメントのID
    * @throws {Error} 削除失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1056,7 +1095,7 @@ class ApiService {
    */
   async deleteComment(commentId: number): Promise<void> {
     await this.fetchWithAuth(`/api/comments/${commentId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   }
 
@@ -1066,13 +1105,13 @@ class ApiService {
 
   /**
    * プロジェクト一覧を取得
-   * 
+   *
    * @param params - フィルター条件（オプション）
    * @param params.status - プロジェクトのステータス（active, completed等）
    * @param params.created_by - 作成者ID
    * @returns プロジェクト一覧
    * @throws {Error} 取得失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1091,11 +1130,11 @@ class ApiService {
 
   /**
    * 指定IDのプロジェクト詳細を取得
-   * 
+   *
    * @param id - プロジェクトID
    * @returns プロジェクト詳細情報
    * @throws {Error} プロジェクトが見つからない場合またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1114,7 +1153,7 @@ class ApiService {
 
   /**
    * 新しいプロジェクトを作成
-   * 
+   *
    * @param projectData - 作成するプロジェクトの情報
    * @param projectData.title - プロジェクトのタイトル（必須）
    * @param projectData.description - プロジェクトの説明
@@ -1122,7 +1161,7 @@ class ApiService {
    * @param projectData.created_by - 作成者ID
    * @returns 作成されたプロジェクト情報
    * @throws {Error} 作成失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1141,7 +1180,7 @@ class ApiService {
   async createProject(projectData: ProjectRequest): Promise<Project> {
     const response = await this.fetchWithAuth('/api/projects', {
       method: 'POST',
-      body: JSON.stringify({ project: projectData })
+      body: JSON.stringify({ project: projectData }),
     });
     const data = await response.json();
     return data;
@@ -1149,12 +1188,12 @@ class ApiService {
 
   /**
    * 既存のプロジェクトを更新
-   * 
+   *
    * @param id - 更新するプロジェクトのID
    * @param projectData - 更新するプロジェクトの情報（部分更新可能）
    * @returns 更新されたプロジェクト情報
    * @throws {Error} 更新失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1171,7 +1210,7 @@ class ApiService {
   async updateProject(id: number, projectData: ProjectRequest): Promise<Project> {
     const response = await this.fetchWithAuth(`/api/projects/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ project: projectData })
+      body: JSON.stringify({ project: projectData }),
     });
     const data = await response.json();
     return data;
@@ -1179,10 +1218,10 @@ class ApiService {
 
   /**
    * プロジェクトを削除
-   * 
+   *
    * @param id - 削除するプロジェクトのID
    * @throws {Error} 削除失敗またはネットワークエラーの場合
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -1195,23 +1234,23 @@ class ApiService {
    */
   async deleteProject(id: number): Promise<void> {
     await this.fetchWithAuth(`/api/projects/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
   }
 }
 
 /**
  * APIサービスのシングルトンインスタンス
- * 
+ *
  * アプリケーション全体で共有されるAPIサービスのインスタンスです。
  * このインスタンスを使用してすべてのAPI通信を行います。
- * 
+ *
  * @example
  * ```typescript
  * import { apiService } from './services/api';
- * 
+ *
  * // 使用例
  * const tickets = await apiService.getTickets();
  * ```
  */
-export const apiService = new ApiService(); 
+export const apiService = new ApiService();

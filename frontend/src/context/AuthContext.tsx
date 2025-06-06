@@ -33,7 +33,7 @@ type AuthAction =
 
 /**
  * 認証コンテキストの型定義
- * 
+ *
  * 認証状態と認証に関する操作を提供するインターフェース
  */
 interface AuthContextType extends AuthState {
@@ -51,14 +51,14 @@ interface AuthContextType extends AuthState {
 
 /**
  * 認証用のReactコンテキスト
- * 
+ *
  * アプリケーション全体で認証状態を共有するためのコンテキスト
  */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * 認証状態を管理するリデューサー関数
- * 
+ *
  * @param state - 現在の認証状態
  * @param action - 実行するアクション
  * @returns 新しい認証状態
@@ -69,7 +69,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return {
         ...state,
         isLoading: true,
-        error: null
+        error: null,
       };
     case 'AUTH_SUCCESS':
       return {
@@ -77,7 +77,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: action.payload,
         isAuthenticated: true,
         isLoading: false,
-        error: null
+        error: null,
       };
     case 'AUTH_ERROR':
       return {
@@ -85,7 +85,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: action.payload
+        error: action.payload,
       };
     case 'AUTH_LOGOUT':
       return {
@@ -93,12 +93,12 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null
+        error: null,
       };
     case 'CLEAR_ERROR':
       return {
         ...state,
-        error: null
+        error: null,
       };
     default:
       return state;
@@ -112,7 +112,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: true, // 初期化時は認証チェック中
-  error: null
+  error: null,
 };
 
 /**
@@ -125,17 +125,17 @@ interface AuthProviderProps {
 
 /**
  * 認証コンテキストプロバイダーコンポーネント
- * 
+ *
  * アプリケーション全体に認証状態と認証操作を提供します。
  * このコンポーネントで以下の機能を管理します：
  * - ユーザーのログイン・ログアウト・登録
  * - 認証状態の永続化（ローカルストレージ）
  * - 自動認証チェック
  * - エラーハンドリング
- * 
+ *
  * @param props - プロバイダーのプロパティ
  * @returns 認証コンテキストを提供するコンポーネント
- * 
+ *
  * @example
  * ```tsx
  * function App() {
@@ -157,12 +157,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * ユーザーログイン処理
-   * 
+   *
    * 1. ログイン処理を開始
    * 2. APIにログイン要求を送信
    * 3. 成功時：ユーザー情報を状態に保存、トークンをローカルストレージに保存
    * 4. 失敗時：エラーメッセージを設定
-   * 
+   *
    * @param credentials - ログイン認証情報（メールアドレスとパスワード）
    * @throws ログイン処理中にエラーが発生した場合
    */
@@ -184,12 +184,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * ユーザー登録処理
-   * 
+   *
    * 1. 登録処理を開始
    * 2. APIに登録要求を送信
    * 3. 成功時：ユーザー情報を状態に保存、トークンをローカルストレージに保存
    * 4. 失敗時：エラーメッセージを設定
-   * 
+   *
    * @param userData - ユーザー登録情報
    * @throws 登録処理中にエラーが発生した場合
    */
@@ -211,11 +211,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * ユーザーログアウト処理
-   * 
+   *
    * 1. APIにログアウト要求を送信
    * 2. ローカルストレージからトークンを削除
    * 3. 認証状態をクリア
-   * 
+   *
    * @throws ログアウト処理中にエラーが発生した場合（状態は確実にクリアされる）
    */
   const logout = async (): Promise<void> => {
@@ -232,7 +232,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * エラーメッセージをクリアする
-   * 
+   *
    * 認証エラーが表示されている場合に、エラー状態をリセットします
    */
   const clearError = (): void => {
@@ -241,10 +241,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * 認証状態をチェックする
-   * 
+   *
    * ローカルストレージに保存されたトークンを使用して、
    * サーバーから現在のユーザー情報を取得します。
-   * 
+   *
    * 処理フロー：
    * 1. ローカルストレージからトークンを取得
    * 2. トークンがない場合：ログアウト状態に設定
@@ -283,37 +283,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     clearError,
-    checkAuth
+    checkAuth,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 /**
  * 認証コンテキストを使用するためのカスタムフック
- * 
+ *
  * このフックを使用して、コンポーネント内で認証状態と
  * 認証操作にアクセスできます。
- * 
+ *
  * @returns 認証コンテキストの値
  * @throws AuthProvider外で使用された場合
- * 
+ *
  * @example
  * ```tsx
  * function LoginButton() {
  *   const { login, isLoading, error } = useAuth();
- *   
+ *
  *   const handleLogin = async () => {
  *     await login({ email: 'user@example.com', password: 'password' });
  *   };
- *   
+ *
  *   if (isLoading) return <div>ログイン中...</div>;
  *   if (error) return <div>エラー: {error}</div>;
- *   
+ *
  *   return <button onClick={handleLogin}>ログイン</button>;
  * }
  * ```
@@ -324,4 +320,4 @@ export const useAuth = (): AuthContextType => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};

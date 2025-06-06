@@ -12,20 +12,20 @@ let mockUser: {
   id: 1,
   email: 'admin@example.com',
   role: 'admin',
-  name: 'Test Admin'
+  name: 'Test Admin',
 };
 
 jest.mock('../context/AuthContext', () => ({
   useAuth: () => ({
-    user: mockUser
-  })
+    user: mockUser,
+  }),
 }));
 
 // apiServiceをモック
 jest.mock('../services/api', () => ({
   apiService: {
-    getSystemSettings: jest.fn()
-  }
+    getSystemSettings: jest.fn(),
+  },
 }));
 
 const mockApiService = require('../services/api').apiService;
@@ -38,7 +38,7 @@ describe('SystemSettingsPage', () => {
       id: 1,
       email: 'admin@example.com',
       role: 'admin',
-      name: 'Test Admin'
+      name: 'Test Admin',
     };
   });
 
@@ -60,6 +60,8 @@ describe('SystemSettingsPage', () => {
 
     // アクセス権限エラーの確認
     expect(screen.getByText('アクセス権限がありません')).toBeInTheDocument();
-    expect(screen.getByText('この機能にアクセスするには管理者権限が必要です。')).toBeInTheDocument();
+    expect(
+      screen.getByText('この機能にアクセスするには管理者権限が必要です。')
+    ).toBeInTheDocument();
   });
-}); 
+});

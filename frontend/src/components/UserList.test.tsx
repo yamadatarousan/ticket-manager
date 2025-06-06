@@ -6,8 +6,8 @@ import { UserList } from './UserList';
 // APIのモック
 jest.mock('../services/api', () => ({
   apiService: {
-    getUsers: jest.fn().mockResolvedValue([])
-  }
+    getUsers: jest.fn().mockResolvedValue([]),
+  },
 }));
 
 // AuthContextのモック
@@ -16,20 +16,14 @@ jest.mock('../context/AuthContext', () => ({
     user: { id: 1, email: 'admin@example.com', role: 'admin' },
     isAuthenticated: true,
     isLoading: false,
-    error: null
-  })
+    error: null,
+  }),
 }));
 
 describe('UserList', () => {
   it('ユーザーリストが正しく表示されること', async () => {
     await act(async () => {
-      render(
-        <UserList
-          onUserClick={() => { }}
-          onCreateUser={() => { }}
-          onUserEdit={() => { }}
-        />
-      );
+      render(<UserList onUserClick={() => {}} onCreateUser={() => {}} onUserEdit={() => {}} />);
     });
 
     // ユーザーリストの主要な要素が存在することを確認
@@ -38,4 +32,4 @@ describe('UserList', () => {
       expect(screen.getByRole('button', { name: /新規ユーザー/i })).toBeInTheDocument();
     });
   });
-}); 
+});

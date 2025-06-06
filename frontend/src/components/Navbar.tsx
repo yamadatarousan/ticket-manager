@@ -1,9 +1,9 @@
 /**
  * ナビゲーションバー - ハイセンスデザイン
- * 
+ *
  * アプリケーションのメインナビゲーションを提供するコンポーネント。
  * モダンなデザインシステムを適用し、ユーザー体験を向上させます。
- * 
+ *
  * 機能：
  * - メインナビゲーション（ダッシュボード、プロジェクト、チケット、ユーザー）
  * - ユーザー情報表示
@@ -58,49 +58,65 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
       id: 'dashboard',
       label: 'ダッシュボード',
       icon: '🏠',
-      description: 'プロジェクトの概要'
+      description: 'プロジェクトの概要',
     },
     {
       id: 'projects',
       label: 'プロジェクト',
       icon: '📁',
-      description: 'プロジェクト管理'
+      description: 'プロジェクト管理',
     },
     {
       id: 'tickets',
       label: 'チケット',
       icon: '🎫',
-      description: 'タスク管理'
+      description: 'タスク管理',
     },
-    ...(user?.role === 'admin' || user?.role === 'manager' ? [{
-      id: 'users',
-      label: 'ユーザー',
-      icon: '👥',
-      description: 'ユーザー管理'
-    }] : []),
-    ...(user?.role === 'admin' ? [{
-      id: 'settings',
-      label: '設定',
-      icon: '⚙️',
-      description: 'システム設定'
-    }] : [])
+    ...(user?.role === 'admin' || user?.role === 'manager'
+      ? [
+          {
+            id: 'users',
+            label: 'ユーザー',
+            icon: '👥',
+            description: 'ユーザー管理',
+          },
+        ]
+      : []),
+    ...(user?.role === 'admin'
+      ? [
+          {
+            id: 'settings',
+            label: '設定',
+            icon: '⚙️',
+            description: 'システム設定',
+          },
+        ]
+      : []),
   ];
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin': return '管理者';
-      case 'manager': return 'マネージャー';
-      case 'user': return 'ユーザー';
-      default: return role;
+      case 'admin':
+        return '管理者';
+      case 'manager':
+        return 'マネージャー';
+      case 'user':
+        return 'ユーザー';
+      default:
+        return role;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'manager': return 'bg-blue-100 text-blue-800';
-      case 'user': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'admin':
+        return 'bg-red-100 text-red-800';
+      case 'manager':
+        return 'bg-blue-100 text-blue-800';
+      case 'user':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -118,24 +134,19 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
                 <span className="text-white text-xl font-bold">T</span>
               </div>
               <div className="hidden md:block">
-                <h1 className="text-xl font-bold gradient-text">
-                  Ticket Manager
-                </h1>
-                <p className="text-xs text-gray-500 -mt-1">
-                  プロジェクト管理システム
-                </p>
+                <h1 className="text-xl font-bold gradient-text">Ticket Manager</h1>
+                <p className="text-xs text-gray-500 -mt-1">プロジェクト管理システム</p>
               </div>
             </div>
           </div>
 
           {/* デスクトップナビゲーション */}
           <div className="hidden md:flex items-center space-x-2">
-            {navigationItems.map((item) => (
+            {navigationItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`nav-item group relative ${currentView === item.id ? 'active' : ''
-                  }`}
+                className={`nav-item group relative ${currentView === item.id ? 'active' : ''}`}
                 title={item.description}
               >
                 <div className="flex items-center space-x-2">
@@ -170,15 +181,18 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
                     <p className="text-sm font-semibold text-gray-900">
                       {user?.name || 'ユーザー'}
                     </p>
-                    <p className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(user?.role || 'user')}`}>
+                    <p
+                      className={`text-xs px-2 py-0.5 rounded-full ${getRoleColor(user?.role || 'user')}`}
+                    >
                       {getRoleLabel(user?.role || 'user')}
                     </p>
                   </div>
                 </div>
                 <div className="hidden md:block">
                   <svg
-                    className={`w-4 h-4 text-gray-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''
-                      }`}
+                    className={`w-4 h-4 text-gray-500 transition-transform ${
+                      isProfileOpen ? 'rotate-180' : ''
+                    }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -203,12 +217,8 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
                         </span>
                       </div>
                       <div>
-                        <p className="text-white font-semibold">
-                          {user?.name || 'ユーザー'}
-                        </p>
-                        <p className="text-blue-100 text-sm">
-                          {user?.email}
-                        </p>
+                        <p className="text-white font-semibold">{user?.name || 'ユーザー'}</p>
+                        <p className="text-blue-100 text-sm">{user?.email}</p>
                         <p className="text-blue-200 text-xs mt-1">
                           {getRoleLabel(user?.role || 'user')}
                         </p>
@@ -303,15 +313,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-xl animate-slide-up">
             <div className="px-4 py-6 space-y-2">
-              {navigationItems.map((item) => (
+              {navigationItems.map(item => (
                 <button
                   key={item.id}
                   onClick={() => {
                     onNavigate(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full nav-item text-left ${currentView === item.id ? 'active' : ''
-                    }`}
+                  className={`w-full nav-item text-left ${currentView === item.id ? 'active' : ''}`}
                 >
                   <div className="flex items-center space-x-3">
                     <span className="text-xl">{item.icon}</span>
@@ -330,4 +339,4 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentView }) => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 /**
  * システム設定管理画面コンポーネント
- * 
+ *
  * 管理者のみがアクセス可能なシステム設定の管理画面です。
  * 各種設定項目の表示、編集、新規作成、削除機能を提供します。
  */
@@ -23,7 +23,7 @@ export const SystemSettingsPage: React.FC = () => {
     value: '',
     description: '',
     setting_type: 'string',
-    is_public: false
+    is_public: false,
   });
 
   useEffect(() => {
@@ -132,7 +132,7 @@ export const SystemSettingsPage: React.FC = () => {
         value: '',
         description: '',
         setting_type: 'string',
-        is_public: false
+        is_public: false,
       });
       await fetchSettings();
       setTimeout(() => setSuccess(null), 3000);
@@ -148,11 +148,16 @@ export const SystemSettingsPage: React.FC = () => {
 
   const getSettingTypeLabel = (type: string) => {
     switch (type) {
-      case 'string': return '文字列';
-      case 'integer': return '整数';
-      case 'boolean': return '真偽値';
-      case 'json': return 'JSON';
-      default: return type;
+      case 'string':
+        return '文字列';
+      case 'integer':
+        return '整数';
+      case 'boolean':
+        return '真偽値';
+      case 'json':
+        return 'JSON';
+      default:
+        return type;
     }
   };
 
@@ -171,7 +176,7 @@ export const SystemSettingsPage: React.FC = () => {
         return (
           <select
             value={editValues[setting.id]}
-            onChange={(e) => setEditValues(prev => ({ ...prev, [setting.id]: e.target.value }))}
+            onChange={e => setEditValues(prev => ({ ...prev, [setting.id]: e.target.value }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="true">有効</option>
@@ -184,7 +189,7 @@ export const SystemSettingsPage: React.FC = () => {
         <input
           type={setting.setting_type === 'integer' ? 'number' : 'text'}
           value={editValues[setting.id]}
-          onChange={(e) => setEditValues(prev => ({ ...prev, [setting.id]: e.target.value }))}
+          onChange={e => setEditValues(prev => ({ ...prev, [setting.id]: e.target.value }))}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         />
       );
@@ -205,9 +210,7 @@ export const SystemSettingsPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          システム設定
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">システム設定</h1>
         <p className="text-gray-600">
           アプリケーション全体の設定を管理します。変更は即座に反映されます。
         </p>
@@ -257,7 +260,7 @@ export const SystemSettingsPage: React.FC = () => {
               <input
                 type="text"
                 value={newSetting.key}
-                onChange={(e) => setNewSetting(prev => ({ ...prev, key: e.target.value }))}
+                onChange={e => setNewSetting(prev => ({ ...prev, key: e.target.value }))}
                 placeholder="例: max_file_size"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
@@ -270,7 +273,7 @@ export const SystemSettingsPage: React.FC = () => {
               <input
                 type="text"
                 value={newSetting.value}
-                onChange={(e) => setNewSetting(prev => ({ ...prev, value: e.target.value }))}
+                onChange={e => setNewSetting(prev => ({ ...prev, value: e.target.value }))}
                 placeholder="例: 10"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
@@ -279,7 +282,9 @@ export const SystemSettingsPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">設定の型</label>
               <select
                 value={newSetting.setting_type}
-                onChange={(e) => setNewSetting(prev => ({ ...prev, setting_type: e.target.value as any }))}
+                onChange={e =>
+                  setNewSetting(prev => ({ ...prev, setting_type: e.target.value as any }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="string">文字列</option>
@@ -293,7 +298,7 @@ export const SystemSettingsPage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={newSetting.is_public}
-                  onChange={(e) => setNewSetting(prev => ({ ...prev, is_public: e.target.checked }))}
+                  onChange={e => setNewSetting(prev => ({ ...prev, is_public: e.target.checked }))}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <span className="ml-2 text-sm text-gray-700">公開設定</span>
@@ -304,7 +309,7 @@ export const SystemSettingsPage: React.FC = () => {
               <input
                 type="text"
                 value={newSetting.description}
-                onChange={(e) => setNewSetting(prev => ({ ...prev, description: e.target.value }))}
+                onChange={e => setNewSetting(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="設定の説明"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
@@ -313,7 +318,11 @@ export const SystemSettingsPage: React.FC = () => {
           <div className="mt-4 flex space-x-2">
             <button
               onClick={handleCreate}
-              disabled={!newSetting.key.trim() || !newSetting.value.trim() || !/^[a-zA-Z0-9_-]+$/.test(newSetting.key)}
+              disabled={
+                !newSetting.key.trim() ||
+                !newSetting.value.trim() ||
+                !/^[a-zA-Z0-9_-]+$/.test(newSetting.key)
+              }
               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md font-medium"
             >
               作成
@@ -359,7 +368,7 @@ export const SystemSettingsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {settings.map((setting) => (
+              {settings.map(setting => (
                 <tr key={setting.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{setting.key}</div>
@@ -380,10 +389,13 @@ export const SystemSettingsPage: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${setting.is_public
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                      }`}>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        setting.is_public
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {setting.is_public ? '公開' : '非公開'}
                     </span>
                   </td>
@@ -428,4 +440,4 @@ export const SystemSettingsPage: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

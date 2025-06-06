@@ -1,6 +1,6 @@
 /**
  * コメントセクション - ハイセンスデザイン
- * 
+ *
  * チケットに対するコメントを表示し、新しいコメントを追加するための機能を提供します。
  * モダンなデザインシステムを適用し、視覚的な魅力とユーザビリティを向上させています。
  */
@@ -27,7 +27,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
   ticketId,
   comments,
   onCommentAdded,
-  onCommentDeleted
+  onCommentDeleted,
 }) => {
   const { user } = useAuth();
   const [newComment, setNewComment] = useState('');
@@ -45,7 +45,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       setError(null);
 
       const response = await apiService.createComment(ticketId, {
-        content: newComment
+        content: newComment,
       });
 
       onCommentAdded(response.comment);
@@ -89,7 +89,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -133,7 +133,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
               <div className="flex-grow">
                 <textarea
                   value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
+                  onChange={e => setNewComment(e.target.value)}
                   className="form-input w-full h-24 rounded-lg resize-none transition-all"
                   placeholder="コメントを入力..."
                   required
@@ -142,18 +142,37 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
                   <button
                     type="submit"
                     disabled={isSubmitting || !newComment.trim()}
-                    className={`btn-primary flex items-center ${isSubmitting || !newComment.trim() ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                    className={`btn-primary flex items-center ${
+                      isSubmitting || !newComment.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         送信中...
                       </>
-                    ) : '投稿する'}
+                    ) : (
+                      '投稿する'
+                    )}
                   </button>
                 </div>
               </div>
@@ -173,41 +192,50 @@ export const CommentSection: React.FC<CommentSectionProps> = ({
             <p className="text-sm text-gray-400 mt-1">最初のコメントを投稿しましょう</p>
           </div>
         ) : (
-          comments.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((comment) => (
-            <div key={comment.id} className="flex space-x-4 animate-slide-up" style={{ animationDelay: `${comment.id * 0.05}s` }}>
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold">
-                  {comment.user_name?.charAt(0).toUpperCase() || '?'}
+          comments
+            .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+            .map(comment => (
+              <div
+                key={comment.id}
+                className="flex space-x-4 animate-slide-up"
+                style={{ animationDelay: `${comment.id * 0.05}s` }}
+              >
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center text-white font-semibold">
+                    {comment.user_name?.charAt(0).toUpperCase() || '?'}
+                  </div>
                 </div>
-              </div>
-              <div className="flex-grow">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover-lift">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      <span className="font-medium text-gray-900">{comment.user_name}</span>
-                      <span className="text-xs text-gray-500 ml-2" title={formatDate(comment.created_at)}>
-                        {getTimeAgo(comment.created_at)}
-                      </span>
+                <div className="flex-grow">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover-lift">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900">{comment.user_name}</span>
+                        <span
+                          className="text-xs text-gray-500 ml-2"
+                          title={formatDate(comment.created_at)}
+                        >
+                          {getTimeAgo(comment.created_at)}
+                        </span>
+                      </div>
+                      {canEditComment(comment) && (
+                        <button
+                          onClick={() => handleDelete(comment.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          title="コメントを削除"
+                        >
+                          <span className="text-sm">🗑️</span>
+                        </button>
+                      )}
                     </div>
-                    {canEditComment(comment) && (
-                      <button
-                        onClick={() => handleDelete(comment.id)}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                        title="コメントを削除"
-                      >
-                        <span className="text-sm">🗑️</span>
-                      </button>
-                    )}
-                  </div>
-                  <div className="prose prose-sm max-w-none">
-                    <p className="whitespace-pre-wrap text-gray-700">{comment.content}</p>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="whitespace-pre-wrap text-gray-700">{comment.content}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
     </div>
   );
-}; 
+};

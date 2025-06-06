@@ -1,9 +1,9 @@
 /**
  * チケット一覧 - ハイセンスデザイン
- * 
+ *
  * チケットを美しいカードレイアウトで表示し、直感的なフィルタリング機能を提供します。
  * モダンなデザインシステムを適用し、ユーザビリティと視覚的魅力を両立します。
- * 
+ *
  * 主な機能：
  * - カードベースのレスポンシブレイアウト
  * - リアルタイムフィルタリング（ステータス、優先度、プロジェクト）
@@ -37,7 +37,7 @@ interface FilterState {
 export const TicketList: React.FC<TicketListProps> = ({
   onTicketClick,
   onTicketEdit,
-  onCreateTicket
+  onCreateTicket,
 }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -50,7 +50,7 @@ export const TicketList: React.FC<TicketListProps> = ({
     status: '',
     priority: '',
     project: '',
-    search: ''
+    search: '',
   });
 
   // ページ読み込み時にデータを取得
@@ -62,7 +62,7 @@ export const TicketList: React.FC<TicketListProps> = ({
 
         const [ticketsResponse, projectsResponse] = await Promise.all([
           apiService.getTickets({ page: currentPage }),
-          apiService.getProjects()
+          apiService.getProjects(),
         ]);
 
         setTickets(ticketsResponse.items);
@@ -85,7 +85,8 @@ export const TicketList: React.FC<TicketListProps> = ({
       const matchesStatus = !filters.status || ticket.status === filters.status;
       const matchesPriority = !filters.priority || ticket.priority === filters.priority;
       const matchesProject = !filters.project || ticket.project_id.toString() === filters.project;
-      const matchesSearch = !filters.search ||
+      const matchesSearch =
+        !filters.search ||
         ticket.title.toLowerCase().includes(filters.search.toLowerCase()) ||
         ticket.description.toLowerCase().includes(filters.search.toLowerCase());
 
@@ -96,22 +97,32 @@ export const TicketList: React.FC<TicketListProps> = ({
   // ステータスラベルを取得
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'open': return '未対応';
-      case 'in_progress': return '対応中';
-      case 'resolved': return '解決済み';
-      case 'closed': return 'クローズ';
-      default: return status;
+      case 'open':
+        return '未対応';
+      case 'in_progress':
+        return '対応中';
+      case 'resolved':
+        return '解決済み';
+      case 'closed':
+        return 'クローズ';
+      default:
+        return status;
     }
   };
 
   // 優先度ラベルを取得
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'low': return '低';
-      case 'medium': return '中';
-      case 'high': return '高';
-      case 'urgent': return '緊急';
-      default: return priority;
+      case 'low':
+        return '低';
+      case 'medium':
+        return '中';
+      case 'high':
+        return '高';
+      case 'urgent':
+        return '緊急';
+      default:
+        return priority;
     }
   };
 
@@ -149,7 +160,7 @@ export const TicketList: React.FC<TicketListProps> = ({
       status: '',
       priority: '',
       project: '',
-      search: ''
+      search: '',
     });
   };
 
@@ -188,9 +199,7 @@ export const TicketList: React.FC<TicketListProps> = ({
           <p className="text-gray-600 mt-2">
             総 <span className="font-semibold text-gray-900">{totalCount}</span> 件のチケット
             {filteredTickets.length !== tickets.length && (
-              <span className="text-blue-600">
-                （フィルター済み: {filteredTickets.length}件）
-              </span>
+              <span className="text-blue-600">（フィルター済み: {filteredTickets.length}件）</span>
             )}
           </p>
         </div>
@@ -213,7 +222,7 @@ export const TicketList: React.FC<TicketListProps> = ({
                 type="text"
                 placeholder="チケットを検索..."
                 value={filters.search}
-                onChange={(e) => updateFilter('search', e.target.value)}
+                onChange={e => updateFilter('search', e.target.value)}
                 className="form-input"
               />
             </div>
@@ -222,7 +231,7 @@ export const TicketList: React.FC<TicketListProps> = ({
             <div className="min-w-40">
               <select
                 value={filters.status}
-                onChange={(e) => updateFilter('status', e.target.value)}
+                onChange={e => updateFilter('status', e.target.value)}
                 className="form-input"
               >
                 <option value="">全てのステータス</option>
@@ -237,7 +246,7 @@ export const TicketList: React.FC<TicketListProps> = ({
             <div className="min-w-32">
               <select
                 value={filters.priority}
-                onChange={(e) => updateFilter('priority', e.target.value)}
+                onChange={e => updateFilter('priority', e.target.value)}
                 className="form-input"
               >
                 <option value="">全ての優先度</option>
@@ -252,11 +261,11 @@ export const TicketList: React.FC<TicketListProps> = ({
             <div className="min-w-48">
               <select
                 value={filters.project}
-                onChange={(e) => updateFilter('project', e.target.value)}
+                onChange={e => updateFilter('project', e.target.value)}
                 className="form-input"
               >
                 <option value="">全てのプロジェクト</option>
-                {projects.map((project) => (
+                {projects.map(project => (
                   <option key={project.id} value={project.id.toString()}>
                     {project.name}
                   </option>
@@ -265,10 +274,7 @@ export const TicketList: React.FC<TicketListProps> = ({
             </div>
 
             {/* リセットボタン */}
-            <button
-              onClick={resetFilters}
-              className="btn-secondary flex items-center space-x-2"
-            >
+            <button onClick={resetFilters} className="btn-secondary flex items-center space-x-2">
               <span>🔄</span>
               <span>リセット</span>
             </button>
@@ -303,15 +309,11 @@ export const TicketList: React.FC<TicketListProps> = ({
                 {/* チケットヘッダー */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
-                      {ticket.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      {ticket.description}
-                    </p>
+                    <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{ticket.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-3">{ticket.description}</p>
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onTicketEdit && onTicketEdit(ticket);
                     }}
@@ -324,16 +326,30 @@ export const TicketList: React.FC<TicketListProps> = ({
 
                 {/* ステータスと優先度 */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className={`status-badge ${ticket.status === 'open' ? 'status-open' :
-                    ticket.status === 'in_progress' ? 'status-in-progress' :
-                      ticket.status === 'resolved' ? 'status-resolved' : 'status-closed'
-                    }`}>
+                  <span
+                    className={`status-badge ${
+                      ticket.status === 'open'
+                        ? 'status-open'
+                        : ticket.status === 'in_progress'
+                          ? 'status-in-progress'
+                          : ticket.status === 'resolved'
+                            ? 'status-resolved'
+                            : 'status-closed'
+                    }`}
+                  >
                     {getStatusLabel(ticket.status)}
                   </span>
-                  <span className={`status-badge ${ticket.priority === 'low' ? 'priority-low' :
-                    ticket.priority === 'medium' ? 'priority-medium' :
-                      ticket.priority === 'high' ? 'priority-high' : 'priority-urgent'
-                    }`}>
+                  <span
+                    className={`status-badge ${
+                      ticket.priority === 'low'
+                        ? 'priority-low'
+                        : ticket.priority === 'medium'
+                          ? 'priority-medium'
+                          : ticket.priority === 'high'
+                            ? 'priority-high'
+                            : 'priority-urgent'
+                    }`}
+                  >
                     {getPriorityLabel(ticket.priority)}
                   </span>
                 </div>
@@ -387,27 +403,19 @@ export const TicketList: React.FC<TicketListProps> = ({
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               {filters.search || filters.status || filters.priority || filters.project
                 ? 'フィルター条件に一致するチケットがありません'
-                : 'チケットがまだありません'
-              }
+                : 'チケットがまだありません'}
             </h3>
             <p className="text-gray-600 mb-6">
               {filters.search || filters.status || filters.priority || filters.project
                 ? 'フィルター条件を変更してみてください。'
-                : '最初のチケットを作成して、プロジェクトを開始しましょう。'
-              }
+                : '最初のチケットを作成して、プロジェクトを開始しましょう。'}
             </p>
             {filters.search || filters.status || filters.priority || filters.project ? (
-              <button
-                onClick={resetFilters}
-                className="btn-secondary"
-              >
+              <button onClick={resetFilters} className="btn-secondary">
                 フィルターをリセット
               </button>
             ) : (
-              <button
-                onClick={onCreateTicket}
-                className="btn-primary"
-              >
+              <button onClick={onCreateTicket} className="btn-primary">
                 最初のチケットを作成
               </button>
             )}
@@ -435,10 +443,11 @@ export const TicketList: React.FC<TicketListProps> = ({
                 <button
                   key={pageNumber}
                   onClick={() => setCurrentPage(pageNumber)}
-                  className={`w-10 h-10 rounded-lg font-medium transition-colors ${currentPage === pageNumber
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                  className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                    currentPage === pageNumber
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
                   {pageNumber}
                 </button>
@@ -457,4 +466,4 @@ export const TicketList: React.FC<TicketListProps> = ({
       )}
     </div>
   );
-}; 
+};

@@ -72,6 +72,4 @@ describe('App', () => {
     const spinner = document.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
   });
-
-
 });

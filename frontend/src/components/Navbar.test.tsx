@@ -9,22 +9,19 @@ jest.mock('../context/AuthContext', () => ({
   useAuth: () => ({
     user: { id: 1, name: 'Test User', email: 'test@example.com', role: 'user' },
     logout: jest.fn(),
-    isAuthenticated: true
-  })
+    isAuthenticated: true,
+  }),
 }));
 
 // テスト用のナビゲーションバーラッパー
 const NavbarWrapper: React.FC<{ initialEntries?: string[] }> = ({
-  initialEntries = ['/tickets']
+  initialEntries = ['/tickets'],
 }) => (
   <MemoryRouter
     initialEntries={initialEntries}
     future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
   >
-    <Navbar
-      onNavigate={() => { }}
-      currentView="tickets"
-    />
+    <Navbar onNavigate={() => {}} currentView="tickets" />
   </MemoryRouter>
 );
 
@@ -37,4 +34,4 @@ describe('Navbar', () => {
     expect(screen.getByText('ダッシュボード')).toBeInTheDocument();
     expect(screen.getByText('チケット')).toBeInTheDocument();
   });
-}); 
+});

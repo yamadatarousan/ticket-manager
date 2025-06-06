@@ -1,6 +1,6 @@
 /**
  * プロジェクト詳細 - ハイセンスデザイン
- * 
+ *
  * プロジェクトの詳細情報を美しいレイアウトで表示し、関連するチケットを一覧表示します。
  * モダンなデザインシステムを適用し、ユーザビリティと視覚的魅力を両立します。
  */
@@ -29,7 +29,7 @@ export const ProjectDetail: React.FC = () => {
       setError(null);
       const [projectData, ticketsData] = await Promise.all([
         apiService.getProject(parseInt(id, 10)),
-        apiService.getTickets({ project_id: parseInt(id, 10) })
+        apiService.getTickets({ project_id: parseInt(id, 10) }),
       ]);
       setProject(projectData);
       setTickets(ticketsData.items);
@@ -53,8 +53,6 @@ export const ProjectDetail: React.FC = () => {
   const handleTicketClick = (ticket: Ticket) => {
     navigate(`/tickets/${ticket.id}`);
   };
-
-
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -168,10 +166,7 @@ export const ProjectDetail: React.FC = () => {
           <p className="text-gray-600 mb-6">
             指定されたプロジェクトは存在しないか、アクセス権限がありません。
           </p>
-          <button
-            onClick={() => navigate('/projects')}
-            className="btn-primary"
-          >
+          <button onClick={() => navigate('/projects')} className="btn-primary">
             プロジェクト一覧に戻る
           </button>
         </div>
@@ -186,11 +181,17 @@ export const ProjectDetail: React.FC = () => {
         <div>
           <h1 className="text-4xl font-bold gradient-text">{project.name}</h1>
           <div className="flex items-center mt-2">
-            <span className={`status-badge ${project.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
-              project.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                project.status === 'on_hold' ? 'bg-amber-100 text-amber-800' :
-                  'bg-red-100 text-red-800'
-              }`}>
+            <span
+              className={`status-badge ${
+                project.status === 'active'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : project.status === 'completed'
+                    ? 'bg-blue-100 text-blue-800'
+                    : project.status === 'on_hold'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-red-100 text-red-800'
+              }`}
+            >
               {getStatusLabel(project.status)}
             </span>
             <span className="mx-2 text-gray-400">•</span>
@@ -241,7 +242,7 @@ export const ProjectDetail: React.FC = () => {
             <div className="card-body">
               {tickets.length > 0 ? (
                 <div className="space-y-4">
-                  {tickets.map((ticket) => (
+                  {tickets.map(ticket => (
                     <div
                       key={ticket.id}
                       className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
@@ -251,16 +252,30 @@ export const ProjectDetail: React.FC = () => {
                         <h4 className="font-semibold text-gray-900">{ticket.title}</h4>
                         <p className="text-sm text-gray-600 line-clamp-2">{ticket.description}</p>
                         <div className="flex items-center space-x-3 mt-2">
-                          <span className={`status-badge ${ticket.status === 'open' ? 'status-open' :
-                            ticket.status === 'in_progress' ? 'status-in-progress' :
-                              ticket.status === 'resolved' ? 'status-resolved' : 'status-closed'
-                            }`}>
+                          <span
+                            className={`status-badge ${
+                              ticket.status === 'open'
+                                ? 'status-open'
+                                : ticket.status === 'in_progress'
+                                  ? 'status-in-progress'
+                                  : ticket.status === 'resolved'
+                                    ? 'status-resolved'
+                                    : 'status-closed'
+                            }`}
+                          >
                             {getTicketStatusLabel(ticket.status)}
                           </span>
-                          <span className={`status-badge ${ticket.priority === 'low' ? 'priority-low' :
-                            ticket.priority === 'medium' ? 'priority-medium' :
-                              ticket.priority === 'high' ? 'priority-high' : 'priority-urgent'
-                            }`}>
+                          <span
+                            className={`status-badge ${
+                              ticket.priority === 'low'
+                                ? 'priority-low'
+                                : ticket.priority === 'medium'
+                                  ? 'priority-medium'
+                                  : ticket.priority === 'high'
+                                    ? 'priority-high'
+                                    : 'priority-urgent'
+                            }`}
+                          >
                             {getPriorityLabel(ticket.priority)}
                           </span>
                         </div>
@@ -280,10 +295,7 @@ export const ProjectDetail: React.FC = () => {
                     <span className="text-2xl">🎫</span>
                   </div>
                   <p className="text-gray-500 mb-4">このプロジェクトにはまだチケットがありません</p>
-                  <button
-                    onClick={handleCreateTicket}
-                    className="btn-secondary"
-                  >
+                  <button onClick={handleCreateTicket} className="btn-secondary">
                     最初のチケットを作成
                   </button>
                 </div>

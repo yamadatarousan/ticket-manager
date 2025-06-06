@@ -8,8 +8,8 @@ jest.mock('../services/api', () => ({
   apiService: {
     getComments: jest.fn(),
     createComment: jest.fn(),
-    deleteComment: jest.fn()
-  }
+    deleteComment: jest.fn(),
+  },
 }));
 
 // AuthContextのモック
@@ -18,11 +18,11 @@ jest.mock('../context/AuthContext', () => ({
     user: { id: 1, name: 'Test User', email: 'test@example.com', role: 'user' },
     isAuthenticated: true,
     isLoading: false,
-    error: null
-  })
+    error: null,
+  }),
 }));
 
-const mockApiService = require('../services/api').apiService;
+const _mockApiService = require('../services/api').apiService;
 
 describe('CommentSection', () => {
   beforeEach(() => {
@@ -47,4 +47,4 @@ describe('CommentSection', () => {
     expect(screen.getByText('まだコメントはありません')).toBeInTheDocument();
     expect(screen.getByText('最初のコメントを投稿しましょう')).toBeInTheDocument();
   });
-}); 
+});

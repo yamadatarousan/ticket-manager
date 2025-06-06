@@ -15,16 +15,13 @@ interface UserFormData {
   role: 'user' | 'manager' | 'admin';
 }
 
-export const UserCreateForm: React.FC<UserCreateFormProps> = ({
-  onSuccess,
-  onCancel
-}) => {
+export const UserCreateForm: React.FC<UserCreateFormProps> = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState<UserFormData>({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
-    role: 'user'
+    role: 'user',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -33,14 +30,14 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // エラーをクリア
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
@@ -145,10 +142,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">新規ユーザー作成</h2>
-          <button
-            onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700"
-          >
+          <button onClick={onCancel} className="text-gray-500 hover:text-gray-700">
             ✕
           </button>
         </div>
@@ -172,13 +166,12 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.name ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="山田 太郎"
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-            )}
+            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
           </div>
 
           {/* メールアドレス */}
@@ -192,13 +185,12 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="user@example.com"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
 
           {/* ロール */}
@@ -211,16 +203,15 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.role ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.role ? 'border-red-500' : 'border-gray-300'
+              }`}
             >
               <option value="user">一般ユーザー</option>
               <option value="manager">マネージャー</option>
               <option value="admin">管理者</option>
             </select>
-            {errors.role && (
-              <p className="mt-1 text-sm text-red-600">{errors.role}</p>
-            )}
+            {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
             <p className="mt-1 text-sm text-gray-500">
               ロールによってシステム内での権限が決まります
             </p>
@@ -237,18 +228,20 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="6文字以上で入力してください"
             />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-            )}
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
           </div>
 
           {/* パスワード確認 */}
           <div>
-            <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password_confirmation"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               パスワード確認 <span className="text-red-500">*</span>
             </label>
             <input
@@ -257,8 +250,9 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="password_confirmation"
               value={formData.password_confirmation}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
-                }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="上記と同じパスワードを入力してください"
             />
             {errors.password_confirmation && (
@@ -270,9 +264,15 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <h4 className="text-sm font-medium text-blue-800 mb-2">ロールの権限について</h4>
             <ul className="text-sm text-blue-700 space-y-1">
-              <li><strong>一般ユーザー:</strong> チケットの閲覧、作成、自分のチケットの編集</li>
-              <li><strong>マネージャー:</strong> 全チケットの管理、ユーザー情報の閲覧</li>
-              <li><strong>管理者:</strong> 全機能へのアクセス、ユーザー管理</li>
+              <li>
+                <strong>一般ユーザー:</strong> チケットの閲覧、作成、自分のチケットの編集
+              </li>
+              <li>
+                <strong>マネージャー:</strong> 全チケットの管理、ユーザー情報の閲覧
+              </li>
+              <li>
+                <strong>管理者:</strong> 全機能へのアクセス、ユーザー管理
+              </li>
             </ul>
           </div>
 
@@ -305,4 +305,4 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

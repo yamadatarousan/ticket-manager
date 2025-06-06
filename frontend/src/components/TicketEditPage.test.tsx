@@ -7,14 +7,14 @@ import { TicketEditPage } from './TicketEditPage';
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ id: '1' }),
-  useNavigate: () => jest.fn()
+  useNavigate: () => jest.fn(),
 }));
 
 // APIサービスのモック
 jest.mock('../services/api', () => ({
   apiService: {
-    getTicket: jest.fn()
-  }
+    getTicket: jest.fn(),
+  },
 }));
 
 describe('TicketEditPage', () => {
@@ -29,4 +29,4 @@ describe('TicketEditPage', () => {
     const skeletonElements = document.querySelectorAll('.animate-pulse');
     expect(skeletonElements.length).toBeGreaterThan(0);
   });
-}); 
+});

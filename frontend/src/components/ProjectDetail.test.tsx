@@ -72,7 +72,7 @@ const mockTickets = {
   total: 2,
   page: 1,
   per_page: 10,
-  total_pages: 1
+  total_pages: 1,
 };
 
 // テスト用のラッパーコンポーネント
@@ -132,7 +132,7 @@ describe('プロジェクト詳細コンポーネント', () => {
       total: 0,
       page: 1,
       per_page: 10,
-      total_pages: 0
+      total_pages: 0,
     });
 
     renderWithRouter(<ProjectDetail />);
@@ -161,7 +161,9 @@ describe('プロジェクト詳細コンポーネント', () => {
 
     await waitFor(() => {
       expect(screen.getByText('プロジェクトが見つかりません')).toBeInTheDocument();
-      expect(screen.getByText('指定されたプロジェクトは存在しないか、アクセス権限がありません。')).toBeInTheDocument();
+      expect(
+        screen.getByText('指定されたプロジェクトは存在しないか、アクセス権限がありません。')
+      ).toBeInTheDocument();
       expect(screen.getByText('プロジェクト一覧に戻る')).toBeInTheDocument();
     });
   });
@@ -209,4 +211,4 @@ describe('プロジェクト詳細コンポーネント', () => {
     // 遷移の確認（実際のルーティングロジックに依存します）
     // この部分は実際のルーティングロジックに依存します
   });
-}); 
+});

@@ -14,14 +14,14 @@ interface TicketCreateFormProps {
 
 /**
  * チケット作成フォームコンポーネント
- * 
+ *
  * 新しいチケットを作成するためのフォームを提供します。
  * プロジェクトIDが指定された場合、そのプロジェクトに紐づくチケットを作成します。
  */
 export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
   onSuccess,
   onCancel,
-  projectId
+  projectId,
 }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CreateTicketRequest>({
@@ -29,7 +29,7 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
     description: '',
     status: 'open',
     priority: 'medium',
-    project_id: projectId || 0
+    project_id: projectId || 0,
   });
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -56,11 +56,13 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
     fetchProjects();
   }, [projectId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'project_id' ? parseInt(value, 10) : value
+      [name]: name === 'project_id' ? parseInt(value, 10) : value,
     }));
   };
 
@@ -83,7 +85,7 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
 
       const ticketData: CreateTicketRequest = {
         ...formData,
-        project_id: formData.project_id
+        project_id: formData.project_id,
       };
 
       const newTicket = await apiService.createTicket(ticketData);
@@ -101,9 +103,7 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
   return (
     <div className="bg-white shadow sm:rounded-lg">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-          新規チケット作成
-        </h3>
+        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">新規チケット作成</h3>
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md" role="alert">
             <p className="text-sm text-red-600">{error}</p>
@@ -160,7 +160,7 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
                   required
                 >
                   <option value="">プロジェクトを選択してください</option>
-                  {projects.map((project) => (
+                  {projects.map(project => (
                     <option key={project.id} value={project.id}>
                       {project.name}
                     </option>
@@ -210,4 +210,4 @@ export const TicketCreateForm: React.FC<TicketCreateFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

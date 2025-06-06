@@ -1,6 +1,6 @@
 /**
  * チケット詳細ページ - ハイセンスデザイン
- * 
+ *
  * チケットの詳細情報を美しいレイアウトで表示し、コメント機能を提供します。
  * モダンなデザインシステムを適用し、ユーザビリティと視覚的魅力を両立します。
  */
@@ -77,22 +77,32 @@ export const TicketDetailPage: React.FC = () => {
   // ステータスを日本語に変換
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'open': return '未対応';
-      case 'in_progress': return '対応中';
-      case 'resolved': return '解決済み';
-      case 'closed': return 'クローズ';
-      default: return status;
+      case 'open':
+        return '未対応';
+      case 'in_progress':
+        return '対応中';
+      case 'resolved':
+        return '解決済み';
+      case 'closed':
+        return 'クローズ';
+      default:
+        return status;
     }
   };
 
   // 優先度を日本語に変換
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'low': return '低';
-      case 'medium': return '中';
-      case 'high': return '高';
-      case 'urgent': return '緊急';
-      default: return priority;
+      case 'low':
+        return '低';
+      case 'medium':
+        return '中';
+      case 'high':
+        return '高';
+      case 'urgent':
+        return '緊急';
+      default:
+        return priority;
     }
   };
 
@@ -104,7 +114,7 @@ export const TicketDetailPage: React.FC = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -119,10 +129,7 @@ export const TicketDetailPage: React.FC = () => {
     if (currentUser.role === 'manager') return true;
 
     // 作成者または担当者は編集可能
-    return (
-      ticket.created_by === currentUser.id ||
-      ticket.assigned_to === currentUser.id
-    );
+    return ticket.created_by === currentUser.id || ticket.assigned_to === currentUser.id;
   };
 
   if (isLoading) {
@@ -200,10 +207,7 @@ export const TicketDetailPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <button
-              onClick={() => navigate('/tickets')}
-              className="btn-secondary"
-            >
+            <button onClick={() => navigate('/tickets')} className="btn-secondary">
               チケット一覧に戻る
             </button>
           </div>
@@ -223,10 +227,7 @@ export const TicketDetailPage: React.FC = () => {
           <p className="text-gray-600 mb-6">
             指定されたチケットは存在しないか、アクセス権限がありません。
           </p>
-          <button
-            onClick={() => navigate('/tickets')}
-            className="btn-primary"
-          >
+          <button onClick={() => navigate('/tickets')} className="btn-primary">
             チケット一覧に戻る
           </button>
         </div>
@@ -241,16 +242,30 @@ export const TicketDetailPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold gradient-text">{ticket.title}</h1>
           <div className="flex items-center mt-2 flex-wrap gap-2">
-            <span className={`status-badge ${ticket.status === 'open' ? 'status-open' :
-              ticket.status === 'in_progress' ? 'status-in-progress' :
-                ticket.status === 'resolved' ? 'status-resolved' : 'status-closed'
-              }`}>
+            <span
+              className={`status-badge ${
+                ticket.status === 'open'
+                  ? 'status-open'
+                  : ticket.status === 'in_progress'
+                    ? 'status-in-progress'
+                    : ticket.status === 'resolved'
+                      ? 'status-resolved'
+                      : 'status-closed'
+              }`}
+            >
               {getStatusLabel(ticket.status)}
             </span>
-            <span className={`status-badge ${ticket.priority === 'low' ? 'priority-low' :
-              ticket.priority === 'medium' ? 'priority-medium' :
-                ticket.priority === 'high' ? 'priority-high' : 'priority-urgent'
-              }`}>
+            <span
+              className={`status-badge ${
+                ticket.priority === 'low'
+                  ? 'priority-low'
+                  : ticket.priority === 'medium'
+                    ? 'priority-medium'
+                    : ticket.priority === 'high'
+                      ? 'priority-high'
+                      : 'priority-urgent'
+              }`}
+            >
               優先度: {getPriorityLabel(ticket.priority)}
             </span>
             <span className="text-gray-600 text-sm">
@@ -332,11 +347,17 @@ export const TicketDetailPage: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-500">ステータス</p>
                   <p className="font-medium">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${ticket.status === 'open' ? 'bg-blue-100 text-blue-800' :
-                      ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                        ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                      }`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
+                        ticket.status === 'open'
+                          ? 'bg-blue-100 text-blue-800'
+                          : ticket.status === 'in_progress'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : ticket.status === 'resolved'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {getStatusLabel(ticket.status)}
                     </span>
                   </p>
@@ -345,11 +366,17 @@ export const TicketDetailPage: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-500">優先度</p>
                   <p className="font-medium">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${ticket.priority === 'low' ? 'bg-green-100 text-green-800' :
-                      ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                          'bg-red-100 text-red-800'
-                      }`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
+                        ticket.priority === 'low'
+                          ? 'bg-green-100 text-green-800'
+                          : ticket.priority === 'medium'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : ticket.priority === 'high'
+                              ? 'bg-orange-100 text-orange-800'
+                              : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {getPriorityLabel(ticket.priority)}
                     </span>
                   </p>
@@ -357,9 +384,7 @@ export const TicketDetailPage: React.FC = () => {
 
                 <div>
                   <p className="text-sm text-gray-500">担当者</p>
-                  <p className="font-medium">
-                    {ticket.assigned_to_name || '未割り当て'}
-                  </p>
+                  <p className="font-medium">{ticket.assigned_to_name || '未割り当て'}</p>
                 </div>
 
                 <div>
@@ -442,4 +467,4 @@ export const TicketDetailPage: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

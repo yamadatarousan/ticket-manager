@@ -1,9 +1,9 @@
 /**
  * プロジェクト一覧 - ハイセンスデザイン
- * 
+ *
  * プロジェクトを美しいカードレイアウトで表示し、直感的な操作を提供します。
  * モダンなデザインシステムを適用し、ユーザビリティと視覚的魅力を両立します。
- * 
+ *
  * 主な機能：
  * - カードベースのレスポンシブレイアウト
  * - プロジェクト進捗状況の視覚的表示
@@ -27,7 +27,7 @@ interface ProjectListProps {
 export const ProjectList: React.FC<ProjectListProps> = ({
   onProjectClick,
   onProjectEdit,
-  onCreateProject
+  onCreateProject,
 }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,12 +54,18 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   // プロジェクトのステータスラベルを取得
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'planning': return '計画中';
-      case 'active': return '進行中';
-      case 'on_hold': return '保留中';
-      case 'completed': return '完了';
-      case 'cancelled': return '中止';
-      default: return status;
+      case 'planning':
+        return '計画中';
+      case 'active':
+        return '進行中';
+      case 'on_hold':
+        return '保留中';
+      case 'completed':
+        return '完了';
+      case 'cancelled':
+        return '中止';
+      default:
+        return status;
     }
   };
 
@@ -161,20 +167,25 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 {/* プロジェクトヘッダー */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">
-                      {project.name}
-                    </h3>
-                    <span className={`status-badge ${project.status === 'planning' ? 'bg-gray-100 text-gray-800' :
-                      project.status === 'active' ? 'bg-blue-100 text-blue-800' :
-                        project.status === 'on_hold' ? 'bg-amber-100 text-amber-800' :
-                          project.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            'bg-red-100 text-red-800'
-                      }`}>
+                    <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">{project.name}</h3>
+                    <span
+                      className={`status-badge ${
+                        project.status === 'planning'
+                          ? 'bg-gray-100 text-gray-800'
+                          : project.status === 'active'
+                            ? 'bg-blue-100 text-blue-800'
+                            : project.status === 'on_hold'
+                              ? 'bg-amber-100 text-amber-800'
+                              : project.status === 'completed'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {getStatusLabel(project.status)}
                     </span>
                   </div>
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onProjectEdit(project);
                     }}
@@ -194,7 +205,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs font-medium text-gray-700">進捗状況</span>
-                    <span className="text-xs font-semibold text-gray-900">{project.progress_rate || 0}%</span>
+                    <span className="text-xs font-semibold text-gray-900">
+                      {project.progress_rate || 0}%
+                    </span>
                   </div>
                   <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                     <div
@@ -252,10 +265,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
             <p className="text-gray-600 mb-6">
               最初のプロジェクトを作成して、チームの作業を管理しましょう。
             </p>
-            <button
-              onClick={onCreateProject}
-              className="btn-primary"
-            >
+            <button onClick={onCreateProject} className="btn-primary">
               最初のプロジェクトを作成
             </button>
           </div>
@@ -263,4 +273,4 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       )}
     </div>
   );
-}; 
+};

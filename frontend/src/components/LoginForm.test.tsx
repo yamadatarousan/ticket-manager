@@ -9,17 +9,17 @@ jest.mock('../context/AuthContext', () => ({
     login: jest.fn(),
     isLoading: false,
     error: null,
-    clearError: jest.fn()
-  })
+    clearError: jest.fn(),
+  }),
 }));
 
 describe('LoginForm', () => {
   it('ログインフォームが正しく表示されること', () => {
     render(<LoginForm />);
-    
+
     // フォームの主要な要素が存在することを確認
     expect(screen.getByLabelText(/メールアドレス/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/パスワード/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ログイン/i })).toBeInTheDocument();
   });
-}); 
+});

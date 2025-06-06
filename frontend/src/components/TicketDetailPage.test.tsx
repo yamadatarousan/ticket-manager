@@ -7,8 +7,8 @@ import { TicketDetailPage } from './TicketDetailPage';
 // apiServiceをモック
 jest.mock('../services/api', () => ({
   apiService: {
-    getTicket: jest.fn()
-  }
+    getTicket: jest.fn(),
+  },
 }));
 
 // AuthContextのモック
@@ -17,8 +17,8 @@ jest.mock('../context/AuthContext', () => ({
     user: { id: 1, name: 'Test User', email: 'test@example.com', role: 'user' },
     isAuthenticated: true,
     isLoading: false,
-    error: null
-  })
+    error: null,
+  }),
 }));
 
 const mockApiService = require('../services/api').apiService;
@@ -31,7 +31,7 @@ describe('TicketDetailPage', () => {
 
   test('ローディング状態が正常に表示されること', async () => {
     // APIが遅延するようにモック設定
-    mockApiService.getTicket.mockReturnValue(new Promise(() => { }));
+    mockApiService.getTicket.mockReturnValue(new Promise(() => {}));
 
     await waitFor(() => {
       render(
@@ -50,4 +50,4 @@ describe('TicketDetailPage', () => {
     const skeletonElements = screen.getAllByText('', { selector: '.loading-skeleton' });
     expect(skeletonElements.length).toBeGreaterThan(0);
   });
-}); 
+});

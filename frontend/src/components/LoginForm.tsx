@@ -13,7 +13,7 @@ interface LoginFormProps {
 
 /**
  * ユーザーログインのためのフォームコンポーネント
- * 
+ *
  * このコンポーネントは以下の機能を提供します：
  * - メールアドレスとパスワードによる認証
  * - リアルタイムバリデーション
@@ -21,10 +21,10 @@ interface LoginFormProps {
  * - エラーメッセージの表示
  * - 登録フォームへの切り替え
  * - テスト用アカウント情報の表示
- * 
+ *
  * @param props - ログインフォームのプロパティ
  * @returns ログインフォームのReactコンポーネント
- * 
+ *
  * @example
  * ```tsx
  * <LoginForm
@@ -35,23 +35,23 @@ interface LoginFormProps {
  */
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) => {
   const { login, isLoading, error, clearError } = useAuth();
-  
+
   /** フォームの入力データを管理するstate */
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
-  
+
   /** フォームバリデーションエラーを管理するstate */
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   /**
    * フォームの入力値をバリデーションする
-   * 
+   *
    * バリデーション規則：
    * - メールアドレス: 必須、有効な形式
    * - パスワード: 必須、6文字以上
-   * 
+   *
    * @returns バリデーションが成功した場合true、失敗した場合false
    */
   const validateForm = (): boolean => {
@@ -77,17 +77,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
 
   /**
    * フォーム送信時の処理
-   * 
+   *
    * 1. バリデーションを実行
    * 2. 認証処理を実行
    * 3. 成功時にコールバックを呼び出し
-   * 
+   *
    * @param e - フォーム送信イベント
    */
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     clearError();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -102,23 +102,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
 
   /**
    * 入力フィールドの値変更時の処理
-   * 
+   *
    * フォームデータを更新し、該当フィールドのエラーをクリアします
-   * 
+   *
    * @param e - 入力変更イベント
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // エラーをクリア
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: '',
       }));
     }
   };
@@ -150,9 +150,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
             placeholder="your@example.com"
             disabled={isLoading}
           />
-          {formErrors.email && (
-            <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
-          )}
+          {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
         </div>
 
         {/* パスワード入力フィールド */}
@@ -231,4 +229,4 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
       </div>
     </div>
   );
-}; 
+};

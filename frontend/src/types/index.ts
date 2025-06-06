@@ -1,9 +1,9 @@
 /**
  * チケット管理システムの型定義
- * 
+ *
  * このファイルは、アプリケーション全体で使用される
  * TypeScriptの型定義を提供します。
- * 
+ *
  * 含まれる型：
  * - User: ユーザー情報
  * - Ticket: チケット情報
@@ -15,7 +15,7 @@
 
 /**
  * ユーザー情報を表すインターフェース
- * 
+ *
  * システムに登録されているユーザーの情報を定義します。
  * ユーザーは3つの役割（ロール）を持つことができます。
  */
@@ -84,7 +84,7 @@ export interface Project {
 
 /**
  * チケット情報を表すインターフェース
- * 
+ *
  * タスクや問題を管理するためのチケットの情報を定義します。
  * チケットは作成から完了まで複数のステータスを持ちます。
  */
@@ -133,7 +133,7 @@ export interface Ticket {
 
 /**
  * コメント情報を表すインターフェース
- * 
+ *
  * チケットに対するコメント（BacklogやRedmineのようなコメント機能）の情報を定義します。
  * コメントは進捗報告、質疑応答、ディスカッションなどに使用されます。
  */
@@ -158,7 +158,7 @@ export interface Comment {
 
 /**
  * コメント作成リクエストの型定義
- * 
+ *
  * 新しいコメントを作成する際に必要な情報を定義します。
  * idや作成日時などの自動生成される値は含まれません。
  */
@@ -169,7 +169,7 @@ export interface CreateCommentRequest {
 
 /**
  * チケット作成リクエストの型定義
- * 
+ *
  * 新しいチケットを作成する際に必要な情報を定義します。
  * idや作成日時などの自動生成される値は含まれません。
  */
@@ -206,7 +206,7 @@ export interface ProjectRequest {
 
 /**
  * 認証レスポンスの型定義
- * 
+ *
  * ログインまたは登録成功時にサーバーから返される情報を定義します。
  */
 export interface AuthResponse {
@@ -220,7 +220,7 @@ export interface AuthResponse {
 
 /**
  * ログインリクエストの型定義
- * 
+ *
  * ユーザーがログインする際に必要な認証情報を定義します。
  */
 export interface LoginRequest {
@@ -232,7 +232,7 @@ export interface LoginRequest {
 
 /**
  * ユーザー登録リクエストの型定義
- * 
+ *
  * 新しいユーザーアカウントを作成する際に必要な情報を定義します。
  */
 export interface RegisterRequest {
@@ -250,10 +250,10 @@ export interface RegisterRequest {
 
 /**
  * 汎用APIレスポンスの型定義
- * 
+ *
  * APIから返される一般的なレスポンス形式を定義します。
  * 成功時はdata、失敗時はerrorが設定されます。
- * 
+ *
  * @template T - レスポンスデータの型
  */
 export interface ApiResponse<T> {
@@ -267,19 +267,19 @@ export interface ApiResponse<T> {
 
 /**
  * ページネーション付きレスポンスの型定義
- * 
+ *
  * 大量のデータを複数ページに分割して取得する際の
  * レスポンス形式を定義します。
- * 
+ *
  * @template T - データの型（TicketまたはUser）
- * 
+ *
  * @example
  * ```typescript
  * // チケット一覧のページネーション
  * const ticketResponse: PaginatedResponse<Ticket> = await apiService.getTickets();
  * console.log('チケット:', ticketResponse.items);
  * console.log('総件数:', ticketResponse.total);
- * 
+ *
  * // ユーザー一覧のページネーション
  * const userResponse: PaginatedResponse<User> = await apiService.getUsers();
  * console.log('ユーザー:', userResponse.items);
@@ -301,7 +301,7 @@ export interface PaginatedResponse<T> {
 
 /**
  * ダッシュボード統計情報の型定義
- * 
+ *
  * ダッシュボード画面で表示する各種統計情報を定義します。
  * チケットの数、ステータス分布、優先度分布、最近の活動などが含まれます。
  */
@@ -336,7 +336,7 @@ export interface DashboardStats {
 
 /**
  * システム設定情報の型定義
- * 
+ *
  * アプリケーション全体の設定を管理する設定項目の型を定義します。
  * 管理者のみがアクセス・編集可能な設定項目です。
  */
@@ -361,7 +361,7 @@ export interface SystemSetting {
 
 /**
  * システム設定作成・更新リクエストの型定義
- * 
+ *
  * システム設定の新規作成や更新時に送信するデータの型を定義します。
  */
 export interface SystemSettingRequest {
@@ -375,4 +375,4 @@ export interface SystemSettingRequest {
   setting_type: 'string' | 'integer' | 'boolean' | 'json';
   /** 公開設定（必須） */
   is_public: boolean;
-} 
+}

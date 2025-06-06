@@ -1,12 +1,12 @@
 /**
  * チケット管理システム メインアプリケーション
- * 
+ *
  * このコンポーネントはアプリケーション全体の構成を管理し、以下の機能を提供します：
  * - ルーティング設定（React Router）
  * - 認証状態管理（AuthProvider）
  * - レイアウト構成（ナビゲーション、メインコンテンツ）
  * - 権限に基づいたルート保護
- * 
+ *
  * アプリケーションのルーティング構造：
  * - / - ホーム画面（認証済みユーザーはダッシュボードにリダイレクト）
  * - /login - ログイン画面
@@ -29,7 +29,15 @@
  * - * - 404ページ
  */
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+  useParams,
+} from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import { LoginForm } from './components/LoginForm';
@@ -109,23 +117,21 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen">
       {/* ハイセンスなナビゲーションバー */}
       <div className="glass-effect border-b border-white/20 sticky top-0 z-50">
-        <Navbar
-          onNavigate={handleNavigate}
-          currentView={getCurrentView()}
-        />
+        <Navbar onNavigate={handleNavigate} currentView={getCurrentView()} />
       </div>
 
       {/* メインコンテンツエリア */}
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="animate-fade-in">
-          {children}
-        </div>
+        <div className="animate-fade-in">{children}</div>
       </main>
 
       {/* 装飾的なバックグラウンド要素 */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-emerald-400/20 to-cyan-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-emerald-400/20 to-cyan-600/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: '1s' }}
+        ></div>
       </div>
     </div>
   );
@@ -167,21 +173,31 @@ const Dashboard: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'open': return '未対応';
-      case 'in_progress': return '対応中';
-      case 'resolved': return '解決済み';
-      case 'closed': return 'クローズ';
-      default: return status;
+      case 'open':
+        return '未対応';
+      case 'in_progress':
+        return '対応中';
+      case 'resolved':
+        return '解決済み';
+      case 'closed':
+        return 'クローズ';
+      default:
+        return status;
     }
   };
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'low': return '低';
-      case 'medium': return '中';
-      case 'high': return '高';
-      case 'urgent': return '緊急';
-      default: return priority;
+      case 'low':
+        return '低';
+      case 'medium':
+        return '中';
+      case 'high':
+        return '高';
+      case 'urgent':
+        return '緊急';
+      default:
+        return priority;
     }
   };
 
@@ -203,9 +219,7 @@ const Dashboard: React.FC = () => {
         <div className="card-body">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold gradient-text mb-3">
-                ダッシュボード
-              </h1>
+              <h1 className="text-4xl font-bold gradient-text mb-3">ダッシュボード</h1>
               <p className="text-xl text-gray-600">
                 こんにちは、<span className="font-semibold text-gray-800">{user?.name}</span>さん！
               </p>
@@ -241,8 +255,12 @@ const Dashboard: React.FC = () => {
               <div className="card-body">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">総チケット数</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1">{stats.ticket_stats.total}</p>
+                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                      総チケット数
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 mt-1">
+                      {stats.ticket_stats.total}
+                    </p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                     <span className="text-white text-2xl">📋</span>
@@ -256,8 +274,12 @@ const Dashboard: React.FC = () => {
               <div className="card-body">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">オープン</p>
-                    <p className="text-3xl font-bold text-blue-600 mt-1">{stats.ticket_stats.open}</p>
+                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                      オープン
+                    </p>
+                    <p className="text-3xl font-bold text-blue-600 mt-1">
+                      {stats.ticket_stats.open}
+                    </p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center">
                     <span className="text-white text-2xl">🔓</span>
@@ -271,8 +293,12 @@ const Dashboard: React.FC = () => {
               <div className="card-body">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">進行中</p>
-                    <p className="text-3xl font-bold text-amber-600 mt-1">{stats.ticket_stats.in_progress}</p>
+                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                      進行中
+                    </p>
+                    <p className="text-3xl font-bold text-amber-600 mt-1">
+                      {stats.ticket_stats.in_progress}
+                    </p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center">
                     <span className="text-white text-2xl">⚡</span>
@@ -286,8 +312,12 @@ const Dashboard: React.FC = () => {
               <div className="card-body">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">解決済み</p>
-                    <p className="text-3xl font-bold text-emerald-600 mt-1">{stats.ticket_stats.resolved}</p>
+                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                      解決済み
+                    </p>
+                    <p className="text-3xl font-bold text-emerald-600 mt-1">
+                      {stats.ticket_stats.resolved}
+                    </p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-xl flex items-center justify-center">
                     <span className="text-white text-2xl">✅</span>
@@ -316,10 +346,14 @@ const Dashboard: React.FC = () => {
                         <div className="flex-1">
                           <h4 className="font-semibold text-gray-900 truncate">{ticket.title}</h4>
                           <div className="flex items-center space-x-3 mt-2">
-                            <span className={`status-badge ${ticket.status === 'open' ? 'status-open' : ticket.status === 'in_progress' ? 'status-in-progress' : ticket.status === 'resolved' ? 'status-resolved' : 'status-closed'}`}>
+                            <span
+                              className={`status-badge ${ticket.status === 'open' ? 'status-open' : ticket.status === 'in_progress' ? 'status-in-progress' : ticket.status === 'resolved' ? 'status-resolved' : 'status-closed'}`}
+                            >
                               {getStatusLabel(ticket.status)}
                             </span>
-                            <span className={`status-badge ${ticket.priority === 'low' ? 'priority-low' : ticket.priority === 'medium' ? 'priority-medium' : ticket.priority === 'high' ? 'priority-high' : 'priority-urgent'}`}>
+                            <span
+                              className={`status-badge ${ticket.priority === 'low' ? 'priority-low' : ticket.priority === 'medium' ? 'priority-medium' : ticket.priority === 'high' ? 'priority-high' : 'priority-urgent'}`}
+                            >
                               {getPriorityLabel(ticket.priority)}
                             </span>
                           </div>
@@ -400,7 +434,7 @@ const Dashboard: React.FC = () => {
 const ProjectPages: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleProjectCreateSuccess = (project: Project) => {
+  const handleProjectCreateSuccess = (_project: Project) => {
     navigate('/projects');
   };
 
@@ -408,7 +442,7 @@ const ProjectPages: React.FC = () => {
     navigate('/projects');
   };
 
-  const handleProjectClick = (project: Project) => {
+  const handleProjectClick = (_project: Project) => {
     navigate(`/projects/${project.id}`);
   };
 
@@ -416,7 +450,7 @@ const ProjectPages: React.FC = () => {
     navigate('/projects/new');
   };
 
-  const handleProjectEdit = (project: Project) => {
+  const handleProjectEdit = (_project: Project) => {
     navigate(`/projects/${project.id}/edit`);
   };
 
@@ -451,7 +485,7 @@ const ProjectPages: React.FC = () => {
 const TicketPages: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleTicketCreateSuccess = (ticket: Ticket) => {
+  const handleTicketCreateSuccess = (_ticket: Ticket) => {
     navigate('/tickets');
   };
 
@@ -459,7 +493,7 @@ const TicketPages: React.FC = () => {
     navigate('/tickets');
   };
 
-  const handleTicketClick = (ticket: Ticket) => {
+  const handleTicketClick = (_ticket: Ticket) => {
     navigate(`/tickets/${ticket.id}`);
   };
 
@@ -467,7 +501,7 @@ const TicketPages: React.FC = () => {
     navigate('/tickets/new');
   };
 
-  const handleEditTicket = (ticket: Ticket) => {
+  const handleEditTicket = (_ticket: Ticket) => {
     navigate(`/tickets/${ticket.id}/edit`);
   };
 
@@ -492,14 +526,8 @@ const TicketPages: React.FC = () => {
           />
         }
       />
-      <Route
-        path="/:id"
-        element={<TicketDetailPage />}
-      />
-      <Route
-        path="/:id/edit"
-        element={<TicketEditPage />}
-      />
+      <Route path="/:id" element={<TicketDetailPage />} />
+      <Route path="/:id/edit" element={<TicketEditPage />} />
     </Routes>
   );
 };
@@ -508,7 +536,7 @@ const TicketPages: React.FC = () => {
 const UserPages: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleUserCreateSuccess = (user: User) => {
+  const handleUserCreateSuccess = (_user: User) => {
     navigate('/users');
   };
 
@@ -516,7 +544,7 @@ const UserPages: React.FC = () => {
     navigate('/users');
   };
 
-  const handleUserClick = (user: User) => {
+  const handleUserClick = (_user: User) => {
     navigate(`/users/${user.id}`);
   };
 
@@ -524,11 +552,11 @@ const UserPages: React.FC = () => {
     navigate('/users/new');
   };
 
-  const handleUserEdit = (user: User) => {
+  const handleUserEdit = (_user: User) => {
     navigate(`/users/${user.id}/edit`);
   };
 
-  const handleUserEditSuccess = (user: User) => {
+  const handleUserEditSuccess = (_user: User) => {
     navigate('/users');
   };
 
@@ -551,19 +579,13 @@ const UserPages: React.FC = () => {
       <Route
         path="/new"
         element={
-          <UserCreateForm
-            onSuccess={handleUserCreateSuccess}
-            onCancel={handleUserCreateCancel}
-          />
+          <UserCreateForm onSuccess={handleUserCreateSuccess} onCancel={handleUserCreateCancel} />
         }
       />
       <Route
         path="/:id/edit"
         element={
-          <UserEditFormWithId
-            onSuccess={handleUserEditSuccess}
-            onCancel={handleUserEditCancel}
-          />
+          <UserEditFormWithId onSuccess={handleUserEditSuccess} onCancel={handleUserEditCancel} />
         }
       />
     </Routes>
@@ -589,7 +611,11 @@ const ProfilePage: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700">役割</label>
           <p className="mt-1 text-sm text-gray-900">
-            {user?.role === 'admin' ? '管理者' : user?.role === 'manager' ? 'マネージャー' : '一般ユーザー'}
+            {user?.role === 'admin'
+              ? '管理者'
+              : user?.role === 'manager'
+                ? 'マネージャー'
+                : '一般ユーザー'}
           </p>
         </div>
       </div>
@@ -636,14 +662,8 @@ const UnauthenticatedApp: React.FC = () => {
       </div>
 
       <Routes>
-        <Route
-          path="/login"
-          element={<LoginForm onSuccess={handleLoginSuccess} />}
-        />
-        <Route
-          path="/register"
-          element={<RegisterForm onSuccess={handleRegisterSuccess} />}
-        />
+        <Route path="/login" element={<LoginForm onSuccess={handleLoginSuccess} />} />
+        <Route path="/register" element={<RegisterForm onSuccess={handleRegisterSuccess} />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </div>
@@ -669,7 +689,7 @@ const AppContent: React.FC = () => {
  * URLパラメータからユーザーIDを取得してUserEditFormにuserプロパティを渡すラッパーコンポーネント
  */
 const UserEditFormWithId: React.FC<{
-  onSuccess: (user: User) => void;
+  onSuccess: (_user: User) => void;
   onCancel: () => void;
 }> = ({ onSuccess, onCancel }) => {
   const { id } = useParams<{ id: string }>();
@@ -739,13 +759,7 @@ const UserEditFormWithId: React.FC<{
     );
   }
 
-  return (
-    <UserEditForm
-      user={user}
-      onSuccess={onSuccess}
-      onCancel={onCancel}
-    />
-  );
+  return <UserEditForm user={user} onSuccess={onSuccess} onCancel={onCancel} />;
 };
 
 // メインアプリケーション

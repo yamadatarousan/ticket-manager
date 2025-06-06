@@ -1,9 +1,9 @@
 /**
  * ユーザー一覧 - ハイセンスデザイン
- * 
+ *
  * システムユーザーを美しいカードレイアウトで表示し、直感的な操作を提供します。
  * モダンなデザインシステムを適用し、ユーザビリティと視覚的魅力を両立します。
- * 
+ *
  * 主な機能：
  * - カードベースのレスポンシブレイアウト
  * - ユーザー権限の視覚的表示
@@ -25,11 +25,7 @@ interface UserListProps {
   onCreateUser: () => void;
 }
 
-export const UserList: React.FC<UserListProps> = ({
-  onUserClick,
-  onUserEdit,
-  onCreateUser
-}) => {
+export const UserList: React.FC<UserListProps> = ({ onUserClick, onUserEdit, onCreateUser }) => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,25 +66,25 @@ export const UserList: React.FC<UserListProps> = ({
         return {
           label: '管理者',
           bgColor: 'bg-rose-100',
-          textColor: 'text-rose-800'
+          textColor: 'text-rose-800',
         };
       case 'manager':
         return {
           label: 'マネージャー',
           bgColor: 'bg-blue-100',
-          textColor: 'text-blue-800'
+          textColor: 'text-blue-800',
         };
       case 'user':
         return {
           label: '一般ユーザー',
           bgColor: 'bg-green-100',
-          textColor: 'text-green-800'
+          textColor: 'text-green-800',
         };
       default:
         return {
           label: '不明',
           bgColor: 'bg-gray-100',
-          textColor: 'text-gray-800'
+          textColor: 'text-gray-800',
         };
     }
   };
@@ -122,7 +118,7 @@ export const UserList: React.FC<UserListProps> = ({
       'bg-violet-500',
       'bg-cyan-500',
       'bg-fuchsia-500',
-      'bg-lime-500'
+      'bg-lime-500',
     ];
     return colors[userId % colors.length];
   };
@@ -204,7 +200,9 @@ export const UserList: React.FC<UserListProps> = ({
                   {/* ユーザーヘッダー */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getRandomColor(user.id)}`}>
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${getRandomColor(user.id)}`}
+                      >
                         {getInitials(user.name)}
                       </div>
                       <div>
@@ -214,7 +212,7 @@ export const UserList: React.FC<UserListProps> = ({
                     </div>
                     {isAdmin && (
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           onUserEdit(user);
                         }}
@@ -280,10 +278,7 @@ export const UserList: React.FC<UserListProps> = ({
               最初のユーザーを登録して、システムの利用を開始しましょう。
             </p>
             {isAdmin && (
-              <button
-                onClick={onCreateUser}
-                className="btn-primary"
-              >
+              <button onClick={onCreateUser} className="btn-primary">
                 最初のユーザーを作成
               </button>
             )}
@@ -292,4 +287,4 @@ export const UserList: React.FC<UserListProps> = ({
       )}
     </div>
   );
-}; 
+};
