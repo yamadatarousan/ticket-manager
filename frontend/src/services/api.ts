@@ -67,13 +67,35 @@ class ApiService {
       ...options.headers
     };
 
+    // デバッグ用ログ
+    console.log('API Request:', {
+      url,
+      method: options.method || 'GET',
+      hasToken: !!this.token,
+      tokenLength: this.token?.length,
+      headers
+    });
+
     const response = await fetch(url, {
       ...options,
       headers
     });
 
+    console.log('API Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
+      console.error('API Error:', error);
+
+      // 422エラー（バリデーションエラー）の場合、JSONそのものを文字列として投げる
+      if (response.status === 422) {
+        throw new Error(JSON.stringify(error));
+      }
+
       throw new Error(error.message || 'APIリクエストに失敗しました');
     }
 
@@ -122,6 +144,12 @@ class ApiService {
 
       try {
         const errorData = await response.json();
+
+        // Rails バリデーションエラー形式（422エラー）の場合、そのまま JSON 文字列として投げる
+        if (response.status === 422 && typeof errorData === 'object') {
+          throw new Error(JSON.stringify(errorData));
+        }
+
         errorMessage = errorData.error || errorData.message || errorMessage;
 
         // 詳細なエラー情報がある場合は追加
@@ -129,6 +157,11 @@ class ApiService {
           errorMessage += '\n詳細: ' + errorData.details.join(', ');
         }
       } catch (parseError) {
+        // parseError が Error インスタンスで、422エラーの場合は再投げ
+        if (parseError instanceof Error && parseError.message.startsWith('{') && response.status === 422) {
+          throw parseError;
+        }
+
         // JSONパースエラーの場合、ステータスコードベースのメッセージを使用
         switch (response.status) {
           case 401:
@@ -139,6 +172,9 @@ class ApiService {
             break;
           case 404:
             errorMessage = 'リソースが見つかりません。';
+            break;
+          case 422:
+            errorMessage = '入力内容に問題があります。';
             break;
           case 500:
             errorMessage = 'サーバーエラーが発生しました。';
@@ -774,7 +810,7 @@ class ApiService {
    * ```
    */
   async getUsers(): Promise<PaginatedResponse<User>> {
-    const response = await this.fetchWithAuth('/api/users');
+    const response = await this.fetchWithAuth('/users');
     const data = await response.json();
 
     return {
@@ -804,9 +840,47 @@ class ApiService {
    * ```
    */
   async getUser(id: number): Promise<{ user: User }> {
-    const response = await this.fetchWithAuth(`/api/users/${id}`);
+    const response = await this.fetchWithAuth(`/users/${id}`);
     const data = await response.json();
     return { user: data };
+  }
+
+  /**
+   * 新しいユーザーを作成
+   * 
+   * @param userData - 作成するユーザーの情報
+   * @returns 作成されたユーザー情報
+   * @throws {Error} 作成失敗またはネットワークエラーの場合
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const newUser = await apiService.createUser({
+   *     name: '新しいユーザー',
+   *     email: 'newuser@example.com',
+   *     password: 'password123',
+   *     password_confirmation: 'password123',
+   *     role: 'user'
+   *   });
+   *   console.log('ユーザー作成成功:', newUser.user);
+   * } catch (error) {
+   *   console.error('ユーザー作成失敗:', error.message);
+   * }
+   * ```
+   */
+  async createUser(userData: {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    role?: string;
+  }): Promise<{ user: User; token: string; message: string }> {
+    const response = await this.fetchWithAuth('/users', {
+      method: 'POST',
+      body: JSON.stringify({ user: userData })
+    });
+    const data = await response.json();
+    return data;
   }
 
   /**
@@ -831,7 +905,7 @@ class ApiService {
    * ```
    */
   async updateUser(id: number, userData: Partial<User>): Promise<{ user: User }> {
-    const response = await this.fetchWithAuth(`/api/users/${id}`, {
+    const response = await this.fetchWithAuth(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ user: userData })
     });
@@ -856,7 +930,7 @@ class ApiService {
    * ```
    */
   async deleteUser(id: number): Promise<void> {
-    await this.fetchWithAuth(`/api/users/${id}`, {
+    await this.fetchWithAuth(`/users/${id}`, {
       method: 'DELETE'
     });
   }

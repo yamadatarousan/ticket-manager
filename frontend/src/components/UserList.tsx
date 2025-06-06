@@ -43,9 +43,17 @@ export const UserList: React.FC<UserListProps> = ({
       try {
         setIsLoading(true);
         setError(null);
+
+        // デバッグ用ログ
+        console.log('ユーザー一覧取得開始');
+        console.log('認証トークン:', localStorage.getItem('auth_token'));
+
         const usersData = await apiService.getUsers();
-        setUsers(Array.isArray(usersData) ? usersData : []);
+        console.log('取得したユーザーデータ:', usersData);
+
+        setUsers(Array.isArray(usersData.items) ? usersData.items : []);
       } catch (err) {
+        console.error('ユーザー取得エラー:', err);
         setError(err instanceof Error ? err.message : 'ユーザーの取得に失敗しました');
       } finally {
         setIsLoading(false);

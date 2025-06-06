@@ -35,7 +35,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
       ...prev,
       [name]: value
     }));
-    
+
     // エラーをクリア
     if (errors[name]) {
       setErrors(prev => ({
@@ -80,7 +80,7 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -88,20 +88,49 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await apiService.register(formData);
+      // デバッグ用ログ
+      console.log('ユーザー作成開始');
+      console.log('送信データ:', formData);
+      console.log('認証トークン:', localStorage.getItem('auth_token'));
+
+      const response = await apiService.createUser(formData);
+      console.log('ユーザー作成成功:', response);
+
       onSuccess(response.user);
     } catch (err) {
+      console.error('ユーザー作成エラー:', err);
+      console.error('エラーのタイプ:', typeof err);
+      console.error('エラーのメッセージ:', err instanceof Error ? err.message : String(err));
+
       if (err instanceof Error) {
-        // サーバーからのバリデーションエラーを処理
-        try {
-          const errorMessage = err.message;
-          if (errorMessage.includes('email')) {
-            setErrors({ email: 'このメールアドレスは既に使用されています' });
-          } else {
-            setErrors({ general: errorMessage });
+        console.log('Error Message:', err.message);
+        console.log('Message starts with "{":', err.message.startsWith('{'));
+
+        // エラーメッセージを解析
+        if (err.message.startsWith('{')) {
+          try {
+            const errorData = JSON.parse(err.message);
+            const newErrors: Record<string, string> = {};
+
+            if (errorData.email) {
+              newErrors.email = 'このメールアドレスは既に使用されています';
+            }
+            if (errorData.name) {
+              newErrors.name = '名前を入力してください';
+            }
+            if (errorData.password) {
+              newErrors.password = 'パスワードは6文字以上で入力してください';
+            }
+            if (errorData.password_confirmation) {
+              newErrors.password_confirmation = 'パスワードが一致しません';
+            }
+
+            setErrors(newErrors);
+          } catch {
+            setErrors({ general: '入力内容に問題があります' });
           }
-        } catch {
-          setErrors({ general: 'ユーザーの作成に失敗しました' });
+        } else {
+          setErrors({ general: err.message });
         }
       } else {
         setErrors({ general: 'ユーザーの作成に失敗しました' });
@@ -143,9 +172,8 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="山田 太郎"
             />
             {errors.name && (
@@ -164,9 +192,8 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="user@example.com"
             />
             {errors.email && (
@@ -184,9 +211,8 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.role ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.role ? 'border-red-500' : 'border-gray-300'
+                }`}
             >
               <option value="user">一般ユーザー</option>
               <option value="manager">マネージャー</option>
@@ -211,9 +237,8 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="6文字以上で入力してください"
             />
             {errors.password && (
@@ -232,9 +257,8 @@ export const UserCreateForm: React.FC<UserCreateFormProps> = ({
               name="password_confirmation"
               value={formData.password_confirmation}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="上記と同じパスワードを入力してください"
             />
             {errors.password_confirmation && (
