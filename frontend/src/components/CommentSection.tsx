@@ -25,14 +25,34 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ ticketId }) => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // デバッグ用ログ
+  console.log('CommentSection - received ticketId:', ticketId, 'type:', typeof ticketId);
+
   // コメント一覧を取得
   const fetchComments = useCallback(async () => {
+    // デバッグ情報を詳しく出力
+    console.log('CommentSection fetchComments - ticketId:', ticketId);
+    console.log('CommentSection fetchComments - type:', typeof ticketId);
+    console.log('CommentSection fetchComments - !ticketId:', !ticketId);
+    console.log('CommentSection fetchComments - ticketId <= 0:', ticketId <= 0);
+    console.log('CommentSection fetchComments - Number(ticketId):', Number(ticketId));
+
+    // ticketIdが有効でない場合は処理を停止
+    const numericTicketId = Number(ticketId);
+    if (!ticketId || isNaN(numericTicketId) || numericTicketId <= 0) {
+      console.log('CommentSection - Invalid ticketId detected:', ticketId);
+      setError('無効なチケットIDです');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
       const response = await apiService.getComments(ticketId);
       setComments(response.comments);
     } catch (err) {
+      console.error('fetchComments error:', err);
       setError(err instanceof Error ? err.message : 'コメントの取得に失敗しました');
     } finally {
       setIsLoading(false);
@@ -42,7 +62,14 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ ticketId }) => {
   // 新規コメントを作成
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    console.log('handleSubmitComment - ticketId:', ticketId, 'type:', typeof ticketId);
+
+    if (!ticketId || ticketId <= 0) {
+      setError('無効なチケットIDです');
+      return;
+    }
+
     if (!newComment.trim()) {
       setError('コメント内容を入力してください');
       return;
@@ -51,17 +78,19 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ ticketId }) => {
     try {
       setIsSubmitting(true);
       setError(null);
-      
+
       const commentData: CreateCommentRequest = {
         content: newComment.trim()
       };
-      
+
+      console.log('Creating comment with ticketId:', ticketId, 'data:', commentData);
       const response = await apiService.createComment(ticketId, commentData);
-      
+
       // コメント一覧を更新
       setComments(prev => [...prev, response.comment]);
       setNewComment('');
     } catch (err) {
+      console.error('handleSubmitComment error:', err);
       setError(err instanceof Error ? err.message : 'コメントの作成に失敗しました');
     } finally {
       setIsSubmitting(false);
@@ -100,7 +129,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ ticketId }) => {
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h3 className="text-lg font-medium text-gray-900 mb-4">
-        コメント ({comments.length})
+        コメント ({comments.length}) - DEBUG: ticketId={ticketId}
       </h3>
 
       {/* エラー表示 */}
@@ -144,7 +173,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ ticketId }) => {
       <form onSubmit={handleSubmitComment} className="border-t pt-6">
         <div className="mb-4">
           <label htmlFor="new-comment" className="block text-sm font-medium text-gray-700 mb-2">
-            新しいコメントを追加
+            新しいコメントを追加 (DEBUG: ticketId={ticketId})
           </label>
           <textarea
             id="new-comment"

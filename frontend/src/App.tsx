@@ -33,17 +33,18 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocat
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import { LoginForm } from './components/LoginForm';
-import { RegisterForm } from './components/RegisterForm';
+import RegisterForm from './components/RegisterForm';
 import { TicketList } from './components/TicketList';
 import { TicketCreateForm } from './components/TicketCreateForm';
-import { TicketEditPage } from './components/TicketEditPage';
 import { TicketDetailPage } from './components/TicketDetailPage';
+import { TicketEditPage } from './components/TicketEditPage';
 import { UserList } from './components/UserList';
 import { UserCreateForm } from './components/UserCreateForm';
 import { UserEditForm } from './components/UserEditForm';
 import { SystemSettingsPage } from './components/SystemSettingsPage';
 import { ProjectList } from './components/ProjectList';
 import { ProjectCreateForm } from './components/ProjectCreateForm';
+import { ProjectDetail } from './components/ProjectDetail';
 import { Ticket, User, DashboardStats, Project } from './types';
 import { apiService } from './services/api';
 import './App.css';
@@ -106,8 +107,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar 
-        onNavigate={handleNavigate} 
+      <Navbar
+        onNavigate={handleNavigate}
         currentView={getCurrentView()}
       />
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -240,8 +241,8 @@ const Dashboard: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-900 mb-4">最近のチケット</h3>
                   <div className="space-y-3">
                     {(stats.recent_tickets || []).slice(0, 5).map(ticket => (
-                      <div 
-                        key={ticket.id} 
+                      <div
+                        key={ticket.id}
                         className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md cursor-pointer"
                         onClick={() => navigate(`/tickets/${ticket.id}`)}
                       >
@@ -254,12 +255,11 @@ const Dashboard: React.FC = () => {
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            ticket.status === 'open' ? 'bg-red-100 text-red-800' :
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ticket.status === 'open' ? 'bg-red-100 text-red-800' :
                             ticket.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                            ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                              ticket.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                                'bg-gray-100 text-gray-800'
+                            }`}>
                             {getStatusLabel(ticket.status)}
                           </span>
                         </div>
@@ -278,8 +278,8 @@ const Dashboard: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-900 mb-4">割り当てられたチケット</h3>
                   <div className="space-y-3">
                     {(stats.assigned_tickets || []).slice(0, 5).map(ticket => (
-                      <div 
-                        key={ticket.id} 
+                      <div
+                        key={ticket.id}
                         className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-md cursor-pointer"
                         onClick={() => navigate(`/tickets/${ticket.id}`)}
                       >
@@ -292,12 +292,11 @@ const Dashboard: React.FC = () => {
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            ticket.priority === 'urgent' ? 'bg-red-100 text-red-800' :
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ticket.priority === 'urgent' ? 'bg-red-100 text-red-800' :
                             ticket.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                            ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                              ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                            }`}>
                             {getPriorityLabel(ticket.priority)}
                           </span>
                         </div>
@@ -345,27 +344,26 @@ const ProjectPages: React.FC = () => {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
-          <ProjectList 
+          <ProjectList
             onProjectClick={handleProjectClick}
             onProjectEdit={handleProjectEdit}
             onCreateProject={handleCreateProject}
           />
-        } 
+        }
       />
-      <Route 
-        path="/new" 
+      <Route
+        path="/new"
         element={
-          <ProjectCreateForm 
+          <ProjectCreateForm
             onSuccess={handleProjectCreateSuccess}
             onCancel={handleProjectCreateCancel}
           />
-        } 
+        }
       />
-      {/* TODO: プロジェクト詳細と編集ページを実装 */}
-      <Route path="/:id" element={<div>プロジェクト詳細（未実装）</div>} />
+      <Route path="/:id" element={<ProjectDetail />} />
       <Route path="/:id/edit" element={<div>プロジェクト編集（未実装）</div>} />
     </Routes>
   );
@@ -393,31 +391,31 @@ const TicketPages: React.FC = () => {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
-          <TicketList 
+          <TicketList
             onTicketClick={handleTicketClick}
             onCreateTicket={handleCreateTicket}
           />
-        } 
+        }
       />
-      <Route 
-        path="/new" 
+      <Route
+        path="/new"
         element={
-          <TicketCreateForm 
+          <TicketCreateForm
             onSuccess={handleTicketCreateSuccess}
             onCancel={handleTicketCreateCancel}
           />
-        } 
+        }
       />
-      <Route 
-        path="/:id" 
-        element={<TicketDetailPage />} 
+      <Route
+        path="/:id"
+        element={<TicketDetailPage />}
       />
-      <Route 
-        path="/:id/edit" 
-        element={<TicketEditPage />} 
+      <Route
+        path="/:id/edit"
+        element={<TicketEditPage />}
       />
     </Routes>
   );
@@ -457,33 +455,33 @@ const UserPages: React.FC = () => {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
+      <Route
+        path="/"
         element={
-          <UserList 
+          <UserList
             onUserClick={handleUserClick}
             onCreateUser={handleCreateUser}
             onEditUser={handleUserEdit}
           />
-        } 
+        }
       />
-      <Route 
-        path="/new" 
+      <Route
+        path="/new"
         element={
-          <UserCreateForm 
+          <UserCreateForm
             onSuccess={handleUserCreateSuccess}
             onCancel={handleUserCreateCancel}
           />
-        } 
+        }
       />
-      <Route 
-        path="/:id/edit" 
+      <Route
+        path="/:id/edit"
         element={
           <UserEditFormWithId
             onSuccess={handleUserEditSuccess}
             onCancel={handleUserEditCancel}
           />
-        } 
+        }
       />
     </Routes>
   );
@@ -553,15 +551,15 @@ const UnauthenticatedApp: React.FC = () => {
           チケット管理システム
         </h1>
       </div>
-      
+
       <Routes>
-        <Route 
-          path="/login" 
-          element={<LoginForm onSuccess={handleLoginSuccess} />} 
+        <Route
+          path="/login"
+          element={<LoginForm onSuccess={handleLoginSuccess} />}
         />
-        <Route 
-          path="/register" 
-          element={<RegisterForm onSuccess={handleRegisterSuccess} />} 
+        <Route
+          path="/register"
+          element={<RegisterForm onSuccess={handleRegisterSuccess} />}
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
